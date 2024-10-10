@@ -218,17 +218,17 @@
       # Global configuration for my systems
       globals =
         let
-          baseName = "masu.rs";
+          baseName = "nixos";
         in
         rec {
-          user = "noah";
-          fullName = "Noah Masur";
+          user = "nixos";
+          fullName = "NixOS";
           gitName = fullName;
-          gitEmail = "7386960+nmasur@users.noreply.github.com";
-          mail.server = "noahmasur.com";
-          mail.imapHost = "imap.purelymail.com";
-          mail.smtpHost = "smtp.purelymail.com";
-          dotfilesRepo = "https://github.com/nmasur/dotfiles";
+          gitEmail = "";
+          mail.server = "";
+          mail.imapHost = "";
+          mail.smtpHost = "";
+          dotfilesRepo = "https://github.com/ajaneeshihx/dotfiles";
           hostnames = {
             files = "files.${baseName}";
             git = "git.${baseName}";
