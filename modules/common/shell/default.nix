@@ -3,6 +3,7 @@
   imports = [
     ./atuin.nix
     ./bash
+    ./zsh
     ./charm.nix
     ./direnv.nix
     ./fish
