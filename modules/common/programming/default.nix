@@ -8,5 +8,6 @@
     ./python.nix
     ./rust.nix
     ./terraform.nix
+    ./vscode-server.nix
   ];
 }
