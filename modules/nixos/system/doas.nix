@@ -13,7 +13,7 @@
     security = {
 
       # Remove sudo
-      sudo.enable = false;
+      sudo.enable = true;
 
       # Add doas
       doas = {
@@ -39,6 +39,10 @@
       # Alias sudo to doas for convenience
       fish.shellAliases = {
         sudo = "doas";
+      };
+
+      zsh.shellAliases = {
+	# sudo = "doas";
       };
 
       # Disable overriding our sudo alias with a TERMINFO alias

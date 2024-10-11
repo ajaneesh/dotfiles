@@ -162,6 +162,8 @@
         curl
       ];
 
+      # security.sudo.enable = true;
+
       # Use the system-level nixpkgs instead of Home Manager's
       home-manager.useGlobalPkgs = true;
 

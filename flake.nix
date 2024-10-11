@@ -31,6 +31,9 @@
       inputs.nixpkgs.follows = "nixpkgs"; # Use system packages list for their inputs
     };
 
+    vscode-server = {
+      url = "github:nix-community/nixos-vscode-server";
+    };
     # Community packages; used for Firefox extensions
     nur.url = "github:nix-community/nur";
 

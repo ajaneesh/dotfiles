@@ -6,7 +6,7 @@
 }:
 {
 
-  users.users.${config.user}.shell = pkgs.fish;
+  # users.users.${config.user}.shell = pkgs.fish;
   programs.fish.enable = true; # Needed for LightDM to remember username
 
   home-manager.users.${config.user} = {

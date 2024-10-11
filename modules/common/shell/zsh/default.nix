@@ -18,18 +18,12 @@
       enable = true;
       shellAliases = {
 
-        # Version of bash which works much better on the terminal
-        zsh = "${pkgs.zshInteractive}/bin/zsh";
-
         # Use eza (exa) instead of ls for fancier output
         ls = "${pkgs.eza}/bin/eza --group";
 
         # Move files to XDG trash on the commandline
         trash = lib.mkIf pkgs.stdenv.isLinux "${pkgs.trash-cli}/bin/trash-put";
       };
-      loginShellInit = "";
-      shellAbbrs = {}
-      shellInit = "";
     };
 
     programs.starship.enableZshIntegration = true;

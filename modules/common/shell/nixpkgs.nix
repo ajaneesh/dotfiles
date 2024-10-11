@@ -62,8 +62,8 @@
 
     # Provides "command-not-found" options
     programs.nix-index = {
-      enable = true;
-      enableFishIntegration = true;
+      enable = false;
+      enableFishIntegration = false;
     };
 
     # Create nix-index if doesn't exist
