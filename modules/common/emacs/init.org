@@ -1,0 +1,10 @@
+# basic configuration
+
+#+begin_src emacs_lisp
+
+  (org-mode)
+  (evil-mode)
+  
+#+end_src
+
+Enable org-mode

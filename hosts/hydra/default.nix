@@ -42,7 +42,9 @@ inputs.nixpkgs.lib.nixosSystem {
       };
 
       services.vscode-server.enable = true;
+      services.emacs.enable = true;
       vscode.enable = true;
+      emacs.enable = true;
       neovim.enable = true;
       mail.enable = true;
       mail.aerc.enable = true;

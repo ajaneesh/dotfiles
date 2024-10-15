@@ -19,7 +19,7 @@
 
       programs.vscode = {
         enable = true;
-	extensions = with pkgs.vscode-extensions; [
+        extensions = with pkgs.vscode-extensions; [
           bbenoist.nix
           github.copilot-chat
           github.copilot
