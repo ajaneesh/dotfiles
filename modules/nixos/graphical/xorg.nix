@@ -36,7 +36,7 @@
 
     home-manager.users.${config.user} = {
 
-      programs.fish.shellAliases = {
+      programs.zsh.shellAliases = {
         pbcopy = "xclip -selection clipboard -in";
         pbpaste = "xclip -selection clipboard -out";
       };

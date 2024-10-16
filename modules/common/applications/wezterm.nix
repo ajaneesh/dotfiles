@@ -38,7 +38,7 @@
         programs.rofi.terminal = lib.mkIf pkgs.stdenv.isLinux "${pkgs.wezterm}/bin/wezterm";
 
         # Display images in the terminal
-        programs.fish.shellAliases = {
+        programs.zsh.shellAliases = {
           icat = lib.mkForce "wezterm imgcat";
         };
 

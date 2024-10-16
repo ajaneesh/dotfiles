@@ -13,13 +13,13 @@
     ];
 
     # Reduce blue light at night
-    services.redshift = {
-      enable = true;
-      brightness = {
-        day = "1.0";
-        night = "1.0";
-      };
-    };
+    # services.redshift = {
+    #   enable = true;
+    #   brightness = {
+    #     day = "1.0";
+    #     night = "1.0";
+    #   };
+    # };
 
     # Detect monitors (brightness) for ddcutil
     hardware.i2c.enable = true;

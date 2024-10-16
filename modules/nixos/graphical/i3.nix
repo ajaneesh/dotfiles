@@ -127,10 +127,10 @@ in
               "XF86AudioNext" = "exec ${pkgs.playerctl}/bin/playerctl next";
               "XF86AudioPrev" = "exec ${pkgs.playerctl}/bin/playerctl previous";
 
-              # Launchers
-              "${modifier}+Return" = "exec --no-startup-id ${
-                config.home-manager.users.${config.user}.programs.rofi.terminal
-              }; workspace ${ws2}; layout tabbed";
+              # # Launchers
+              # "${modifier}+Return" = "exec --no-startup-id ${
+              #   config.home-manager.users.${config.user}.programs.rofi.terminal
+              # }; workspace ${ws2}; layout tabbed";
               "${modifier}+space" = "exec --no-startup-id ${config.launcherCommand}";
               "${modifier}+Shift+s" = "exec --no-startup-id ${config.systemdSearch}";
               "${modifier}+Shift+a" = "exec --no-startup-id ${config.audioSwitchCommand}";
@@ -142,12 +142,12 @@ in
               "${modifier}+Shift+r" = "restart";
               "${modifier}+Shift+q" = ''exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"'';
               "${modifier}+Shift+x" = "exec ${lockCmd}";
-              "${modifier}+Mod1+h" = "exec --no-startup-id ${
-                config.home-manager.users.${config.user}.programs.rofi.terminal
-              } -e sh -c '${pkgs.home-manager}/bin/home-manager switch --flake ${config.dotfilesPath}#${config.networking.hostName} || read'";
-              "${modifier}+Mod1+r" = "exec --no-startup-id ${
-                config.home-manager.users.${config.user}.programs.rofi.terminal
-              } -e sh -c 'doas nixos-rebuild switch --flake ${config.dotfilesPath}#${config.networking.hostName} || read'";
+              # "${modifier}+Mod1+h" = "exec --no-startup-id ${
+              #   config.home-manager.users.${config.user}.programs.rofi.terminal
+              # } -e sh -c '${pkgs.home-manager}/bin/home-manager switch --flake ${config.dotfilesPath}#${config.networking.hostName} || read'";
+              # "${modifier}+Mod1+r" = "exec --no-startup-id ${
+              #   config.home-manager.users.${config.user}.programs.rofi.terminal
+              # } -e sh -c 'doas nixos-rebuild switch --flake ${config.dotfilesPath}#${config.networking.hostName} || read'";
 
               # Window options
               "${modifier}+q" = "kill";
@@ -254,12 +254,12 @@ in
         extraConfig = "";
       };
 
-      programs.fish.functions = {
-        update-lock-screen = lib.mkIf config.services.xserver.enable {
-          description = "Update lockscreen with wallpaper";
-          body = lockUpdate;
-        };
-      };
+    #   programs.fish.functions = {
+    #     update-lock-screen = lib.mkIf config.services.xserver.enable {
+    #       description = "Update lockscreen with wallpaper";
+    #       body = lockUpdate;
+    #     };
+    #   };
 
       # Update lock screen cache only if cache is empty
       home.activation.updateLockScreenCache =
