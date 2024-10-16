@@ -109,8 +109,8 @@
             (put 'upcase-region 'disabled nil)
             (put 'downcase-region 'disabled nil)
 
-            (setq custom-file (locate-user-emacs-file "custom.el"))
-            (load custom-file)
+            ;; (setq custom-file (locate-user-emacs-file "custom.el"))
+            ;; (load custom-file)
 
             ;; When finding file in non-existing directory, offer to create the
             ;; parent directory.
@@ -130,7 +130,7 @@
             (add-hook 'term-mode-hook (lambda () (setq show-trailing-whitespace nil)))
             '';
 
-            usePackage = {
+        usePackage = {
             abbrev = {
                 enable = true;
                 diminish = [ "abbrev-mode" ];
