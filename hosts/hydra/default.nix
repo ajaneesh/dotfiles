@@ -19,8 +19,11 @@ inputs.nixpkgs.lib.nixosSystem {
     ../../modules/wsl
     globals
     inputs.wsl.nixosModules.wsl
-    inputs.vscode-server.nixosModules.default
     inputs.home-manager.nixosModules.home-manager
+    inputs.vscode-server.nixosModules.default
+    ({ config, pkgs, ... }: {
+      services.vscode-server.enable = true;
+    })
     {
       networking.hostName = "hydra";
       nixpkgs.overlays = overlays;
@@ -43,10 +46,10 @@ inputs.nixpkgs.lib.nixosSystem {
         interop.includePath = false; # Including Windows PATH will slow down Neovim command mode
       };
 
-      services.vscode-server.enable = true;
+
       services.emacs.enable = true;
       services.xserver.enable = true;
-      vscode.enable = true;
+      # vscode.enable = true;
       emacs.enable = true;
       # neovim.enable = true;
       # mail.enable = true;
