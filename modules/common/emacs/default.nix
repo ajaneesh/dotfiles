@@ -402,54 +402,54 @@
                 };
             };
 
-            ivy = {
-                enable = true;
-                demand = true;
-                diminish = [ "ivy-mode" ];
-                command = [ "ivy-mode" ];
-                config = ''
-                (setq ivy-use-virtual-buffers t
-                        ivy-count-format "%d/%d "
-                        ivy-virtual-abbreviate 'full)
+            # ivy = {
+            #     enable = true;
+            #     demand = true;
+            #     diminish = [ "ivy-mode" ];
+            #     command = [ "ivy-mode" ];
+            #     config = ''
+            #     (setq ivy-use-virtual-buffers t
+            #             ivy-count-format "%d/%d "
+            #             ivy-virtual-abbreviate 'full)
 
-                (ivy-mode 1)
-                '';
-            };
+            #     (ivy-mode 1)
+            #     '';
+            # };
 
-            ivy-xref = {
-                enable = true;
-                after = [ "ivy" "xref" ];
-                command = [ "ivy-xref-show-xrefs" ];
-                config = ''
-                (setq xref-show-xrefs-function #'ivy-xref-show-xrefs)
-                '';
-            };
+            # ivy-xref = {
+            #     enable = true;
+            #     after = [ "ivy" "xref" ];
+            #     command = [ "ivy-xref-show-xrefs" ];
+            #     config = ''
+            #     (setq xref-show-xrefs-function #'ivy-xref-show-xrefs)
+            #     '';
+            # };
 
-            swiper = {
-                enable = true;
-                command = [ "swiper" "swiper-all" "swiper-isearch" ];
-                bind = {
-                "C-s" = "swiper-isearch";
-                };
-            };
+            # swiper = {
+            #     enable = true;
+            #     command = [ "swiper" "swiper-all" "swiper-isearch" ];
+            #     bind = {
+            #     "C-s" = "swiper-isearch";
+            #     };
+            # };
 
             # Lets counsel do prioritization. A fork of smex.
-            amx = {
-                enable = true;
-                command = [ "amx-initialize" ];
-            };
+            # amx = {
+            #     enable = true;
+            #     command = [ "amx-initialize" ];
+            # };
 
-            counsel = {
-                enable = true;
-                bind = {
-                "C-x C-d" = "counsel-dired-jump";
-                "C-x C-f" = "counsel-find-file";
-                "C-x C-r" = "counsel-recentf";
-                "C-x C-y" = "counsel-yank-pop";
-                "M-x" = "counsel-M-x";
-                };
-                diminish = [ "counsel-mode" ];
-            };
+            # counsel = {
+            #     enable = true;
+            #     bind = {
+            #     "C-x C-d" = "counsel-dired-jump";
+            #     "C-x C-f" = "counsel-find-file";
+            #     "C-x C-r" = "counsel-recentf";
+            #     "C-x C-y" = "counsel-yank-pop";
+            #     "M-x" = "counsel-M-x";
+            #     };
+            #     diminish = [ "counsel-mode" ];
+            # };
 
             # nyan-mode = {
             #     enable = true;
@@ -556,16 +556,16 @@
             #     '';
             # };
 
-            company-lsp = {
-                enable = true;
-                after = [ "company" ];
-                command = [ "company-lsp" ];
-                config = ''
-                (setq company-lsp-enable-snippet t
-                        company-lsp-async t
-                        company-lsp-cache-candidates 'auto)
-                '';
-            };
+            # company-lsp = {
+            #     enable = true;
+            #     after = [ "company" ];
+            #     command = [ "company-lsp" ];
+            #     config = ''
+            #     (setq company-lsp-enable-snippet t
+            #             company-lsp-async t
+            #             company-lsp-cache-candidates 'auto)
+            #     '';
+            # };
 
             lsp-ui = {
                 enable = true;

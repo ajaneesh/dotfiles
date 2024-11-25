@@ -101,7 +101,7 @@ inputs.nixpkgs.lib.nixosSystem rec {
       services.bind.enable = true;
       services.caddy.enable = true;
       services.jellyfin.enable = true;
-      services.nextcloud.enable = true;
+      services.nextcloud.enable = false;
       services.calibre-web.enable = true;
       services.openssh.enable = true;
       services.prometheus.enable = false;

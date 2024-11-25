@@ -96,43 +96,44 @@ inputs.nixpkgs.lib.nixosSystem rec {
       };
       wallpaper = "${inputs.wallpapers}/gruvbox/road.jpg";
       gtk.theme.name = inputs.nixpkgs.lib.mkDefault "Adwaita-dark";
-
+      
       # Programs and services
-      atuin.enable = true;
+      atuin.enable = false;
       charm.enable = true;
-      neovim.enable = true;
-      media.enable = true;
+      neovim.enable = false;
+      emacs.enable = true;
+      # media.enable = true;
       dotfiles.enable = true;
       firefox.enable = true;
       kitty.enable = true;
       _1password.enable = true;
-      discord.enable = true;
+      discord.enable = false;
       nautilus.enable = true;
-      obsidian.enable = true;
-      mail.enable = true;
-      mail.aerc.enable = true;
-      mail.himalaya.enable = true;
+      obsidian.enable = false;
+      mail.enable = false;
+      mail.aerc.enable = false;
+      mail.himalaya.enable = false;
       keybase.enable = true;
       mullvad.enable = false;
-      rust.enable = true;
-      terraform.enable = true;
+      rust.enable = false;
+      terraform.enable = false;
       wezterm.enable = true;
-      yt-dlp.enable = true;
+      yt-dlp.enable = false;
       gaming = {
-        dwarf-fortress.enable = true;
-        enable = true;
-        steam.enable = true;
-        moonlight.enable = true;
-        legendary.enable = true;
-        lutris.enable = true;
-        ryujinx.enable = true;
+        dwarf-fortress.enable = false;
+        enable = false;
+        steam.enable = false;
+        moonlight.enable = false;
+        legendary.enable = false;
+        lutris.enable = false;
+        ryujinx.enable = false;
       };
       services.vmagent.enable = true; # Enables Prometheus metrics
       services.openssh.enable = true; # Required for Cloudflare tunnel and identity file
 
       # Allows private remote access over the internet
       cloudflareTunnel = {
-        enable = true;
+        enable = false;
         id = "ac133a82-31fb-480c-942a-cdbcd4c58173";
         credentialsFile = ../../private/cloudflared-tempest.age;
         ca = "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPY6C0HmdFCaxYtJxFr3qV4/1X4Q8KrYQ1hlme3u1hJXK+xW+lc9Y9glWHrhiTKilB7carYTB80US0O47gI5yU4= open-ssh-ca@cloudflareaccess.org";
