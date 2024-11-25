@@ -1,6 +1,8 @@
+#+PROPERTY: header-args  :tangle yes
+
 * startup performance
 
-#+begin_src emacs_lisp
+#+begin_src emacs-lisp
 
 ;; -*- lexical-binding: t; -*-
 
@@ -19,13 +21,12 @@
 
 ;; Set the right directory to store the native comp cache
 (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" user-emacs-directory))
-  
-
+ 
 #+end_src
 
 * load path for our custom elisp package
 
-#+begin_src emacs_lisp
+#+begin_src emacs-lisp
 
 ;; Add my library path to load-path
 (push "~/.config/emacs/lisp" load-path)
@@ -35,7 +36,7 @@
 
 * using straight.el for package management
 
-#+begin_src emacs_lisp
+#+begin_src emacs-lisp
 (unless (featurep 'straight)
   ;; Bootstrap straight.el
   (defvar bootstrap-version)
@@ -57,7 +58,7 @@
 #+end_src
 
 * Get org templates, babel and tangle up and running
-#+begin_src emacs_lisp
+#+begin_src emacs-lisp
 
 ;; TODO: Mode this to another section
 (setq-default fill-column 80)
@@ -180,7 +181,7 @@
 
 #+end_src
 * load modus theme
-#+begin_src emacs_lisp
+#+begin_src emacs-lisp
 ;; Configure the Modus Themes' appearance
   (use-package modus-themes
   :ensure t
@@ -208,7 +209,7 @@
 #+end_src
 * start server process
 
-#+begin_src emacs_lisp
+#+begin_src emacs-lisp
   
 (server-start)
 
@@ -216,7 +217,7 @@
 
 * useful key binding
 
-#+begin_src emacs_lisp
+#+begin_src emacs-lisp
 ;; ESC cancels all
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
@@ -228,7 +229,7 @@ need to check if modus also does a good job with modeline
 need a proper theme in orgmode so that code blocks and hierarchy stand out well.
 
 * Get evil-mode up and running ASAP so that we dont have to struggle with emacs editing controls
-#+begin_src emacs_lisp
+#+begin_src emacs-lisp
 
 (use-package undo-tree
   :config
