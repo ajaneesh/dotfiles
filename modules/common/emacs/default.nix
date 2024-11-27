@@ -40,10 +40,10 @@
             (set-face-attribute 'default
                                 nil
                                 :height 80
-                                :family "Fantasque Sans Mono")
+                                :family "Firacode Mono")
             (set-face-attribute 'variable-pitch
                                 nil
-                                :family "DejaVu Sans")
+                                :family "Firacode Sans")
 
             ;; Set frame title.
             (setq frame-title-format
