@@ -536,6 +536,10 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
     ;; ...
     )
 
+  (use-package which-key
+    :config
+    (which-key-mode))
+
 #+end_src
 
 #+RESULTS:
