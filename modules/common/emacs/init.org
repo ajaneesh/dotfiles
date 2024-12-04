@@ -3,6 +3,7 @@
 * start server process
 
 #+begin_src emacs-lisp
+;; -*- lexical-binding: t; -*-
   
 (server-start)
 
@@ -11,8 +12,6 @@
 * startup performance
 
 #+begin_src emacs-lisp
-
-  ;; -*- lexical-binding: t; -*-
 
   ;; The default is 800 kilobytes.  Measured in bytes.
   (setq gc-cons-threshold (* 50 1000 1000))
@@ -29,6 +28,23 @@
 
   ;; Set the right directory to store the native comp cache
   (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" user-emacs-directory))
+
+#+end_src
+
+* Setup package.el and Melpa
+
+#+begin_src emacs-lisp
+
+;; Initialize package sources
+(require 'package)
+
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                        ("org" . "https://orgmode.org/elpa/")
+                        ("elpa" . "https://elpa.gnu.org/packages/")))
+
+(package-initialize)
+(unless package-archive-contents
+  (package-refresh-contents))
 
 #+end_src
 
@@ -61,40 +77,97 @@
 
 ;; Add my library path to load-path
 (push "~/.config/emacs/lisp" load-path)
-(push "~/dotfiles/modules/common/emacs/lib" load-path)
 
 #+end_src
 
-* load modus theme
-#+begin_src emacs-lisp
-  ;; Configure the Modus Themes' appearance
-  ;;  (use-package modus-themes
-  ;;    :ensure t
-  ;;    :config
-  (setq modus-themes-mode-line '(accented borderless)
-        modus-themes-bold-constructs t
-        modus-themes-italic-constructs t
-        modus-themes-fringes 'subtle
-        modus-themes-tabs-accented t
-        modus-themes-paren-match '(bold intense)
-        modus-themes-prompts '(bold intense)
-        modus-themes-completions '((matches . (extrabold underline))
-  				 (selection . (semibold italic)))
-        modus-themes-org-blocks 'tinted-background
-        modus-themes-scale-headings t
-        modus-themes-region '(bg-only)
-        modus-themes-headings
-        '((1 . (rainbow overline background 1.4))
-          (2 . (rainbow background 1.3))
-          (3 . (rainbow bold 1.2))
-          (t . (semilight 1.1))))
+* Font configuration
 
-  ;; Load the dark theme by default
-  (load-theme 'modus-vivendi t )
-  ;;  )
+#+begin_src emacs-lisp
+
+  ;;     ;; Set default fonts
+  ;;     (set-face-attribute 'default nil
+  ;;                         :family "Fira Code"
+  ;;                         :height 120)
+
+  ;;     ;; Ensure programming modes and code use fixed-pitch
+  ;;     (set-face-attribute 'fixed-pitch nil 
+  ;;                         :family "Fira Code"
+  ;;                         :height 120)
+
+  ;;     (set-face-attribute 'variable-pitch nil
+  ;;                         :family "Cantarell"
+  ;;                         :height 120)
+  ;;   (use-package ligature
+  ;;     :ensure t
+  ;;     :config
+  ;;     (ligature-set-ligatures 't '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\"
+  ;;                                 "{-" "::" ":::" ":=" "!!" "!=" "!==" "-}" "--" "---" "-->"
+  ;;                                 "->>" "->" "-<" "-<<" "-~" "#{" "#[" "##" "###" "####"
+  ;;                                 "#(" "#?" "#_" "#_(" ".-" ".=" ".." "..<" "..." "?=")))
+                                  
+  ;;   ;; Ensure fixed-pitch in all programming modes
+  ;;   (add-hook 'prog-mode-hook
+  ;;             (lambda ()
+  ;;               (mixed-pitch-mode -1)  ; Disable mixed-pitch-mode
+  ;;               (variable-pitch-mode -1)  ; Ensure variable-pitch is off
+  ;;               ))
+
+  ;; ;; Configure mixed-pitch-mode
+  ;; (use-package mixed-pitch
+  ;;   :ensure t
+  ;;   :hook (org-mode . mixed-pitch-mode)
+  ;;   :config
+  ;;   (setq mixed-pitch-set-height t)
+  ;;   ;; Ensure these elements stay fixed-pitch in mixed-pitch-mode
+  ;;   (setq mixed-pitch-fixed-pitch-faces
+  ;;         '(org-block
+  ;;           org-block-begin-line
+  ;;           org-block-end-line
+  ;;           org-code
+  ;;           org-document-info-keyword
+  ;;           org-meta-line
+  ;;           org-property-value
+  ;;           org-special-keyword
+  ;;           org-table
+  ;;           org-verbatim
+  ;;           line-number
+  ;;           line-number-current-line)))
+
+#+end_src
+
+* Modus Theme Configuration
+
+#+begin_src emacs-lisp
+
+  ;; Configure the Modus Themes' appearance
+  (use-package modus-themes
+      :ensure t
+      :config
+      (setq modus-themes-mode-line '(accented borderless)
+            modus-themes-bold-constructs t
+            modus-themes-italic-constructs t
+            modus-themes-fringes 'subtle
+            modus-themes-tabs-accented t
+            modus-themes-paren-match '(bold intense)
+            modus-themes-prompts '(bold intense)
+            modus-themes-completions '((matches . (extrabold underline))
+              (selection . (semibold italic)))
+            modus-themes-org-blocks 'tinted-background
+            modus-themes-scale-headings t
+            modus-themes-region '(bg-only)
+            modus-themes-headings
+            '((1 . (rainbow overline background 1.2))
+              (2 . (rainbow background 1.1))
+              (3 . (rainbow bold 1.1))
+              (t . (semilight 1.1))))
+
+      ;; Load the dark theme by default
+      (load-theme 'modus-vivendi t ))
+
 #+end_src
 
 * Get evil-mode up and running ASAP so that we dont have to struggle with emacs editing controls
+
 #+begin_src emacs-lisp
 
   (use-package undo-tree
@@ -138,144 +211,63 @@
     ;; Use visual line motions even outside of visual-line-mode buffers
     (evil-global-set-key 'motion "j" 'evil-next-visual-line)
     (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-
-    ;; (unless dw/is-termux
-    ;;   (defun dw/dont-arrow-me-bro ()
-    ;;     (interactive)
-    ;;     (message "Arrow keys are bad, you know?"))
-
-    ;;   ;; Disable arrow keys in normal and visual modes
-    ;;   (define-key evil-normal-state-map (kbd "<left>") 'dw/dont-arrow-me-bro)
-    ;;   (define-key evil-normal-state-map (kbd "<right>") 'dw/dont-arrow-me-bro)
-    ;;   (define-key evil-normal-state-map (kbd "<down>") 'dw/dont-arrow-me-bro)
-    ;;   (define-key evil-normal-state-map (kbd "<up>") 'dw/dont-arrow-me-bro)
-    ;;   (evil-global-set-key 'motion (kbd "<left>") 'dw/dont-arrow-me-bro)
-    ;;   (evil-global-set-key 'motion (kbd "<right>") 'dw/dont-arrow-me-bro)
-    ;;   (evil-global-set-key 'motion (kbd "<down>") 'dw/dont-arrow-me-bro)
-    ;;   (evil-global-set-key 'motion (kbd "<up>") 'dw/dont-arrow-me-bro))
-
     (evil-set-initial-state 'messages-buffer-mode 'normal)
     (evil-set-initial-state 'dashboard-mode 'normal))
 
-  ;; (use-package evil-collection
-  ;;  :ensure t
-  ;;  :config
-  ;;    (setq evil-collection-company-use-tng nil)
-  ;;    (setq evil-collection-outline-bind-tab-p nil)
-  ;;    (setq evil-collection-mode-list (remove 'lispy evil-collection-mode-list))
-  ;;    (setq evil-collection-mode-list (remove 'org-present evil-collection-mode-list))
-  ;;    (evil-collection-init))
-
+    (use-package evil-collection
+	:after evil
+	:ensure t
+	:config
+	(evil-collection-init))
 #+end_src
 
 * Get org templates, babel and tangle up and running
+
 #+begin_src emacs-lisp
 
   ;; TODO: Mode this to another section
   (setq-default fill-column 80)
 
+  ;; Org-mode specific settings
   (use-package org
-    ;; :straight t
-    :defer t
-    :requires (org-tempo dw-org dw-workflow)
-    :hook 'dw/org-mode-setup
-    :config
-    (setq org-ellipsis " ▾"
-          org-hide-emphasis-markers t
-          org-src-fontify-natively t
-          org-fontify-quote-and-verse-blocks t
-          org-src-tab-acts-natively t
-          org-edit-src-content-indentation 2
-          org-hide-block-startup nil
-          org-src-preserve-indentation nil
-          org-startup-folded 'content
-          org-cycle-separator-lines 2
-          org-capture-bookmark nil)
-    (org-indent-mode)
-    (variable-pitch-mode 1)
-    (auto-fill-mode 0)
-    (visual-line-mode 1)
-    (setq corfu-auto nil)
-    (setq evil-auto-indent nil)
-    (setq org-modules '(org-crypt org-habit org-bookmark org-eshell org-irc))
-
-    (setq org-refile-targets '((nil :maxlevel . 1)
-                               (org-agenda-files :maxlevel . 1)))
-
-    (setq org-outline-path-complete-in-steps nil)
-    (setq org-refile-use-outline-path t)
-
-    (evil-define-key '(normal insert visual) org-mode-map (kbd "C-j") 'org-next-visible-heading)
-    (evil-define-key '(normal insert visual) org-mode-map (kbd "C-k") 'org-previous-visible-heading)
-
-    (evil-define-key '(normal insert visual) org-mode-map (kbd "M-j") 'org-metadown)
-    (evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup)
-
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((emacs-lisp . t))) 
-
-    (push '("conf-unix" . conf-unix) org-src-lang-modes))
-
-
-  ;;(unless dw/is-termux
-
-  (use-package org-superstar
-    :ensure t)
-  (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
-  ;;(setup (:pkg org-superstar)
-  ;;  (:load-after org)
-  ;;  (:hook-into org-mode)
-  ;;  (:option org-superstar-remove-leading-stars t
-  ;;           org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
-  ;;)
-
-  ;; Replace list hyphen with dot
-  ;; (font-lock-add-keywords 'org-mode
-  ;;                         '(("^ *\\([-]\\) "
-  ;;                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
-
-  (use-package org-faces
-    ;; Make sure org-indent face is available
-    :requires (org-indent)
-    :config
-    ;; Increase the size of various headings
-    (set-face-attribute 'org-document-title nil :font "Firacode Sans" :weight 'bold :height 1.3)
+    :ensure t
+    :custom
+    (org-hide-emphasis-markers t)
+    (org-fontify-quote-and-verse-blocks t)
+    (org-fontify-whole-heading-line t)
+    (org-hide-leading-stars t)
+    (org-pretty-entities t)
+    (org-ellipsis "…")
     
-    (dolist (face '((org-level-1 . 1.2)
-                    (org-level-2 . 1.1)
-                    (org-level-3 . 1.05)
-                    (org-level-4 . 1.0)
-                    (org-level-5 . 1.1)
-                    (org-level-6 . 1.1)
-                    (org-level-7 . 1.1)
-                    (org-level-8 . 1.1)))
-      (set-face-attribute (car face) nil :font "Firacode Sans" :weight 'medium :height (cdr face)))
+    :config
+    ;; Clear any existing face settings first
+    (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-verbatim nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-special-keyword nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-meta-line nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+    
+    ;; Set headings to use variable-pitch and scale properly
+  ;;   (dolist (face '((org-level-1 . 1.3)
+  ;;                   (org-level-2 . 1.2)
+  ;;                   (org-level-3 . 1.1)
+  ;;                   (org-level-4 . 1.0)
+  ;;                   (org-level-5 . 1.0)
+  ;;                   (org-level-6 . 1.0)
+  ;;                   (org-level-7 . 1.0)
+  ;;                   (org-level-8 . 1.0)))
+  ;;     (set-face-attribute (car face) nil 
+  ;;                       :inherit 'variable-pitch 
+  ;;                       :height (* 120 (cdr face)))))
 
-    ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-    (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-    (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
-    (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-    (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
-    (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-    (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-    (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
-
-    ;; Get rid of the background on column views
-    (set-face-attribute 'org-column nil :background nil)
-    (set-face-attribute 'org-column-title nil :background nil))
-
-  ;; TODO: Others to consider
-  ;; '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-  ;; '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-  ;; '(org-property-value ((t (:inherit fixed-pitch))) t)
-  ;; '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-  ;; '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
-  ;; '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
-  ;; '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
-
+   (use-package org-superstar
+    :ensure t
+    :after org
+    :hook (org-mode . org-superstar-mode)
+    :custom
+    (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
 
   ;; This is needed as of Org 9.2
   (use-package org-tempo
@@ -291,6 +283,7 @@
     (add-to-list 'org-structure-template-alist '("json" . "src json")))
 
 #+end_src
+
 * useful key binding
 
 #+begin_src emacs-lisp
@@ -306,7 +299,48 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
 
 * Buffer customizations (prot tips to ensure they open in specific windows)
 
-* vertico, marginalia, orderless, project.el, treemacs, embark, consult
+* Project.el configuration
+#+begin_src emacs-lisp
+
+  ;; Project configuration
+  (use-package project
+    :ensure nil  ; built into Emacs
+    :config
+    ;; Custom project root finding function
+    (defun my/project-try-deps-edn (dir)
+      "Return project instance if DIR has deps.edn file."
+      (let ((proj-file (locate-dominating-file dir "deps.edn")))
+        (if proj-file
+            (cons 'deps-edn proj-file)
+          nil)))
+    
+    (defun my/project-try-project-clj (dir)
+      "Return project instance if DIR has project.clj file."
+      (let ((proj-file (locate-dominating-file dir "project.clj")))
+        (if proj-file
+            (cons 'lein proj-file)
+          nil)))
+    
+    ;; Add Clojure project detection
+    (add-hook 'project-find-functions #'my/project-try-deps-edn)
+    (add-hook 'project-find-functions #'my/project-try-project-clj))
+    
+      ;; Convenient keybindings for project.el
+      (global-set-key (kbd "C-c p f") #'project-find-file)
+      (global-set-key (kbd "C-c p d") #'project-find-dir)
+      (global-set-key (kbd "C-c p b") #'project-switch-to-buffer)
+      (global-set-key (kbd "C-c p p") #'project-switch-project)
+      (global-set-key (kbd "C-c p s") #'project-shell)
+      (global-set-key (kbd "C-c p g") #'project-find-regexp)
+      (global-set-key (kbd "C-c p e") #'project-eshell)
+
+  (setq project-additional-project-dirs 
+      '("~/automation_scripts"
+        ))
+
+#+end_src
+* vertico configuration
+
 #+begin_src emacs-lisp
   ;; Enable vertico
   (use-package vertico
@@ -324,6 +358,12 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
     :ensure t
     :init
     (savehist-mode))  
+#+end_src
+
+* Marginalia configuration
+
+#+begin_src emacs-lisp
+
   ;; Enable rich annotations using the Marginalia package
   (use-package marginalia
     :ensure t
@@ -340,6 +380,11 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
     ;; the mode gets enabled right away. Note that this forces loading the
     ;; package.
     (marginalia-mode))
+#+end_src
+
+* Consult configuration
+
+#+begin_src emacs-lisp
 
   ;; Example configuration for Consult
   (use-package consult
@@ -447,6 +492,11 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
     ;; You may want to use `embark-prefix-help-command' or which-key instead.
     ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
     )
+#+end_src
+
+* Embark configuration
+
+#+begin_src emacs-lisp
 
   (use-package embark
     :ensure t
@@ -483,6 +533,12 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
     :ensure t ; only need to install it, embark loads it after consult if found
     :hook
     (embark-collect-mode . consult-preview-at-point-mode))
+  
+#+end_src
+
+* Orderless configuration
+
+#+begin_src emacs-lisp
 
   (use-package orderless
     :ensure t
@@ -490,70 +546,208 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
     (completion-styles '(orderless basic))
     (completion-category-defaults nil)
     (completion-category-overrides '((file (styles basic partial-completion)))))  
+#+end_src
+
+* Cape Configuration
+
+#+begin_src emacs-lisp
+
+  ;; Completion Setup with Cape and Corfu
+  (use-package cape
+    :ensure t
+    :init
+    ;; Add useful defaults completion sources from Cape
+    (add-to-list 'completion-at-point-functions #'cape-file)
+    (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+
+    :config
+    ;; Enhance Clojure completion with Cape
+    (with-eval-after-load 'clojure-mode
+      (add-hook 'clojure-mode-hook
+                (lambda ()
+                  (add-to-list 'completion-at-point-functions #'cape-symbol)))))
+#+end_src
+
+* Corfu Configuration
+
+#+begin_src emacs-lisp
 
   (use-package corfu
     :ensure t
-    ;; Optional customizations
     :custom
-    ;; (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
-    (corfu-auto t)                 ;; Enable auto completion
-    ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-    (corfu-quit-no-match 'separator)      ;; Never quit, even if there is no match
-    ;; (corfu-preview-current nil)    ;; Disable current candidate preview
-    ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
-    ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+    (corfu-auto t)  ; Enable auto completion
+    (corfu-auto-delay 0.2)
+    (corfu-auto-prefix 2)
+    (corfu-preview-current nil)
+    (corfu-quit-at-boundary 'separator)
 
-    ;; Enable Corfu only for certain modes. See also `global-corfu-modes'.
-    ;; :hook ((prog-mode . corfu-mode)
-    ;;        (shell-mode . corfu-mode)
-    ;;        (eshell-mode . corfu-mode))
-
-    ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
-    ;; be used globally (M-/).  See also the customization variable
-    ;; `global-corfu-modes' to exclude certain modes.
     :init
-    (global-corfu-mode))
+    (global-corfu-mode)
 
-  (use-package cape
-    :ensure t
-    ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
-    ;; Press C-c p ? to for help.
-    :bind ("C-c p" . cape-prefix-map) ;; Alternative keys: M-p, M-+, ...
-    ;; Alternatively bind Cape commands individually.
-    ;; :bind (("C-c p d" . cape-dabbrev)
-    ;;        ("C-c p h" . cape-history)
-    ;;        ("C-c p f" . cape-file)
-    ;;        ...)
-    :init
-    ;; Add to the global default value of `completion-at-point-functions' which is
-    ;; used by `completion-at-point'.  The order of the functions matters, the
-    ;; first function returning a result wins.  Note that the list of buffer-local
-    ;; completion functions takes precedence over the global list.
-    (add-hook 'completion-at-point-functions #'cape-dabbrev)
-    (add-hook 'completion-at-point-functions #'cape-file)
-    (add-hook 'completion-at-point-functions #'cape-elisp-block)
-    ;; (add-hook 'completion-at-point-functions #'cape-history)
-    ;; ...
-    )
+    :hook
+    ((clojure-mode . corfu-mode)
+     (cider-repl-mode . corfu-mode)))
+
+  ;; Optional: Enable Corfu in the minibuffer
+  (defun corfu-enable-in-minibuffer ()
+    "Enable Corfu in the minibuffer if `completion-at-point' is bound."
+    (when (where-is-internal #'completion-at-point (list (current-local-map)))
+      (corfu-mode 1)))
+
+  (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
+#+end_src
+
+* Which Key Configuration
+
+#+begin_src emacs-lisp
 
   (use-package which-key
     :config
     (which-key-mode))
-
 #+end_src
-
-#+RESULTS:
-: cape-prefix-map
-
-These should help up start working with project folders.
 
 * do we need acewindow to navigate easily between windows 
 
-* install things necessary to quickly find files by name and by content like swiper, ripgrep et al. 
-
 * magit to start working with Git.
 
+* Clojure support
+
+#+begin_src emacs-lisp
+
+  (use-package clojure-mode
+    :ensure t)
+
+  (use-package cider
+    :ensure t
+    :config
+    (setq cider-repl-display-help-banner nil)
+    (setq cider-print-fn 'puget)
+    (setq cider-repl-use-pretty-printing t))
+
+  (use-package paredit
+    :ensure t
+    :hook ((clojure-mode . paredit-mode)
+          (cider-repl-mode . paredit-mode)))
+
+  (use-package rainbow-delimiters
+    :ensure t
+    :hook ((clojure-mode . rainbow-delimiters-mode)
+          (cider-repl-mode . rainbow-delimiters-mode)))
+#+end_src
+
+* Cider REPL Configuration
+
+#+begin_src emacs-lisp
+
+  ;; Debugging Setup
+  (setq cider-cljs-lein-repl
+        "(do (require 'figwheel-sidecar.repl-api)
+           (figwheel-sidecar.repl-api/start-figwheel!)
+           (figwheel-sidecar.repl-api/cljs-repl))")
+
+  (setq cider-debug-display-locals t)
+  (setq cider-debug-prompt 'overlay)
+
+  ;; Optional but Recommended Packages
+  (use-package clj-refactor
+    :ensure t
+    :config
+    (cljr-add-keybindings-with-prefix "C-c C-m")
+    :hook (clojure-mode . clj-refactor-mode))
+
+  (use-package flycheck-clj-kondo
+    :ensure t)
+
+  (use-package aggressive-indent
+    :ensure t
+    :hook (clojure-mode . aggressive-indent-mode))
+
+  ;; Testing Setup  
+  (setq cider-test-show-report-on-success t)
+  (setq cider-auto-select-test-report-buffer t)
+
+
+  ;; REPL Configuration
+  (setq cider-repl-history-file ".cider-repl-history")
+  (setq cider-repl-wrap-history t)
+  (setq cider-repl-history-size 3000)
+#+end_src
+
+* treemacs configuration
+#+begin_src emacs-lisp
+
+  (use-package treemacs
+    :ensure t
+    :config
+    (setq treemacs-follow-mode t)
+    (setq treemacs-width 35)
+    ;; project.el integration
+    (treemacs-project-follow-mode t)
+    ;; Modus theme integration
+    (with-eval-after-load 'modus-themes
+      (setq treemacs-directory-name-face 'modus-themes-completion-selected
+            treemacs-file-name-face 'default
+            treemacs-git-modified-face 'modus-themes-mark-alt
+            treemacs-git-added-face 'modus-themes-mark-sel
+            treemacs-git-untracked-face 'modus-themes-special-mild
+            treemacs-git-conflict-face 'modus-themes-intense-red))
+    
+    ;; Additional customization for better modus integration
+    (setq treemacs-indentation 2
+          treemacs-indentation-string "  "
+          treemacs-show-hidden-files t
+          treemacs-collapse-dirs 3
+          treemacs-width 35)
+    
+    ;; Use simple icons that work well with modus
+    (setq treemacs-no-png-images t)
+    
+    ;; Optional: disable file size and modification time
+    (treemacs-filewatch-mode t)
+    (treemacs-git-mode 'simple)
+    (setq treemacs-show-git-status t)
+  	:bind
+  	(:map global-map
+    ("C-c t t" . treemacs)
+    ("C-c t f" . treemacs-select-window)))
+
+  (custom-set-faces
+    '(treemacs-root-face ((t (:inherit modus-themes-completion-selected :height 1.2))))
+    '(treemacs-directory-collapsed-face ((t (:inherit modus-themes-completion-match-0))))
+    '(treemacs-tags-face ((t (:inherit modus-themes-key-binding))))
+    '(treemacs-help-title-face ((t (:inherit modus-themes-bold))))
+    )
+    
+#+end_src
 * lsp mode and code completion using corfu
+
+#+begin_src emacs-lisp
+
+      (use-package lsp-mode
+        :ensure t
+        :init
+        ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+        (setq lsp-keymap-prefix "C-c l")
+        :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+      	 (clojure-mode . lsp)
+      	 (clojurec-mode . lsp)
+      	 (clojurescript-mode . lsp)
+      	 ;; if you want which-key integration
+      	 (lsp-mode . lsp-enable-which-key-integration))
+        :commands ls)
+
+      ;; (use-package treemacs
+      ;;   :ensure t
+      ;;   :config (
+      ;; 	   (setq treemacs-no-png-images t)))
+
+      (use-package lsp-ui
+        :commands lsp-ui-mode)
+
+      (use-package lsp-treemacs
+        :commands lsp-treemacs-errors-list)
+
+#+end_src
 
 * debugging with dap-mode?
 

@@ -523,16 +523,16 @@ in {
         })
       ];
 
-    home.file = {
-      ".emacs.d/early-init.el".text = ''
-        (require 'hm-early-init)
-        (provide 'early-init)
-      '';
+    # home.file = {
+    #   ".emacs.d/early-init.el".text = ''
+    #     (require 'hm-early-init)
+    #     (provide 'early-init)
+    #   '';
 
-      ".emacs.d/init.el".text = ''
-        (require 'hm-init)
-        (provide 'init)
-      '';
-    };
+    #   ".emacs.d/init.el".text = ''
+    #     (require 'hm-init)
+    #     (provide 'init)
+    #   '';
+    # };
   };
 }

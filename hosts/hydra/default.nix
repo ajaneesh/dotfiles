@@ -57,6 +57,7 @@ inputs.nixpkgs.lib.nixosSystem {
       # mail.himalaya.enable = true;
       dotfiles.enable = true;
       lua.enable = true;
+      clojure.enable = true;
     }
   ];
 }
