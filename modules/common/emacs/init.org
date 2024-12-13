@@ -76,10 +76,57 @@
 #+begin_src emacs-lisp
 
 ;; Add my library path to load-path
-(push "~/.config/emacs/lisp" load-path)
+(push "~/lib/elisp/" load-path)
 
 #+end_src
 
+* SSH Configuration
+
+#+begin_src emacs-lisp
+
+  (require 'ssh-tunnel-manager)
+  
+  ;; Optional: setup default keybindings
+  (ssh-tunnel-setup-default-keybindings)
+
+
+#+end_src
+
+* Basic UI Configuration
+
+#+begin_src emacs-lisp
+
+
+  (setq inhibit-startup-message t)
+
+  (scroll-bar-mode -1)        ; Disable visible scrollbar
+  (tool-bar-mode -1)          ; Disable the toolbar
+  (tooltip-mode -1)           ; Disable tooltips
+  (set-fringe-mode 10)        ; Give some breathing room
+
+  (menu-bar-mode -1)            ; Disable the menu bar
+
+  ;; Set up the visible bell
+  (setq visible-bell t)
+
+  (column-number-mode)
+  (global-display-line-numbers-mode t)
+
+  ;; Set frame transparency
+  (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
+  (add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
+  (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+  (add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+  ;; Disable line numbers for some modes
+  (dolist (mode '(org-mode-hook
+                  term-mode-hook
+                  shell-mode-hook
+                  treemacs-mode-hook
+                  eshell-mode-hook))
+    (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  
+#+end_src
 * Font configuration
 
 #+begin_src emacs-lisp
@@ -320,6 +367,10 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
         (if proj-file
             (cons 'lein proj-file)
           nil)))
+    
+    ;; Define how to get root for deps.edn projects
+    (cl-defmethod project-root ((project (head deps-edn)))
+      (cdr project))
     
     ;; Add Clojure project detection
     (add-hook 'project-find-functions #'my/project-try-deps-edn)
@@ -614,25 +665,26 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
 
 #+begin_src emacs-lisp
 
-  (use-package clojure-mode
-    :ensure t)
+    (use-package clojure-mode
+      :ensure t)
 
-  (use-package cider
-    :ensure t
-    :config
-    (setq cider-repl-display-help-banner nil)
-    (setq cider-print-fn 'puget)
-    (setq cider-repl-use-pretty-printing t))
+    (use-package cider
+      :ensure t
+      :config
+      (setq cider-repl-display-help-banner nil)
+      (setq cider-print-fn 'puget)
+      (setq cider-repl-use-pretty-printing t)
+      (setq cider-clojure-cli-aliases ":dev:cider"))
 
-  (use-package paredit
-    :ensure t
-    :hook ((clojure-mode . paredit-mode)
-          (cider-repl-mode . paredit-mode)))
+    (use-package paredit
+      :ensure t
+      :hook ((clojure-mode . paredit-mode)
+            (cider-repl-mode . paredit-mode)))
 
-  (use-package rainbow-delimiters
-    :ensure t
-    :hook ((clojure-mode . rainbow-delimiters-mode)
-          (cider-repl-mode . rainbow-delimiters-mode)))
+    (use-package rainbow-delimiters
+      :ensure t
+      :hook ((clojure-mode . rainbow-delimiters-mode)
+            (cider-repl-mode . rainbow-delimiters-mode)))
 #+end_src
 
 * Cider REPL Configuration

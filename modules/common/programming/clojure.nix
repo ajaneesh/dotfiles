@@ -11,6 +11,7 @@
         fira-code-symbols
         nerdfonts
         nodejs_22
+        jdk17
         clojure
         leiningen
         clojure-lsp
