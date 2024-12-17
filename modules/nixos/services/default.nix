@@ -5,6 +5,7 @@
 {
 
   imports = [
+    ./audiobookshelf.nix
     ./arr.nix
     ./backups.nix
     ./bind.nix
@@ -14,6 +15,7 @@
     ./cloudflare.nix
     ./filebrowser.nix
     ./identity.nix
+    ./immich.nix
     ./irc.nix
     ./gitea-runner.nix
     ./gitea.nix

@@ -22,6 +22,11 @@
         description = "S3 access key ID for backups";
         default = null;
       };
+      glacierBucket = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        description = "S3 bucket for glacier backups";
+        default = null;
+      };
     };
   };
 
@@ -46,7 +51,7 @@
 
     # Broken on 2024-08-23
     # https://github.com/NixOS/nixpkgs/commit/0875d0ce1c778f344cd2377a5337a45385d6ffa0
-    nixpkgs.config.permittedInsecurePackages = [ "litestream-0.3.13" ];
+    insecurePackages = [ "litestream-0.3.13" ];
 
     # Wait for secret to exist
     systemd.services.litestream = {
@@ -69,5 +74,30 @@
     #   timerConfig = { OnCalendar = "00:05:00"; };
     #   environmentFile = backup.s3File;
     # };
+
+    secrets.s3-glacier = {
+      source = ../../../private/s3-glacier.age;
+      dest = "${config.secretsDirectory}/s3-glacier";
+    };
+    secrets.restic = {
+      source = ../../../private/restic.age;
+      dest = "${config.secretsDirectory}/restic";
+    };
+
+    services.restic.backups = {
+      default = {
+        repository = "s3:s3.us-east-1.amazonaws.com/${config.backup.s3.glacierBucket}/restic";
+        paths = [ "/data/images" ];
+        environmentFile = config.secrets.s3-glacier.dest;
+        passwordFile = config.secrets.restic.dest;
+        pruneOpts = [
+          "--keep-daily 14"
+          "--keep-weekly 6"
+          "--keep-monthly 12"
+          "--keep-yearly 100"
+        ];
+      };
+    };
+
   };
 }

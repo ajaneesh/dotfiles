@@ -13,12 +13,18 @@
         ns = "nix-shell -p";
         nsf = "nix-shell --run fish -p";
         nsr = "nix-shell-run";
-        nps = "nix repl '<nixpkgs>'";
+        nps = "nix repl --expr 'import <nixpkgs>{}'";
         nixo = "man configuration.nix";
         nixh = "man home-configuration.nix";
-        nr = "rebuild-nixos";
-        nro = "rebuild-nixos offline";
-        hm = "rebuild-home";
+        nr = {
+          function = "rebuild-nixos";
+        };
+        nro = {
+          function = "rebuild-nixos-offline";
+        };
+        hm = {
+          function = "rebuild-home";
+        };
       };
       functions = {
         nix-shell-run = {
@@ -42,19 +48,20 @@
         };
         rebuild-nixos = {
           body = ''
-            if test "$argv[1]" = "offline"
-                set option "--option substitute false"
-            end
             git -C ${config.dotfilesPath} add --intent-to-add --all
-            commandline -r "doas nixos-rebuild switch $option --flake ${config.dotfilesPath}#${config.networking.hostName}"
-            commandline --function execute
+            echo "doas nixos-rebuild switch --flake ${config.dotfilesPath}#${config.networking.hostName}"
+          '';
+        };
+        rebuild-nixos-offline = {
+          body = ''
+            git -C ${config.dotfilesPath} add --intent-to-add --all
+            echo "doas nixos-rebuild switch --option substitute false --flake ${config.dotfilesPath}#${config.networking.hostName}"
           '';
         };
         rebuild-home = {
           body = ''
             git -C ${config.dotfilesPath} add --intent-to-add --all
-            commandline -r "${pkgs.home-manager}/bin/home-manager switch --flake ${config.dotfilesPath}#${config.networking.hostName}";
-            commandline --function execute
+            echo "${pkgs.home-manager}/bin/home-manager switch --flake ${config.dotfilesPath}#${config.networking.hostName}";
           '';
         };
       };
@@ -90,12 +97,6 @@
 
     # Set channel to flake packages, used for nix-shell commands
     nixPath = [ "nixpkgs=${pkgs.path}" ];
-
-    # Set registry to this flake's packages, used for nix X commands
-    registry.nixpkgs.to = {
-      type = "path";
-      path = builtins.toString pkgs.path;
-    };
 
     # For security, only allow specific users
     settings.allowed-users = [

@@ -14,6 +14,11 @@ let
       url = "localhost:7878";
       apiKey = config.secrets.radarrApiKey.dest;
     };
+    readarr = {
+      exportarrPort = "9711";
+      url = "localhost:8787";
+      apiKey = config.secrets.readarrApiKey.dest;
+    };
     sonarr = {
       exportarrPort = "9708";
       url = "localhost:8989";
@@ -39,37 +44,44 @@ in
 
   config = lib.mkIf config.arrs.enable {
 
+    # Broken on 2024-12-07
+    # https://discourse.nixos.org/t/solved-sonarr-is-broken-in-24-11-unstable-aka-how-the-hell-do-i-use-nixpkgs-config-permittedinsecurepackages/
+    insecurePackages = [
+      "aspnetcore-runtime-wrapped-6.0.36"
+      "aspnetcore-runtime-6.0.36"
+      "dotnet-sdk-wrapped-6.0.428"
+      "dotnet-sdk-6.0.428"
+    ];
+
     services = {
       bazarr = {
         enable = true;
-        group = "media";
+        group = "shared";
       };
       jellyseerr.enable = true;
       prowlarr.enable = true;
       sabnzbd = {
         enable = true;
-        group = "media";
+        group = "shared";
         # The config file must be editable within the application
         # It contains server configs and credentials
         configFile = "/data/downloads/sabnzbd/sabnzbd.ini";
       };
       sonarr = {
         enable = true;
-        group = "media";
+        group = "shared";
       };
       radarr = {
         enable = true;
-        group = "media";
+        group = "shared";
+      };
+      readarr = {
+        enable = true;
+        group = "shared";
       };
     };
 
-    # Create a media group to be shared between services
-    users.groups.media = { };
-
-    # Give the human user access to the media group
-    users.users.${config.user}.extraGroups = [ "media" ];
-
-    # Allows media group to read/write the sabnzbd directory
+    # Allows shared group to read/write the sabnzbd directory
     users.users.sabnzbd.homeMode = "0770";
 
     unfreePackages = [ "unrar" ]; # Required as a dependency for sabnzbd
@@ -90,7 +102,7 @@ in
         handle = [
           {
             handler = "reverse_proxy";
-            # We're able to reference the url and port of the service dynamically 
+            # We're able to reference the url and port of the service dynamically
             upstreams = [ { dial = arrConfig.sonarr.url; } ];
           }
         ];
@@ -107,6 +119,21 @@ in
           {
             handler = "reverse_proxy";
             upstreams = [ { dial = arrConfig.radarr.url; } ];
+          }
+        ];
+      }
+      {
+        group = "download";
+        match = [
+          {
+            host = [ config.hostnames.download ];
+            path = [ "/readarr*" ];
+          }
+        ];
+        handle = [
+          {
+            handler = "reverse_proxy";
+            upstreams = [ { dial = arrConfig.readarr.url; } ];
           }
         ];
       }
@@ -221,6 +248,11 @@ in
     secrets.radarrApiKey = {
       source = ../../../private/radarr-api-key.age;
       dest = "/var/private/radarr-api";
+      prefix = "API_KEY=";
+    };
+    secrets.readarrApiKey = {
+      source = ../../../private/radarr-api-key.age;
+      dest = "/var/private/readarr-api";
       prefix = "API_KEY=";
     };
     secrets.sonarrApiKey = {

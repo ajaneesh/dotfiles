@@ -77,7 +77,16 @@
       description = "List of unfree packages to allow.";
       default = [ ];
     };
+    insecurePackages = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      description = "List of insecure packages to allow.";
+      default = [ ];
+    };
     hostnames = {
+      audiobooks = lib.mkOption {
+        type = lib.types.str;
+        description = "Hostname for audiobook server (Audiobookshelf).";
+      };
       files = lib.mkOption {
         type = lib.types.str;
         description = "Hostname for files server (Filebrowser).";
@@ -97,6 +106,10 @@
       paperless = lib.mkOption {
         type = lib.types.str;
         description = "Hostname for document server (paperless-ngx).";
+      };
+      photos = lib.mkOption {
+        type = lib.types.str;
+        description = "Hostname for photo management (Immich).";
       };
       prometheus = lib.mkOption {
         type = lib.types.str;
@@ -175,6 +188,9 @@
       # Allow specified unfree packages (identified elsewhere)
       # Retrieves package object based on string name
       nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) config.unfreePackages;
+
+      # Allow specified insecure packages (identified elsewhere)
+      nixpkgs.config.permittedInsecurePackages = config.insecurePackages;
 
       # Pin a state version to prevent warnings
       home-manager.users.${config.user}.home.stateVersion = stateVersion;

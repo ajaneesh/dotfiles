@@ -184,6 +184,13 @@
       flake = false;
     };
 
+    # Git alternative
+    # Fixes: https://github.com/martinvonz/jj/issues/4784
+    jujutsu = {
+      url = "github:martinvonz/jj";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Ren and rep - CLI find and replace
     rep = {
       url = "github:robenkleene/rep-grep";
@@ -194,26 +201,37 @@
       flake = false;
     };
 
+    gh-collaborators = {
+      url = "github:katiem0/gh-collaborators";
+      flake = false;
+    };
+
+    # Clipboard over SSH
+    osc = {
+      url = "github:theimpostor/osc/v0.4.6";
+      flake = false;
+    };
+
     # Nextcloud Apps
     nextcloud-news = {
       # https://github.com/nextcloud/news/releases
-      url = "https://github.com/nextcloud/news/releases/download/25.0.0-alpha7/news.tar.gz";
+      url = "https://github.com/nextcloud/news/releases/download/25.0.0-alpha12/news.tar.gz";
       flake = false;
     };
     nextcloud-external = {
       # https://github.com/nextcloud-releases/external/releases
-      url = "https://github.com/nextcloud-releases/external/releases/download/v5.4.0/external-v5.4.0.tar.gz";
+      url = "https://github.com/nextcloud-releases/external/releases/download/v5.5.2/external-v5.5.2.tar.gz";
       flake = false;
     };
     nextcloud-cookbook = {
       # https://github.com/christianlupus-nextcloud/cookbook-releases/releases/
-      url = "https://github.com/christianlupus-nextcloud/cookbook-releases/releases/download/v0.11.1/cookbook-0.11.1.tar.gz";
+      url = "https://github.com/christianlupus-nextcloud/cookbook-releases/releases/download/v0.11.2/cookbook-0.11.2.tar.gz";
       flake = false;
     };
     nextcloud-snappymail = {
       # https://github.com/the-djmaze/snappymail/releases
       # https://snappymail.eu/repository/nextcloud
-      url = "https://snappymail.eu/repository/nextcloud/snappymail-2.37.2-nextcloud.tar.gz";
+      url = "https://snappymail.eu/repository/nextcloud/snappymail-2.38.2-nextcloud.tar.gz";
       # url = "https://github.com/nmasur/snappymail-nextcloud/releases/download/v2.36.3/snappymail-2.36.3-nextcloud.tar.gz";
       flake = false;
     };
@@ -239,6 +257,7 @@
           mail.smtpHost = "";
           dotfilesRepo = "https://github.com/ajaneeshihx/dotfiles";
           hostnames = {
+            audiobooks = "read.${baseName}";
             files = "files.${baseName}";
             git = "git.${baseName}";
             influxdb = "influxdb.${baseName}";
@@ -249,6 +268,7 @@
             notifications = "ntfy.${baseName}";
             prometheus = "prom.${baseName}";
             paperless = "paper.${baseName}";
+            photos = "photos.${baseName}";
             secrets = "vault.${baseName}";
             stream = "stream.${baseName}";
             content = "cloud.${baseName}";
@@ -261,16 +281,19 @@
 
       # Common overlays to always use
       overlays = [
-        inputs.nur.overlay
+        inputs.nur.overlays.default
         inputs.nix2vim.overlay
+        inputs.jujutsu.overlays.default # Fix: https://github.com/martinvonz/jj/issues/4784
         (import ./overlays/neovim-plugins.nix inputs)
         (import ./overlays/disko.nix inputs)
         (import ./overlays/tree-sitter.nix inputs)
         (import ./overlays/mpv-scripts.nix inputs)
         (import ./overlays/nextcloud-apps.nix inputs)
         (import ./overlays/betterlockscreen.nix)
-        (import ./overlays/gh-collaborators.nix)
+        (import ./overlays/gh-collaborators.nix inputs)
+        (import ./overlays/osc.nix inputs)
         (import ./overlays/ren-rep.nix inputs)
+        (import ./overlays/volnoti.nix)
       ];
 
       # System types to support.

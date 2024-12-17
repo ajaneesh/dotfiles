@@ -67,6 +67,14 @@ inputs.nixpkgs.lib.nixosSystem rec {
         devices = (import ../../disks/root.nix { disk = "/dev/nvme0n1"; });
       };
 
+      zramSwap.enable = true;
+      swapDevices = [
+        {
+          device = "/swapfile";
+          size = 4 * 1024; # 4 GB
+        }
+      ];
+
       boot.zfs = {
         # Automatically load the ZFS pool on boot
         extraPools = [ "tank" ];
@@ -98,8 +106,10 @@ inputs.nixpkgs.lib.nixosSystem rec {
       dotfiles.enable = true;
       arrs.enable = true;
       filebrowser.enable = true;
+      services.audiobookshelf.enable = true;
       services.bind.enable = true;
       services.caddy.enable = true;
+      services.immich.enable = true;
       services.jellyfin.enable = true;
       services.nextcloud.enable = false;
       services.calibre-web.enable = true;
@@ -124,6 +134,7 @@ inputs.nixpkgs.lib.nixosSystem rec {
         endpoint = "s3.us-west-002.backblazeb2.com";
         bucket = "noahmasur-backup";
         accessKeyId = "0026b0e73b2e2c80000000005";
+        glacierBucket = "noahmasur-archive";
       };
 
       # Disable passwords, only use SSH key

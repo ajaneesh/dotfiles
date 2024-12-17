@@ -27,6 +27,7 @@ inputs.darwin.lib.darwinSystem {
     {
       nixpkgs.overlays = [ inputs.firefox-darwin.overlay ] ++ overlays;
       networking.hostName = "lookingglass";
+      networking.computerName = "NYCM-NMASUR1";
       identityFile = "/Users/Noah.Masur/.ssh/id_ed25519";
       gui.enable = true;
       theme = {
