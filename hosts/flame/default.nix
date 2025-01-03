@@ -62,7 +62,7 @@ inputs.nixpkgs.lib.nixosSystem rec {
 
       # Still require colors for programs like Neovim, K9S
       theme = {
-        colors = (import ../../colorscheme/gruvbox).dark;
+        colors = (import ../../colorscheme/gruvbox-dark).dark;
       };
 
       # Programs and services
@@ -71,6 +71,7 @@ inputs.nixpkgs.lib.nixosSystem rec {
       dotfiles.enable = true; # Clone dotfiles
       neovim.enable = true;
       giteaRunner.enable = true;
+      services.actualbudget.enable = true;
       services.caddy.enable = true;
       services.grafana.enable = true;
       services.thelounge.enable = true;
