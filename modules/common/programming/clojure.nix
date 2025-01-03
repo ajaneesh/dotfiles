@@ -9,11 +9,11 @@
 
       home.packages = with pkgs; [
         fira-code-symbols
-        nerdfonts
         nodejs_22
         jdk17
         clojure
         leiningen
+        babashka
         clojure-lsp
         cider
         emacsPackages.ob-clojurescript

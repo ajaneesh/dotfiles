@@ -48,13 +48,13 @@ in
     # These aren't necessary, but helpful for the user
     environment.systemPackages = with pkgs; [
       pamixer # Audio control
-      volnoti # Volume notifications
+      # volnoti # Volume notifications
     ];
 
     home-manager.users.${config.user} = {
 
       # Graphical volume notifications
-      services.volnoti.enable = true;
+      # services.volnoti.enable = true;
 
       xsession.windowManager.i3.config = {
 

@@ -13,15 +13,36 @@
     home-manager.users.${config.user} = {
 
       home.packages = with pkgs; [
-        # python310 # Standard Python interpreter
-        pyright # Python language server
-        black # Python formatter
-        python310Packages.flake8 # Python linter
+        python3
+        # Build dependencies for tree-sitter
+        gcc
+        gnumake
+    
+        # Python LSP and development tools
+        pyright
+        python3Packages.python-lsp-server
+        python3Packages.black
+        python3Packages.isort
+        python3Packages.debugpy
+        # Additional LSP plugins
+        python3Packages.pylsp-mypy
+        python3Packages.python-lsp-black
+        python3Packages.python-lsp-ruff
       ];
 
-      programs.fish.shellAbbrs = {
-        py = "python3";
-      };
+      # programs.fish.shellAbbrs = {
+      #   py = "python3";
+      # };
+
+      # Optional: If you want to configure pyright globally
+      home.file.".config/pyright/pyrightconfig.json".text = ''
+            {
+            "include": ["src"],
+            "exclude": ["**/node_modules", "**/__pycache__"],
+            "typeCheckingMode": "basic",
+            "useLibraryCodeForTypes": true
+            }
+      '';
     };
   };
 }

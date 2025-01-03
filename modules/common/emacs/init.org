@@ -97,88 +97,86 @@
 #+begin_src emacs-lisp
 
 
-  (setq inhibit-startup-message t)
+    (setq inhibit-startup-message t)
 
-  (scroll-bar-mode -1)        ; Disable visible scrollbar
-  (tool-bar-mode -1)          ; Disable the toolbar
-  (tooltip-mode -1)           ; Disable tooltips
-  (set-fringe-mode 10)        ; Give some breathing room
+    (scroll-bar-mode -1)        ; Disable visible scrollbar
+    (tool-bar-mode -1)          ; Disable the toolbar
+    (tooltip-mode -1)           ; Disable tooltips
+    (set-fringe-mode 10)        ; Give some breathing room
 
-  (menu-bar-mode -1)            ; Disable the menu bar
+    (menu-bar-mode -1)            ; Disable the menu bar
 
-  ;; Set up the visible bell
-  (setq visible-bell t)
+    ;; Set up the visible bell
+    (setq visible-bell t)
 
-  (column-number-mode)
-  (global-display-line-numbers-mode t)
+    (column-number-mode)
+    (global-display-line-numbers-mode t)
+    (global-hl-line-mode 1)
+    
+    ;; Set frame transparency
+    ;; (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
+    ;; (add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
+    ;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+    ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
-  ;; Set frame transparency
-  (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
-  (add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
-  (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-  (add-to-list 'default-frame-alist '(fullscreen . maximized))
-
-  ;; Disable line numbers for some modes
-  (dolist (mode '(org-mode-hook
-                  term-mode-hook
-                  shell-mode-hook
-                  treemacs-mode-hook
-                  eshell-mode-hook))
-    (add-hook mode (lambda () (display-line-numbers-mode 0))))
-  
+    ;;
+    ;; Disable line numbers for some modes
+    (dolist (mode '(org-mode-hook
+                    term-mode-hook
+                    shell-mode-hook
+                    treemacs-mode-hook
+                    eshell-mode-hook))
+      (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  (setq make-backup-files nil) ; stop creating backup~ files
+  (setq auto-save-default nil) ; stop creating #autosave# files
+  (setq cider-save-file-on-load nil)
 #+end_src
 * Font configuration
 
 #+begin_src emacs-lisp
 
-  ;;     ;; Set default fonts
-  ;;     (set-face-attribute 'default nil
-  ;;                         :family "Fira Code"
-  ;;                         :height 120)
+  ;; Set default fonts
+  (set-face-attribute 'default nil
+                      :family "JetBrains Mono"
+                      :height 100)
 
-  ;;     ;; Ensure programming modes and code use fixed-pitch
-  ;;     (set-face-attribute 'fixed-pitch nil 
-  ;;                         :family "Fira Code"
-  ;;                         :height 120)
+  ;; Ensure programming modes and code use fixed-pitch
+  (set-face-attribute 'fixed-pitch nil 
+                      :family "JetBrains Mono"
+                      :height 100)
 
-  ;;     (set-face-attribute 'variable-pitch nil
-  ;;                         :family "Cantarell"
-  ;;                         :height 120)
-  ;;   (use-package ligature
-  ;;     :ensure t
-  ;;     :config
-  ;;     (ligature-set-ligatures 't '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\"
-  ;;                                 "{-" "::" ":::" ":=" "!!" "!=" "!==" "-}" "--" "---" "-->"
-  ;;                                 "->>" "->" "-<" "-<<" "-~" "#{" "#[" "##" "###" "####"
-  ;;                                 "#(" "#?" "#_" "#_(" ".-" ".=" ".." "..<" "..." "?=")))
-                                  
-  ;;   ;; Ensure fixed-pitch in all programming modes
-  ;;   (add-hook 'prog-mode-hook
-  ;;             (lambda ()
-  ;;               (mixed-pitch-mode -1)  ; Disable mixed-pitch-mode
-  ;;               (variable-pitch-mode -1)  ; Ensure variable-pitch is off
-  ;;               ))
+  (set-face-attribute 'variable-pitch nil
+                      :family "ETBembo"
+                      :height 100)
+  ;; Enable ligatures if using a font that supports them
+  (use-package ligature
+    :config
+    (ligature-set-ligatures 't '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\"
+                                 "{-" "::" ":::" ":=" "!!" "!=" "!==" "-}" "--" "---" "-->"
+                                 "->>" "->" "-<" "-<<" "-~" "#{" "#[" "##" "###" "####"
+                                 "#(" "#?" "#_" "#_(" ".-" ".=" ".." "..<" "..." "?="))
+    (global-ligature-mode t))
 
-  ;; ;; Configure mixed-pitch-mode
-  ;; (use-package mixed-pitch
-  ;;   :ensure t
-  ;;   :hook (org-mode . mixed-pitch-mode)
-  ;;   :config
-  ;;   (setq mixed-pitch-set-height t)
-  ;;   ;; Ensure these elements stay fixed-pitch in mixed-pitch-mode
-  ;;   (setq mixed-pitch-fixed-pitch-faces
-  ;;         '(org-block
-  ;;           org-block-begin-line
-  ;;           org-block-end-line
-  ;;           org-code
-  ;;           org-document-info-keyword
-  ;;           org-meta-line
-  ;;           org-property-value
-  ;;           org-special-keyword
-  ;;           org-table
-  ;;           org-verbatim
-  ;;           line-number
-  ;;           line-number-current-line)))
+  ;; Configure mixed-pitch mode for Org
+  (use-package mixed-pitch
+    :hook
+    (org-mode . mixed-pitch-mode)
+    :config
+    (setq mixed-pitch-set-height t)
+    ;; Keep code blocks, tables, etc in fixed-pitch
+    (setq mixed-pitch-fixed-pitch-faces
+          '(org-block
+            org-block-begin-line
+            org-block-end-line
+            org-code
+            org-document-info-keyword
+            org-meta-line
+            org-property-value
+            org-special-keyword
+            org-table
+            org-verbatim
+            line-number
+            line-number-current-line)))
 
 #+end_src
 
@@ -198,7 +196,7 @@
             modus-themes-paren-match '(bold intense)
             modus-themes-prompts '(bold intense)
             modus-themes-completions '((matches . (extrabold underline))
-              (selection . (semibold italic)))
+              (selection . (semibold)))
             modus-themes-org-blocks 'tinted-background
             modus-themes-scale-headings t
             modus-themes-region '(bg-only)
@@ -265,7 +263,82 @@
 	:after evil
 	:ensure t
 	:config
-	(evil-collection-init))
+	(evil-collection-init '(not python)))
+#+end_src
+
+* Python configuration
+
+#+begin_src emacs-lisp
+
+  ;; Remove ELPA python package from load path
+  (setq load-path 
+        (cl-remove-if
+         (lambda (path)
+           (string-match-p "python-0\\.28" path))
+         load-path))
+
+  ;; Force load the built-in python.el first
+  (load "/nix/store/ypkhlc24d7skgal25f58bnnbp9rp49li-emacs-29.4/share/emacs/29.4/lisp/progmodes/python")
+
+  ;; TreeSit and Python configuration
+  (use-package treesit
+    :ensure nil
+    :config
+    (setq treesit-language-source-alist
+          '((python "https://github.com/tree-sitter/tree-sitter-python")))
+
+    (when (treesit-available-p)
+      ;; Install grammar if needed
+      (unless (treesit-language-available-p 'python)
+        (treesit-install-language-grammar 'python))
+      
+      ;; Set up python-ts-mode
+      (defvar python-ts-mode-map (make-sparse-keymap))
+      (add-to-list 'major-mode-remap-alist
+                   '(python-mode . python-ts-mode))
+      (add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))))
+
+  ;; LSP and development tools configuration
+  (use-package lsp-mode
+    :hook ((python-ts-mode . lsp-deferred))
+    :config
+    (setq lsp-pyright-use-library-code-for-types t)
+    (setq lsp-pyright-diagnostic-mode "workspace")
+    (setq lsp-pyright-auto-import-completions t))
+
+  (use-package lsp-pyright
+    :hook (python-ts-mode . (lambda ()
+                              (require 'lsp-pyright)
+                              (lsp-deferred))))
+
+  ;; Development tools
+  (use-package python-black
+    :after python
+    :hook (python-ts-mode . python-black-on-save-mode))
+
+  (use-package py-isort
+    :hook (python-ts-mode . py-isort-before-save))
+
+  ;; Environment Management
+  (use-package pyvenv
+    :config
+    (pyvenv-mode 1))
+
+  ;; Initialize evil-collection for python after everything is set up
+  (with-eval-after-load 'evil-collection
+    (when (treesit-available-p)
+      (evil-collection-init '(python))))
+
+  ;; Python development keybindings
+  (add-hook 'python-ts-mode-hook
+            (lambda ()
+              (let ((map python-ts-mode-map))
+                (define-key map (kbd "C-c C-f") 'python-black-buffer)
+                (define-key map (kbd "C-c C-i") 'py-isort-buffer)
+                (define-key map (kbd "C-c d") 'lsp-ui-doc-show)
+                (define-key map (kbd "C-c C-d") 'lsp-find-definition)
+                (define-key map (kbd "C-c C-r") 'lsp-find-references))))
+
 #+end_src
 
 * Get org templates, babel and tangle up and running
@@ -294,27 +367,27 @@
     (set-face-attribute 'org-verbatim nil :inherit 'fixed-pitch)
     (set-face-attribute 'org-special-keyword nil :inherit 'fixed-pitch)
     (set-face-attribute 'org-meta-line nil :inherit 'fixed-pitch)
-    (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
-    
-    ;; Set headings to use variable-pitch and scale properly
-  ;;   (dolist (face '((org-level-1 . 1.3)
-  ;;                   (org-level-2 . 1.2)
-  ;;                   (org-level-3 . 1.1)
-  ;;                   (org-level-4 . 1.0)
-  ;;                   (org-level-5 . 1.0)
-  ;;                   (org-level-6 . 1.0)
-  ;;                   (org-level-7 . 1.0)
-  ;;                   (org-level-8 . 1.0)))
-  ;;     (set-face-attribute (car face) nil 
-  ;;                       :inherit 'variable-pitch 
-  ;;                       :height (* 120 (cdr face)))))
+    (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
 
-   (use-package org-superstar
+    ;; Set headings to use variable-pitch and scale properly
+    (dolist (face '((org-level-1 . 1.3)
+                    (org-level-2 . 1.2)
+                    (org-level-3 . 1.1)
+                    (org-level-4 . 1.0)
+                    (org-level-5 . 1.0)
+                    (org-level-6 . 1.0)
+                    (org-level-7 . 1.0)
+                    (org-level-8 . 1.0)))
+      (set-face-attribute (car face) nil 
+  			:inherit 'variable-pitch 
+  			:height (* 1.2 (cdr face)))))
+
+  (use-package org-superstar
     :ensure t
     :after org
     :hook (org-mode . org-superstar-mode)
     :custom
-    (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
+    (org-superstar-headline-Bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
 
   ;; This is needed as of Org 9.2
   (use-package org-tempo
@@ -339,7 +412,7 @@
 
 #+end_src
 
-# Initial setup and overall look and feel using modus and fonts
+* Initial setup and overall look and feel using modus and fonts
 
 need to check if modus also does a good job with modeline
 need a proper theme in orgmode so that code blocks and hierarchy stand out well.
@@ -375,6 +448,8 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
     ;; Add Clojure project detection
     (add-hook 'project-find-functions #'my/project-try-deps-edn)
     (add-hook 'project-find-functions #'my/project-try-project-clj))
+
+    (setq project-vc-extra-root-markers '("pyproject.toml" "setup.py" ".git" "requirements.txt"))
     
       ;; Convenient keybindings for project.el
       (global-set-key (kbd "C-c p f") #'project-find-file)
@@ -386,7 +461,7 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
       (global-set-key (kbd "C-c p e") #'project-eshell)
 
   (setq project-additional-project-dirs 
-      '("~/automation_scripts"
+      '("~/automation_scripts" "pyprojects"
         ))
 
 #+end_src
@@ -437,114 +512,126 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
 
 #+begin_src emacs-lisp
 
-  ;; Example configuration for Consult
-  (use-package consult
+    ;; Example configuration for Consult
+    (use-package consult
+      :ensure t
+      ;; Replace bindings. Lazily loaded by `use-package'.
+      :bind (;; C-c bindings in `mode-specific-map'
+             ("C-c M-x" . consult-mode-command)
+             ("C-c h" . consult-history)
+             ("C-c k" . consult-kmacro)
+             ("C-c m" . consult-man)
+             ("C-c i" . consult-info)
+             ([remap Info-search] . consult-info)
+             ;; C-x bindings in `ctl-x-map'
+             ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+             ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+             ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+             ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+             ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+             ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+             ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+             ;; Custom M-# bindings for fast register access
+             ("M-#" . consult-register-load)
+             ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+             ("C-M-#" . consult-register)
+             ;; Other custom bindings
+             ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+             ;; M-g bindings in `goto-map'
+             ("M-g e" . consult-compile-error)
+             ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+             ("M-g g" . consult-goto-line)             ;; orig. goto-line
+             ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+             ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+             ("M-g m" . consult-mark)
+             ("M-g k" . consult-global-mark)
+             ("M-g i" . consult-imenu)
+             ("M-g I" . consult-imenu-multi)
+             ;; M-s bindings in `search-map'
+             ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+             ("M-s c" . consult-locate)
+             ("M-s g" . consult-grep)
+             ("M-s G" . consult-git-grep)
+             ("M-s r" . consult-ripgrep)
+             ("M-s l" . consult-line)
+             ("M-s L" . consult-line-multi)
+             ("M-s k" . consult-keep-lines)
+             ("M-s u" . consult-focus-lines)
+             ;; Isearch integration
+             ("M-s e" . consult-isearch-history)
+             :map isearch-mode-map
+             ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+             ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+             ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+             ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+             ;; Minibuffer history
+             :map minibuffer-local-map
+             ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+             ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+      ;; Enable automatic preview at point in the *Completions* buffer. This is
+      ;; relevant when you use the default completion UI.
+      :hook (completion-list-mode . consult-preview-at-point-mode)
+
+      ;; The :init configuration is always executed (Not lazy)
+      :init
+
+      ;; Optionally configure the register formatting. This improves the register
+      ;; preview for `consult-register', `consult-register-load',
+      ;; `consult-register-store' and the Emacs built-ins.
+      (setq register-preview-delay 0.5
+            register-preview-function #'consult-register-format)
+
+      ;; Optionally tweak the register preview window.
+      ;; This adds thin lines, sorting and hides the mode line of the window.
+      (advice-add #'register-preview :override #'consult-register-window)
+
+      ;; Use Consult to select xref locations with preview
+      (setq xref-show-xrefs-function #'consult-xref
+            xref-show-definitions-function #'consult-xref)
+
+      ;; Configure other variables and modes in the :config section,
+      ;; after lazily loading the package.
+      :config
+
+      ;; Optionally configure preview. The default value
+      ;; is 'any, such that any key triggers the preview.
+      ;; (setq consult-preview-key 'any)
+      ;; (setq consult-preview-key "M-.")
+      ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+      ;; For some commands and buffer sources it is useful to configure the
+      ;; :preview-key on a per-command basis using the `consult-customize' macro.
+      (consult-customize
+       consult-theme :preview-key '(:debounce 0.2 any)
+       consult-ripgrep consult-git-grep consult-grep
+       consult-bookmark consult-recent-file consult-xref
+       consult--source-bookmark consult--source-file-register
+       consult--source-recent-file consult--source-project-recent-file
+       ;; :preview-key "M-."
+       :preview-key '(:debounce 0.4 any))
+
+      ;; Optionally configure the narrowing key.
+      ;; Both < and C-+ work reasonably well.
+      (setq consult-narrow-key "<") ;; "C-+"
+
+      ;; Optionally make narrowing help available in the minibuffer.
+      ;; You may want to use `embark-prefix-help-command' or which-key instead.
+      ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
+      )
+
+    (use-package consult-lsp
+      :ensure t
+      
+      )
+
+  (use-package consult-project-extra
     :ensure t
-    ;; Replace bindings. Lazily loaded by `use-package'.
-    :bind (;; C-c bindings in `mode-specific-map'
-           ("C-c M-x" . consult-mode-command)
-           ("C-c h" . consult-history)
-           ("C-c k" . consult-kmacro)
-           ("C-c m" . consult-man)
-           ("C-c i" . consult-info)
-           ([remap Info-search] . consult-info)
-           ;; C-x bindings in `ctl-x-map'
-           ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-           ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-           ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-           ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-           ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
-           ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-           ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-           ;; Custom M-# bindings for fast register access
-           ("M-#" . consult-register-load)
-           ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-           ("C-M-#" . consult-register)
-           ;; Other custom bindings
-           ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-           ;; M-g bindings in `goto-map'
-           ("M-g e" . consult-compile-error)
-           ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-           ("M-g g" . consult-goto-line)             ;; orig. goto-line
-           ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-           ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-           ("M-g m" . consult-mark)
-           ("M-g k" . consult-global-mark)
-           ("M-g i" . consult-imenu)
-           ("M-g I" . consult-imenu-multi)
-           ;; M-s bindings in `search-map'
-           ("M-s d" . consult-find)                  ;; Alternative: consult-fd
-           ("M-s c" . consult-locate)
-           ("M-s g" . consult-grep)
-           ("M-s G" . consult-git-grep)
-           ("M-s r" . consult-ripgrep)
-           ("M-s l" . consult-line)
-           ("M-s L" . consult-line-multi)
-           ("M-s k" . consult-keep-lines)
-           ("M-s u" . consult-focus-lines)
-           ;; Isearch integration
-           ("M-s e" . consult-isearch-history)
-           :map isearch-mode-map
-           ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-           ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-           ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-           ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
-           ;; Minibuffer history
-           :map minibuffer-local-map
-           ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-           ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+    :bind
+    (("C-c p f" . consult-project-extra-find)
+     ("C-c p o" . consult-project-extra-find-other-window)))
 
-    ;; Enable automatic preview at point in the *Completions* buffer. This is
-    ;; relevant when you use the default completion UI.
-    :hook (completion-list-mode . consult-preview-at-point-mode)
-
-    ;; The :init configuration is always executed (Not lazy)
-    :init
-
-    ;; Optionally configure the register formatting. This improves the register
-    ;; preview for `consult-register', `consult-register-load',
-    ;; `consult-register-store' and the Emacs built-ins.
-    (setq register-preview-delay 0.5
-          register-preview-function #'consult-register-format)
-
-    ;; Optionally tweak the register preview window.
-    ;; This adds thin lines, sorting and hides the mode line of the window.
-    (advice-add #'register-preview :override #'consult-register-window)
-
-    ;; Use Consult to select xref locations with preview
-    (setq xref-show-xrefs-function #'consult-xref
-          xref-show-definitions-function #'consult-xref)
-
-    ;; Configure other variables and modes in the :config section,
-    ;; after lazily loading the package.
-    :config
-
-    ;; Optionally configure preview. The default value
-    ;; is 'any, such that any key triggers the preview.
-    ;; (setq consult-preview-key 'any)
-    ;; (setq consult-preview-key "M-.")
-    ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-    ;; For some commands and buffer sources it is useful to configure the
-    ;; :preview-key on a per-command basis using the `consult-customize' macro.
-    (consult-customize
-     consult-theme :preview-key '(:debounce 0.2 any)
-     consult-ripgrep consult-git-grep consult-grep
-     consult-bookmark consult-recent-file consult-xref
-     consult--source-bookmark consult--source-file-register
-     consult--source-recent-file consult--source-project-recent-file
-     ;; :preview-key "M-."
-     :preview-key '(:debounce 0.4 any))
-
-    ;; Optionally configure the narrowing key.
-    ;; Both < and C-+ work reasonably well.
-    (setq consult-narrow-key "<") ;; "C-+"
-
-    ;; Optionally make narrowing help available in the minibuffer.
-    ;; You may want to use `embark-prefix-help-command' or which-key instead.
-    ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
-    )
 #+end_src
-
+    
 * Embark configuration
 
 #+begin_src emacs-lisp
@@ -610,7 +697,9 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
     ;; Add useful defaults completion sources from Cape
     (add-to-list 'completion-at-point-functions #'cape-file)
     (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-
+    :hook (python-ts-mode . (lambda ()
+                             (add-to-list 'completion-at-point-functions #'cape-file)
+                             (add-to-list 'completion-at-point-functions #'cape-dabbrev)))
     :config
     ;; Enhance Clojure completion with Cape
     (with-eval-after-load 'clojure-mode
@@ -623,29 +712,30 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
 
 #+begin_src emacs-lisp
 
-  (use-package corfu
-    :ensure t
-    :custom
-    (corfu-auto t)  ; Enable auto completion
-    (corfu-auto-delay 0.2)
-    (corfu-auto-prefix 2)
-    (corfu-preview-current nil)
-    (corfu-quit-at-boundary 'separator)
+    (use-package corfu
+      :ensure t
+      :custom
+      (corfu-auto t)  ; Enable auto completion
+      (corfu-auto-delay 0.2)
+      (corfu-auto-prefix 2)
+      (corfu-preview-current nil)
+      (corfu-quit-at-boundary 'separator)
 
-    :init
-    (global-corfu-mode)
+      :init
+      (global-corfu-mode)
 
-    :hook
-    ((clojure-mode . corfu-mode)
-     (cider-repl-mode . corfu-mode)))
+      :hook
+      ((clojure-mode . corfu-mode)
+       (cider-repl-mode . corfu-mode)
+       (python-ts-mode . corfu-mode)))
 
-  ;; Optional: Enable Corfu in the minibuffer
-  (defun corfu-enable-in-minibuffer ()
-    "Enable Corfu in the minibuffer if `completion-at-point' is bound."
-    (when (where-is-internal #'completion-at-point (list (current-local-map)))
-      (corfu-mode 1)))
+    ;; Optional: Enable Corfu in the minibuffer
+    (defun corfu-enable-in-minibuffer ()
+      "Enable Corfu in the minibuffer if `completion-at-point' is bound."
+      (when (where-is-internal #'completion-at-point (list (current-local-map)))
+        (corfu-mode 1)))
 
-  (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
+    (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
 #+end_src
 
 * Which Key Configuration
@@ -758,46 +848,16 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
     (treemacs-filewatch-mode t)
     (treemacs-git-mode 'simple)
     (setq treemacs-show-git-status t)
-  	:bind
-  	(:map global-map
-    ("C-c t t" . treemacs)
-    ("C-c t f" . treemacs-select-window)))
-
-  (custom-set-faces
-    '(treemacs-root-face ((t (:inherit modus-themes-completion-selected :height 1.2))))
-    '(treemacs-directory-collapsed-face ((t (:inherit modus-themes-completion-match-0))))
-    '(treemacs-tags-face ((t (:inherit modus-themes-key-binding))))
-    '(treemacs-help-title-face ((t (:inherit modus-themes-bold))))
+    (custom-set-faces
+     '(treemacs-root-face ((t (:inherit default :height 1.2))))
+     '(treemacs-directory-face ((t (:inherit default)))))
+    :bind
+    (:map global-map
+  	("C-c t t" . treemacs)
+  	("C-c t f" . treemacs-select-window))
     )
-    
-#+end_src
-* lsp mode and code completion using corfu
 
-#+begin_src emacs-lisp
 
-      (use-package lsp-mode
-        :ensure t
-        :init
-        ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-        (setq lsp-keymap-prefix "C-c l")
-        :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-      	 (clojure-mode . lsp)
-      	 (clojurec-mode . lsp)
-      	 (clojurescript-mode . lsp)
-      	 ;; if you want which-key integration
-      	 (lsp-mode . lsp-enable-which-key-integration))
-        :commands ls)
-
-      ;; (use-package treemacs
-      ;;   :ensure t
-      ;;   :config (
-      ;; 	   (setq treemacs-no-png-images t)))
-
-      (use-package lsp-ui
-        :commands lsp-ui-mode)
-
-      (use-package lsp-treemacs
-        :commands lsp-treemacs-errors-list)
 
 #+end_src
 

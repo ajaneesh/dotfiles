@@ -13,6 +13,12 @@ in
   config = lib.mkIf (config.gui.enable && pkgs.stdenv.isLinux) {
 
     fonts.packages = with pkgs; [
+      etBook
+      jetbrains-mono
+      source-sans-pro
+      fira-code
+      hack-font
+      iosevka
       victor-mono # Used for Vim and Terminal
       nerd-fonts.hack # For Polybar, Rofi
     ];

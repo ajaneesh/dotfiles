@@ -58,6 +58,7 @@ inputs.nixpkgs.lib.nixosSystem {
       dotfiles.enable = true;
       lua.enable = true;
       clojure.enable = true;
+      python.enable = true;
     }
   ];
 }
