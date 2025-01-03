@@ -110,7 +110,7 @@
     (setq visible-bell t)
 
     (column-number-mode)
-    (global-display-line-numbers-mode t)
+    ;; (global-display-line-numbers-mode t)
     (global-hl-line-mode 1)
     
     ;; Set frame transparency
@@ -836,45 +836,37 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
   (use-package treemacs
     :ensure t
     :config
-    (setq treemacs-follow-mode t)
-    (setq treemacs-width 35)
-    ;; project.el integration
-    (treemacs-project-follow-mode t)
-    ;; Modus theme integration
-    (with-eval-after-load 'modus-themes
-      (setq treemacs-directory-name-face 'modus-themes-completion-selected
-            treemacs-file-name-face 'default
-            treemacs-git-modified-face 'modus-themes-mark-alt
-            treemacs-git-added-face 'modus-themes-mark-sel
-            treemacs-git-untracked-face 'modus-themes-special-mild
-            treemacs-git-conflict-face 'modus-themes-intense-red))
-    
-    ;; Additional customization for better modus integration
-    (setq treemacs-indentation 2
-          treemacs-indentation-string "  "
-          treemacs-show-hidden-files t
-          treemacs-collapse-dirs 3
-          treemacs-width 35)
-    
-    ;; Use simple icons that work well with modus
-    (setq treemacs-no-png-images t)
-    
-    ;; Optional: disable file size and modification time
-    (treemacs-filewatch-mode t)
-    (treemacs-git-mode 'simple)
-    (setq treemacs-show-git-status t)
+
+    ;; Basic settings
+    (setq treemacs-indentation 1
+    	treemacs-indentation-string "  "
+    	treemacs-width 35
+    	treemacs-show-hidden-files t
+    	treemacs-show-git-status t
+    	treemacs-no-png-images nil
+    	treemacs-collapse-dirs 3)
+
+    ;; Faces configuration - make sure these are AFTER the basic settings
     (custom-set-faces
-     '(treemacs-root-face ((t (:inherit variable-pitch :height 1.2))))
-     '(treemacs-file-face ((t (:inherit variable-pitch ))))
-     '(treemacs-directory-face ((t (:inherit variable-pitch)))))
+     '(treemacs-root-face ((t (:inherit variable-pitch :height 1.0))))
+     '(treemacs-file-face ((t (:inherit variable-pitch :height 0.9))))
+     '(treemacs-directory-face ((t (:inherit variable-pitch :height 0.9))))
+     '(treemacs-git-modified-face ((t (:inherit variable-pitch))))
+     '(treemacs-git-untracked-face ((t (:inherit variable-pitch)))))
+
     :bind
     (:map global-map
-  	("C-c t t" . treemacs)
-  	("C-c t f" . treemacs-select-window))
-    )
+    	("C-c t t" . treemacs)
+    	("C-c t f" . treemacs-select-window)))
 
+  (use-package treemacs-all-the-icons
+    :ensure t)
 
+  (treemacs-load-theme "all-the-icons")
 
+  ;; Disable line numbers for treemacs
+  (add-hook 'treemacs-mode-hook
+            (lambda() (display-line-numbers-mode -1)))
 #+end_src
 
 * debugging with dap-mode?
