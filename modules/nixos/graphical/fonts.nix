@@ -13,6 +13,7 @@ in
   config = lib.mkIf (config.gui.enable && pkgs.stdenv.isLinux) {
 
     fonts.packages = with pkgs; [
+      emacs-all-the-icons-fonts
       etBook
       jetbrains-mono
       source-sans-pro

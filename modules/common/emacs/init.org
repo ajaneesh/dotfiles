@@ -13,21 +13,28 @@
 
 #+begin_src emacs-lisp
 
-  ;; The default is 800 kilobytes.  Measured in bytes.
-  (setq gc-cons-threshold (* 50 1000 1000))
+    ;; 1. Performance Improvements
+  (defun my/restore-gc-threshold ()
+    "Restore garbage collection threshold after startup."
+    (setq gc-cons-threshold (* 2 1000 1000)))  ; 2MB
 
-  ;; Profile emacs startup
-  (add-hook 'emacs-startup-hook
-            (lambda ()
-              (message "*** Emacs loaded in %s seconds with %d garbage collections."
-                       (emacs-init-time "%.2f")
-                       gcs-done)))
+  (add-hook 'emacs-startup-hook #'my/restore-gc-threshold)
 
-  ;; Silence compiler warnings as they can be pretty disruptive
-  (setq native-comp-async-report-warnings-errors nil)
+    ;; Silence compiler warnings as they can be pretty disruptive
+    (setq native-comp-async-report-warnings-errors nil)
 
-  ;; Set the right directory to store the native comp cache
-  (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" user-emacs-directory))
+    ;; Set the right directory to store the native comp cache
+    (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" user-emacs-directory))
+
+  ;; Auto save and backup settings
+  (setq
+    backup-by-copying t
+    backup-directory-alist '(("." . "~/.emacs.d/backups"))
+    delete-old-versions t
+    kept-new-versions 6
+    kept-old-versions 2
+    version-control t)
+
 
 #+end_src
 
@@ -80,7 +87,7 @@
 
 #+end_src
 
-* SSH Configuration
+* SSH Tunnel Configuration (need external library that uses pem key and secrets)
 
 #+begin_src emacs-lisp
 
@@ -96,41 +103,58 @@
 
 #+begin_src emacs-lisp
 
+        (setq inhibit-startup-message t)
 
-    (setq inhibit-startup-message t)
+        (scroll-bar-mode -1)        ; Disable visible scrollbar
+        (tool-bar-mode -1)          ; Disable the toolbar
+        (tooltip-mode -1)           ; Disable tooltips
+        (set-fringe-mode 10)        ; Give some breathing room
 
-    (scroll-bar-mode -1)        ; Disable visible scrollbar
-    (tool-bar-mode -1)          ; Disable the toolbar
-    (tooltip-mode -1)           ; Disable tooltips
-    (set-fringe-mode 10)        ; Give some breathing room
+        (menu-bar-mode -1)            ; Disable the menu bar
 
-    (menu-bar-mode -1)            ; Disable the menu bar
+        ;; Set up the visible bell
+        (setq visible-bell t)
 
-    ;; Set up the visible bell
-    (setq visible-bell t)
+        (column-number-mode)
+        ;; (global-display-line-numbers-mode t)
+        (global-hl-line-mode 1)
+        
+        ;; Set frame transparency
+        ;; (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
+        ;; (add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
+        ;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+        ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
-    (column-number-mode)
-    ;; (global-display-line-numbers-mode t)
-    (global-hl-line-mode 1)
-    
-    ;; Set frame transparency
-    ;; (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
-    ;; (add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
-    ;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-    ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
+        ;;
+        ;; Disable line numbers for some modes
+        (dolist (mode '(org-mode-hook
+                        term-mode-hook
+                        shell-mode-hook
+                        treemacs-mode-hook
+                        eshell-mode-hook))
+          (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
-    ;;
-    ;; Disable line numbers for some modes
-    (dolist (mode '(org-mode-hook
-                    term-mode-hook
-                    shell-mode-hook
-                    treemacs-mode-hook
-                    eshell-mode-hook))
-      (add-hook mode (lambda () (display-line-numbers-mode 0))))
   (setq make-backup-files nil) ; stop creating backup~ files
   (setq auto-save-default nil) ; stop creating #autosave# files
   (setq cider-save-file-on-load nil)
+
+  ;; 7. Better Window Management
+  (use-package windmove
+      :ensure nil
+      :config
+      (windmove-default-keybindings 'super))
+
+  ;; Ace-window - for more complex window management
+  (use-package ace-window
+    :ensure t
+    :bind (("M-o" . ace-window))
+    :custom
+    (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)) ; Use letters instead of numbers
+    :config
+    (ace-window-display-mode 1)) ; Optionally show persistent window labels
+
 #+end_src
+
 * Font configuration
 
 #+begin_src emacs-lisp
@@ -138,17 +162,35 @@
   ;; Set default fonts
   (set-face-attribute 'default nil
                       :family "JetBrains Mono"
-                      :height 100)
+                      :height 110)
 
   ;; Ensure programming modes and code use fixed-pitch
   (set-face-attribute 'fixed-pitch nil 
                       :family "JetBrains Mono"
-                      :height 100)
+                      :height 110)
 
   (set-face-attribute 'variable-pitch nil
                       :family "Source Sans Pro"
                       :height 120)
-  ;; Enable ligatures if using a font that supports them
+
+  (use-package all-the-icons
+    :ensure t)
+  
+  ;; ;; Font rendering options
+  ;; (setq-default inhibit-compacting-font-caches t)  ; Improve performance
+
+  ;; ;; If you're on Linux, you might want to enable these
+  ;; (setq-default x-use-underline-position-properties t)
+  ;; (setq x-underline-at-descent-line t)
+
+  ;; ;; Anti-aliasing settings
+  ;; (setq-default frame-title-format nil)
+  ;; (push '(font-backend xft x) default-frame-alist)
+
+  ;; ;; HiDPI settings if needed
+  ;; (setq x-gtk-use-system-tooltips nil) 
+
+  ;; ;; Enable ligatures if using a font that supports them
   (use-package ligature
     :config
     (ligature-set-ligatures 't '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\"
@@ -260,12 +302,34 @@
     (evil-set-initial-state 'dashboard-mode 'normal))
 
     (use-package evil-collection
-	:after evil
-	:ensure t
-	:config
-	(evil-collection-init '(not python)))
+  	:after evil
+  	:ensure t
+  	:config
+  	(evil-collection-init '(not python)))
+
+    ;; Example: ysiw"  surround word with quotes
+    ;;          ds"    delete surrounding quotes
+    ;;          cs'   change surrounding quotes to single quotes
+  (use-package evil-surround
+    :ensure t
+    :config"
+    (global-evil-surround-mode 1))
+
+  (use-package evil-commentary
+  :ensure t
+  :config
+  (evil-commentary-mode))
+
 #+end_src
 
+* Some helpful key bindings
+
+#+begin_src emacs-lisp
+  
+  (global-set-key [C-tab] 'other-window)
+  (global-set-key [M-.] 'lsp-find-definition)
+#+end_src
+  
 * Python configuration
 
 #+begin_src emacs-lisp
@@ -301,7 +365,13 @@
   ;; LSP and development tools configuration
   (use-package lsp-mode
     :hook ((python-ts-mode . lsp-deferred))
+    :custom
+    (lsp-idle-delay 0.5)
+    (lsp-log-io nil)
+    (lsp-completion-provider :capf)
+    (lsp-keymap-prefix "C-c l")
     :config
+    (lsp-enable-which-key-integration t)
     (setq lsp-pyright-use-library-code-for-types t)
     (setq lsp-pyright-diagnostic-mode "workspace")
     (setq lsp-pyright-auto-import-completions t))
@@ -352,6 +422,10 @@
   (use-package org
     :ensure t
     :custom
+    (org-startup-indented t)
+    (org-startup-folded t)
+    (org-log-done 'time)
+    (org-agenda-start-on-weekday nil)
     (org-hide-emphasis-markers t)
     (org-fontify-quote-and-verse-blocks t)
     (org-fontify-whole-heading-line t)
@@ -426,11 +500,6 @@
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 #+end_src
-
-* Initial setup and overall look and feel using modus and fonts
-
-need to check if modus also does a good job with modeline
-need a proper theme in orgmode so that code blocks and hierarchy stand out well.
 
 * Buffer customizations (prot tips to ensure they open in specific windows)
 
@@ -705,6 +774,9 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
 
 #+begin_src emacs-lisp
 
+  ;; diabling company as we have corfu and cape for completions.
+  (global-company-mode -1)
+
   ;; Completion Setup with Cape and Corfu
   (use-package cape
     :ensure t
@@ -833,44 +905,82 @@ need a proper theme in orgmode so that code blocks and hierarchy stand out well.
 * treemacs configuration
 #+begin_src emacs-lisp
 
-  (use-package treemacs
-    :ensure t
-    :config
+    (use-package treemacs
+      :ensure t
+      :config
 
-    ;; Basic settings
-    (setq treemacs-indentation 1
-    	treemacs-indentation-string "  "
-    	treemacs-width 35
-    	treemacs-show-hidden-files t
-    	treemacs-show-git-status t
-    	treemacs-no-png-images nil
-    	treemacs-collapse-dirs 3)
+      ;; Basic settings
+      (setq treemacs-indentation 1
+      	treemacs-indentation-string "  "
+      	treemacs-width 35
+      	treemacs-show-hidden-files t
+      	treemacs-show-git-status t
+      	treemacs-no-png-images t
+      	treemacs-collapse-dirs 3)
 
-    ;; Faces configuration - make sure these are AFTER the basic settings
-    (custom-set-faces
-     '(treemacs-root-face ((t (:inherit variable-pitch :height 1.0))))
-     '(treemacs-file-face ((t (:inherit variable-pitch :height 0.9))))
-     '(treemacs-directory-face ((t (:inherit variable-pitch :height 0.9))))
-     '(treemacs-git-modified-face ((t (:inherit variable-pitch))))
-     '(treemacs-git-untracked-face ((t (:inherit variable-pitch)))))
+      ;; Faces configuration - make sure these are AFTER the basic settings
+  (custom-set-faces
+   '(treemacs-root-face ((t (:inherit variable-pitch :height 0.9))))
+   '(treemacs-file-face ((t (:inherit variable-pitch :height 0.9))))
+   '(treemacs-directory-face ((t (:inherit variable-pitch :height 0.9))))
+   '(treemacs-git-modified-face ((t (:inherit variable-pitch :height 0.9))))
+   '(treemacs-git-untracked-face ((t (:inherit variable-pitch :height 0.9)))))
 
-    :bind
-    (:map global-map
-    	("C-c t t" . treemacs)
-    	("C-c t f" . treemacs-select-window)))
+      :bind
+      (:map global-map
+      	("C-c t t" . treemacs)
+      	("C-c t f" . treemacs-select-window)))
 
-  (use-package treemacs-all-the-icons
-    :ensure t)
+    (add-hook 'treemacs-mode-hook
+    	    (lambda() (display-line-numbers-mode -1)))
 
-  (treemacs-load-theme "all-the-icons")
+    (use-package treemacs-all-the-icons
+      :ensure t)
 
-  ;; Disable line numbers for treemacs
-  (add-hook 'treemacs-mode-hook
-            (lambda() (display-line-numbers-mode -1)))
-#+end_src
+    (treemacs-load-theme "all-the-icons")
+
+    (with-eval-after-load 'all-the-icons
+      (set-face-attribute 'treemacs-directory-face nil
+                        :family "Source Sans Pro"
+                        :height 0.9)
+      (set-face-attribute 'treemacs-file-face nil
+                        :inherit 'treemacs-directory-face))
+
+  (with-eval-after-load 'treemacs
+    (treemacs-modify-theme "all-the-icons"
+      :config
+      (progn
+        (set-face-attribute 'treemacs-directory-face nil
+                        :family "Source Sans Pro"
+                        :height 0.9)
+  	(set-face-attribute 'treemacs-file-face nil
+                        :inherit 'treemacs-directory-face))))
+
+ #+end_src
 
 * debugging with dap-mode?
 
 #+begin_src emacs-lisp
+
+#+end_src
+
+* Some packages that make it easy to work with JSON-MEM
+
+#+begin_src emacs-lisp
+
+    (use-package json-mode
+      :ensure t)
+
+    (use-package yafolding
+      :ensure t)
+
+    (use-package yasnippet-capf
+      :ensure t
+      :after cape
+      :init
+	(defun my/yasnippet-capf-h ()
+	    (add-to-list 'completion-at-point-function #'yasnippet-capf))
+	:hook
+	(emacs-lisp-mode . my/yasnippet-capf-h))
 
 #+end_src
