@@ -409,6 +409,14 @@
                 (define-key map (kbd "C-c C-d") 'lsp-find-definition)
                 (define-key map (kbd "C-c C-r") 'lsp-find-references))))
 
+  (use-package pytest
+    :ensure t
+    :after python
+    :commands (pytest-one
+		pytest-pdb-one
+		pytest-all
+		pytest-module
+		pytest-last-failed))
 #+end_src
 
 * Org Mode configuration
@@ -842,26 +850,33 @@
 
 #+begin_src emacs-lisp
 
-    (use-package clojure-mode
-      :ensure t)
+      (use-package clojure-mode
+        :ensure t
+        :custom
+        (clojure-align-forms-automatically t)
 
-    (use-package cider
-      :ensure t
-      :config
-      (setq cider-repl-display-help-banner nil)
-      (setq cider-print-fn 'puget)
-      (setq cider-repl-use-pretty-printing t)
-      (setq cider-clojure-cli-aliases ":dev:cider"))
+      (use-package cider
+        :ensure t
+        :custom
+          (cider-repl-pop-to-buffer-on-connect nil)
+          (cider-save-file-on-load t)
+          (cider-save-file-on-load t)
+        :config
 
-    (use-package paredit
-      :ensure t
-      :hook ((clojure-mode . paredit-mode)
-            (cider-repl-mode . paredit-mode)))
+        (setq cider-repl-display-help-banner nil)
+        (setq cider-print-fn 'puget)
+        (setq cider-repl-use-pretty-printing t)
+        (setq cider-clojure-cli-aliases ":dev:cider"))
 
-    (use-package rainbow-delimiters
-      :ensure t
-      :hook ((clojure-mode . rainbow-delimiters-mode)
-            (cider-repl-mode . rainbow-delimiters-mode)))
+      (use-package paredit
+        :ensure t
+        :hook ((clojure-mode . paredit-mode)
+              (cider-repl-mode . paredit-mode)))
+
+      (use-package rainbow-delimiters
+        :ensure t
+        :hook ((clojure-mode . rainbow-delimiters-mode)
+              (cider-repl-mode . rainbow-delimiters-mode)))
 #+end_src
 
 * Cider REPL Configuration
@@ -982,5 +997,50 @@
 	    (add-to-list 'completion-at-point-function #'yasnippet-capf))
 	:hook
 	(emacs-lisp-mode . my/yasnippet-capf-h))
+
+#+end_src
+
+* YASnippet Configuration
+
+#+begin_src emacs-lisp
+  ;; Basic YASnippet setup
+  (use-package yasnippet
+    :straight t
+    :hook ((prog-mode . yas-minor-mode)
+           (org-mode . yas-minor-mode)
+           (text-mode . yas-minor-mode)
+           (cider-repl-mode . yas-minor-mode)        ;; Enable in Clojure REPL
+           (inferior-python-mode . yas-minor-mode))  ;; Enable in Python REPL
+    :config
+    (yas-reload-all)
+    (setq yas-snippet-dirs
+          '("~/.emacs.d/snippets"  ;; personal snippets
+            yasnippet-snippets-dir ;; collection from yasnippet-snippets package
+           ))
+    :bind
+    (:map yas-minor-mode-map
+          ("C-c y n" . yas-new-snippet)
+          ("C-c y v" . yas-visit-snippet-file)
+          ("C-c y i" . yas-insert-snippet)))
+
+  ;; Install the main snippet collection
+  (use-package yasnippet-snippets
+    :straight t
+    :after yasnippet)
+
+  ;; Optional: Add Clojure snippets if you work with Clojure
+  (use-package clojure-snippets
+    :straight t
+    :after (yasnippet clojure-mode))
+
+
+  ;; Integrate with Corfu completion
+  (with-eval-after-load 'corfu
+    (add-to-list 'completion-at-point-functions #'yasnippet-capf))
+
+  ;; Add Consult integration for better snippet selection
+  (use-package consult-yasnippet
+    :ensure t
+    :bind ("C-c y" . consult-yasnippet))
 
 #+end_src
