@@ -1,0 +1,486 @@
+\documentclass[6pt,landscape]{article}
+\usepackage[landscape,margin=0.3cm]{geometry}
+\usepackage{multicol}
+\usepackage{enumitem}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\titleformat*{\section}{\fontsize{9.5}{9}\bfseries}
+
+% Layout settings
+\setlength{\columnsep}{0.4cm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+
+% Custom commands
+\newcommand{\key}[1]{\texttt{#1}}
+\newcommand{\group}[1]{\textbf{\small #1}}
+
+\titlespacing*{\section}
+  {0pt}    % left margin
+  {6pt}    % space before
+  {3pt}    % space after
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.2pt}
+\fancyhead[C]{Emacs + Evil Mode Quick Reference (Page \thepage/2)}
+
+\begin{document}
+
+\begin{multicols*}{5}
+
+\section*{Evil Basic Movement}
+\begin{itemize}[
+    leftmargin=*,
+    itemsep=0.1em,
+    parsep=0pt,
+    topsep=0pt,
+    partopsep=0pt,
+    align=left,      % Ensure left alignment
+    labelwidth=1em,  % Give space for the bullet
+    labelsep=0.5em,  % Space after bullet
+    itemindent=0em,  % No extra indent
+    listparindent=0em, % No paragraph indent
+    rightmargin=0pt, % Use full width
+    wide=0pt         % No extra width
+]
+\item \key{h} - Move left
+\item \key{j} - Move down
+\item \key{k} - Move up
+\item \key{l} - Move right
+\item \key{w} - Move to next word start
+\item \key{b} - Move to word start
+\item \key{e} - Move to word end
+\item \key{W} - Move to next WORD start
+\item \key{B} - Move to WORD start
+\item \key{E} - Move to WORD end
+\item \key{0} - Start of line
+\item \key{\$} - End of line
+\item \key{\textasciicircum} - First non-blank char
+\item \key{gg} - Go to first line
+\item \key{G} - Go to last line
+\item \key{f\{char\}} - Find char forward
+\item \key{F\{char\}} - Find char backward
+\item \key{t\{char\}} - Till char forward
+\item \key{T\{char\}} - Till char backward
+\item \key{;} - Repeat last f/F/t/T forward
+\item \key{,} - Repeat last f/F/t/T backward
+\item \key{/pattern} - Search forward
+\item \key{?pattern} - Search backward
+\item \key{*} - Find word under cursor forward
+\item \key{\#} - Find word under cursor backward
+\item \key{n} - Next search match
+\item \key{N} - Previous search match
+\item \key{[]} - Matching bracket pair
+\item \key{[(} - Previous unclosed (
+\item \key{[]} - Previous unclosed [
+\item \key{[\{} - Previous unclosed \{
+\item \key{]\)} - Next unclosed )
+\item \key{]\]} - Next unclosed ]
+\item \key{]\}} - Next unclosed \}
+\item \key{\%} - Jump to matching bracket
+\item \key{H} - Move to screen top
+\item \key{M} - Move to screen middle
+\item \key{L} - Move to screen bottom
+\item \key{zz} - Center screen on cursor
+\item \key{zt} - Move screen top to cursor
+\item \key{zb} - Move screen bottom to cursor
+\item \key{C-u} - Half page up
+\item \key{C-d} - Half page down
+\item \key{C-b} - Full page up
+\item \key{C-f} - Full page down
+\end{itemize}  
+
+\section*{Evil Operators}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{d\{motion\}} - Delete
+\item \key{y\{motion\}} - Yank (copy)
+\item \key{c\{motion\}} - Change
+\item \key{>\{motion\}} - Indent right
+\item \key{<\{motion\}} - Indent left
+\item \key{=\{motion\}} - Format
+\item \key{!\{motion\}} - Filter
+\item \key{gU\{motion\}} - Uppercase
+\item \key{gu\{motion\}} - Lowercase
+\item \key{gq\{motion\}} - Format text
+\item \key{gc\{motion\}} - Comment
+\item \key{g@\{motion\}} - Operator-Pending
+\end{itemize}
+
+\section*{Count and Range Operations}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{[number] + motion} - Repeat motion n times
+\item \key{5j} - Move down 5 lines
+\item \key{3w} - Move forward 3 words
+\item \key{7dw} - Delete next 7 words
+\item \key{4dd} - Delete 4 lines
+\item \key{3yy} - Yank 3 lines
+
+% Line ranges
+\item \key{:.,\$s/foo/bar/g} - Replace from cursor to end of file
+\item \key{:.,+5s/foo/bar/g} - Replace in next 5 lines
+\item \key{:-5,.s/foo/bar/g} - Replace in previous 5 lines
+\item \key{:10,20s/foo/bar/g} - Replace between lines 10-20
+
+% Visual mode with counts
+\item \key{v2j} - Select current and 2 lines down
+\item \key{V5j} - Select 5 lines down linewise
+\item \key{d5j} - Delete current and 5 lines down
+
+% Until patterns
+\item \key{d/pattern} - Delete until 'pattern'
+\item \key{y?pattern} - Yank back to 'pattern'
+\item \key{c/end} - Change until word 'end'
+
+% Line motions with counts
+\item \key{5G} - Go to line 5
+\item \key{d5G} - Delete until line 5
+\item \key{y5G} - Yank until line 5
+\item \key{d\$} - Delete to end of line
+\item \key{y\$} - Yank to end of line
+\item \key{c\$} - Change to end of line
+
+% Complex examples
+\item \key{d4j} - Delete current line and 4 lines down
+\item \key{y2/foo} - Yank until second occurrence of 'foo'
+\item \key{>5j} - Indent current line and 5 lines down
+\item \key{gU3j} - Uppercase current line and 3 lines down
+\end{itemize}
+
+\section*{Evil Text Objects}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{d/c/y/v + ...} - Use with delete/change/yank/visual
+\item \key{iw} - Inner word (diw = delete word)
+\item \key{aw} - Around word with space
+\item \key{iW} - Inner WORD (ciW = change WORD)
+\item \key{aW} - Around WORD with space
+\item \key{is} - Inner sentence (vis = select sentence)
+\item \key{as} - Around sentence
+\item \key{ip} - Inner paragraph (yip = copy paragraph)
+\item \key{ap} - Around paragraph
+\item \key{i"} - Inside double quotes (ci" = change inside quotes)
+\item \key{a"} - Around double quotes
+\item \key{i'} - Inside single quotes
+\item \key{a'} - Around single quotes
+\item \key{i)} - Inside parentheses (yi) = copy inside parens)
+\item \key{a)} - Around parentheses
+\item \key{i]} - Inside brackets
+\item \key{a]} - Around brackets
+\item \key{i\}} - Inside braces (di\} = delete inside braces)
+\item \key{a\}} - Around braces
+\item \key{it} - Inside tags (cit = change inside tag)
+\item \key{at} - Around tags
+\item \key{ib} - Inside block
+\item \key{ab} - Around block
+\item \key{iB} - Inside Block (larger)
+\item \key{aB} - Around Block (larger)
+\end{itemize}
+
+\section*{Evil Advanced}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{[( ])} - Previous/next parenthesis
+\item \key{[\{ ]\}} - Previous/next brace
+\item \key{[m ]m} - Previous/next method
+\item \key{[[ ]]} - Previous/next section
+\item \key{gv} - Reselect visual
+\item \key{gJ} - Join lines without space
+\item \key{g\textasciitilde/gu/gU} - Case conversion
+\item \key{ga} - Show character code
+\item \key{g8} - Show UTF-8 code
+\item \key{g<} - Display last output
+\item \key{gq} - Format lines
+\item \key{gw} - Format and keep cursor
+\end{itemize}
+
+\section*{Evil Surround}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{ys\{motion\}\{char\}} - Add surround
+\item \key{cs\{old\}\{new\}} - Change surround
+\item \key{ds\{char\}} - Delete surround
+\item \key{S\{char\}} - Surround visual
+\item \key{ysiw)} - Surround word with ()
+\item \key{yssb} - Surround line with ()
+\item \key{yss)} - Surround line with ()
+\item \key{ySS)} - Surround line, new lines
+\end{itemize}
+
+\section*{LSP Commands}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{M-.} - Find definition
+\item \key{M-,} - Pop back
+\item \key{M-?} - Find references
+\item \key{C-c l r} - Rename
+\item \key{C-c l a} - Code actions
+\item \key{C-c l h} - Hover
+\item \key{C-c l f} - Format buffer
+\item \key{C-c l d} - Find declaration
+\item \key{C-c l i} - Find implementation
+\item \key{C-c l t} - Find type definition
+\item \key{C-c l s} - Find workspace symbol
+\end{itemize}
+
+\section*{Project Management}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-c p f} - Find file in project
+\item \key{C-c p d} - Find directory
+\item \key{C-c p b} - Switch project buffer
+\item \key{C-c p p} - Switch project
+\item \key{C-c p s s} - Search in project
+\item \key{C-c p r} - Recent project files
+\item \key{C-c p k} - Kill project buffers
+\item \key{C-c p e} - Project eshell
+\item \key{C-c p c} - Compile project
+\item \key{C-c p !} - Run command in root
+\end{itemize}
+
+\section*{Consult/Search}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-.} - Embark act
+\item \key{C-;} - Embark dwim
+\item \key{M-s r} - Ripgrep search
+\item \key{M-s l} - Line search
+\item \key{M-s f} - Find files
+\item \key{M-s i} - Imenu
+\item \key{M-s o} - Multi-occur
+\item \key{M-s g} - Grep
+\item \key{C-x b} - Switch buffer
+\item \key{C-c f} - Recent files
+\end{itemize}
+
+\section*{Window Management}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-x 0} - Delete window
+\item \key{C-x 1} - Delete other windows
+\item \key{C-x 2} - Split below
+\item \key{C-x 3} - Split right
+\item \key{C-x o} - Other window
+\item \key{C-x \textasciicircum} - Grow window taller
+\item \key{C-x \}} - Grow window wider
+\item \key{C-x \{} - Shrink window
+\item \key{C-x +} - Balance windows
+\item \key{C-x w} - Window commands
+\item \key{M-o} - Ace window select
+\end{itemize}
+
+\columnbreak
+\section*{Dired}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-x d} - Open dired
+\item \key{q} - Quit window
+\item \key{RET} - Open file/dir
+\item \key{\textasciicircum} - Go up directory
+\item \key{+} - Create directory
+\item \key{C} - Copy
+\item \key{D} - Delete
+\item \key{R} - Rename/move
+\item \key{m} - Mark
+\item \key{u} - Unmark
+\item \key{U} - Unmark all
+\item \key{t} - Toggle marks
+\item \key{*} - Mark by regexp
+\item \key{Q} - Query replace
+\item \key{Z} - Compress
+\item \key{!} - Shell command
+\end{itemize}
+
+\section*{Org Mode}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{TAB} - Cycle visibility
+\item \key{S-TAB} - Global cycle
+\item \key{C-c C-t} - Todo state
+\item \key{C-c C-s} - Schedule
+\item \key{C-c C-d} - Deadline
+\item \key{C-c .} - Insert timestamp
+\item \key{C-c C-c} - Tag command
+\item \key{C-c [} - Add to agenda
+\item \key{C-c C-e} - Export menu
+\item \key{C-c /} - Sparse tree
+\item \key{C-c a} - Agenda commands
+\item \key{M-RET} - New heading
+\item \key{M-S-RET} - New TODO
+\item \key{C-c C-x C-i} - Clock in
+\item \key{C-c C-x C-o} - Clock out
+\end{itemize}
+
+\section*{Python Development}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-c C-f} - Format (Black)
+\item \key{C-c C-i} - Sort imports
+\item \key{C-c C-t} - Run tests
+\item \key{C-c C-d} - Show docs
+\item \key{C-c C-p} - Run Python
+\item \key{C-c C-z} - Switch to shell
+\item \key{C-c C-v} - Check (flake8)
+\item \key{C-c C-l} - Send line
+\item \key{C-c C-r} - Send region
+\item \key{C-c C-c} - Send buffer
+\end{itemize}
+
+\section*{Clojure/CIDER}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-c M-j} - Start REPL
+\item \key{C-c C-k} - Load buffer
+\item \key{C-c C-c} - Eval defun
+\item \key{C-c C-e} - Eval last sexp
+\item \key{C-c C-r} - Eval region
+\item \key{C-c C-d} - Show docs
+\item \key{C-c C-t n} - Run ns tests
+\item \key{C-c C-t t} - Run test
+\item \key{C-c M-n} - Switch namespace
+\item \key{C-c M-i} - Inspect
+\end{itemize}
+
+\section*{Magit}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-x g} - Status buffer
+\item \key{s} - Stage changes
+\item \key{u} - Unstage changes
+\item \key{c c} - Commit
+\item \key{P u} - Push
+\item \key{F u} - Pull
+\item \key{b b} - Switch branch
+\item \key{b c} - Create branch
+\item \key{l l} - Show log
+\item \key{t t} - Create tag
+\item \key{z z} - Stash
+\item \key{V} - Revert changes
+\item \key{E} - Ediff
+\item \key{o} - Show section
+\end{itemize}
+
+\section*{Treemacs}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-c t t} - Toggle treemacs
+\item \key{C-c t f} - Select window
+\item \key{RET} - Open/close node
+\item \key{cf} - Create file
+\item \key{cd} - Create directory
+\item \key{R} - Rename
+\item \key{d} - Delete
+\item \key{?} - Show help
+\item \key{q} - Quit
+\item \key{r} - Refresh
+\end{itemize}
+
+\section*{Rectangle Operations}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-x r r} - Copy rectangle
+\item \key{C-x r k} - Kill rectangle
+\item \key{C-x r y} - Yank rectangle
+\item \key{C-x r o} - Insert space
+\item \key{C-x r c} - Clear region
+\item \key{C-x r t} - Replace with text
+\item \key{C-x r N} - Insert numbers
+\end{itemize}
+
+\section*{Registers}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-x r s} - Save region
+\item \key{C-x r i} - Insert register
+\item \key{C-x r SPC} - Save point
+\item \key{C-x r j} - Jump to register
+\item \key{C-x r w} - Save window
+\item \key{C-x r f} - Save frameset
+\item \key{C-x r n} - Number to register
+\item \key{C-x r +} - Increment register
+\end{itemize}
+
+\section*{Help System}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-h k} - Describe key
+\item \key{C-h f} - Describe function
+\item \key{C-h v} - Describe variable
+\item \key{C-h m} - Describe mode
+\item \key{C-h b} - Show all bindings
+\item \key{C-h w} - Where is command
+\item \key{C-h a} - Command apropos
+\item \key{C-h i} - Info reader
+\item \key{C-h r} - Emacs manual
+\item \key{C-h t} - Tutorial
+\item \key{C-h p} - Find packages
+\end{itemize}
+
+\section*{Buffer Operations}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-x C-s} - Save buffer
+\item \key{C-x s} - Save some buffers
+\item \key{C-x b} - Switch buffer
+\item \key{C-x k} - Kill buffer
+\item \key{C-x C-b} - List buffers
+\item \key{C-x h} - Mark whole buffer
+\item \key{M-<} - Beginning of buffer
+\item \key{M->} - End of buffer
+\item \key{C-x C-q} - Toggle read-only
+\item \key{C-x C-v} - Find alternate file
+\end{itemize}
+
+\section*{Text Editing}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{M-d} - Kill word
+\item \key{M-DEL} - Backward kill word
+\item \key{C-k} - Kill line
+\item \key{C-w} - Kill region
+\item \key{M-w} - Copy region
+\item \key{C-y} - Yank
+\item \key{M-y} - Yank pop
+\item \key{C-x C-o} - Delete blank lines
+\item \key{M-\textasciicircum} - Join lines
+\item \key{M-m} - Back to indentation
+\item \key{M-/} - Dabbrev expand
+\item \key{M-q} - Fill paragraph
+\end{itemize}
+
+\section*{Search and Replace}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-s} - Incremental search
+\item \key{C-r} - Search backward
+\item \key{M-\%} - Query replace
+\item \key{C-M-s} - Regexp search
+\item \key{C-M-r} - Regexp backward
+\item \key{C-M-\%} - Regexp replace
+\item \key{M-x occur} - Show all occurrences
+\item \key{M-s h r} - Highlight regexp
+\item \key{M-s h l} - Highlight lines
+\item \key{M-s h u} - Unhighlight regexp
+\end{itemize}
+
+\section*{Shell \& Terminal}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{M-x shell} - Open shell
+\item \key{M-x eshell} - Open Eshell
+\item \key{M-x term} - Open terminal
+\item \key{C-c C-j} - Line mode
+\item \key{C-c C-k} - Char mode
+\item \key{C-c C-p} - Previous command
+\item \key{C-c C-n} - Next command
+\item \key{C-c C-r} - Search history
+\item \key{C-c C-o} - Clear output
+\end{itemize}
+
+\section*{Custom Functions}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{M-:} - Eval expression
+\item \key{M-x} - Execute command
+\item \key{M-!} - Shell command
+\item \key{M-|} - Shell on region
+\item \key{M-x compile} - Compile project
+\item \key{M-x grep} - Run grep
+\item \key{M-x rgrep} - Recursive grep
+\item \key{M-x find-name-dired} - Find files
+\end{itemize}
+
+\section*{Ex Command Ranges}
+\begin{itemize}[leftmargin=*,itemsep=0.1em,parsep=0pt,topsep=0pt]
+\item \key{:1} - \parbox[t]{\linewidth-3em}{First line of the file}
+\item \key{:\$} - \parbox[t]{\linewidth-3em}{Last line of the file}
+\item \key{:.} - \parbox[t]{\linewidth-3em}{Current cursor line}
+\item \key{:\%} - \parbox[t]{\linewidth-3em}{Entire file (same as 1,\$)}
+\item \key{:.,+5} - \parbox[t]{\linewidth-3em}{Current line and 5 lines after}
+\item \key{:-5,.} - \parbox[t]{\linewidth-3em}{5 lines before current line up to current line}
+\item \key{'a,'b} - \parbox[t]{\linewidth-3em}{From mark a to mark b}
+\item \key{:/pat1/,/pat2/} - \parbox[t]{\linewidth-3em}{From pattern1 to pattern2}
+\end{itemize}
+
+\end{multicols*}
+\end{document}

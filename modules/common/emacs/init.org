@@ -3,9 +3,9 @@
 * start server process
 
 #+begin_src emacs-lisp
-;; -*- lexical-binding: t; -*-
-  
-(server-start)
+  ;; -*- lexical-binding: t; -*-
+
+  (server-start)
 
 #+end_src
 
@@ -13,27 +13,27 @@
 
 #+begin_src emacs-lisp
 
-    ;; 1. Performance Improvements
+  ;; 1. Performance Improvements
   (defun my/restore-gc-threshold ()
     "Restore garbage collection threshold after startup."
     (setq gc-cons-threshold (* 2 1000 1000)))  ; 2MB
 
   (add-hook 'emacs-startup-hook #'my/restore-gc-threshold)
 
-    ;; Silence compiler warnings as they can be pretty disruptive
-    (setq native-comp-async-report-warnings-errors nil)
+  ;; Silence compiler warnings as they can be pretty disruptive
+  (setq native-comp-async-report-warnings-errors nil)
 
-    ;; Set the right directory to store the native comp cache
-    (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" user-emacs-directory))
+  ;; Set the right directory to store the native comp cache
+  (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" user-emacs-directory))
 
   ;; Auto save and backup settings
   (setq
-    backup-by-copying t
-    backup-directory-alist '(("." . "~/.emacs.d/backups"))
-    delete-old-versions t
-    kept-new-versions 6
-    kept-old-versions 2
-    version-control t)
+   backup-by-copying t
+   backup-directory-alist '(("." . "~/.emacs.d/backups"))
+   delete-old-versions t
+   kept-new-versions 6
+   kept-old-versions 2
+   version-control t)
 
 
 #+end_src
@@ -42,16 +42,16 @@
 
 #+begin_src emacs-lisp
 
-;; Initialize package sources
-(require 'package)
+  ;; Initialize package sources
+  (require 'package)
 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                        ("org" . "https://orgmode.org/elpa/")
-                        ("elpa" . "https://elpa.gnu.org/packages/")))
+  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                           ("org" . "https://orgmode.org/elpa/")
+                           ("elpa" . "https://elpa.gnu.org/packages/")))
 
-(package-initialize)
-(unless package-archive-contents
-  (package-refresh-contents))
+  (package-initialize)
+  (unless package-archive-contents
+    (package-refresh-contents))
 
 #+end_src
 
@@ -82,8 +82,8 @@
 
 #+begin_src emacs-lisp
 
-;; Add my library path to load-path
-(push "~/lib/elisp/" load-path)
+  ;; Add my library path to load-path
+  (push "~/lib/elisp/" load-path)
 
 #+end_src
 
@@ -92,7 +92,7 @@
 #+begin_src emacs-lisp
 
   (require 'ssh-tunnel-manager)
-  
+
   ;; Optional: setup default keybindings
   (ssh-tunnel-setup-default-keybindings)
 
@@ -103,36 +103,36 @@
 
 #+begin_src emacs-lisp
 
-        (setq inhibit-startup-message t)
+  (setq inhibit-startup-message t)
 
-        (scroll-bar-mode -1)        ; Disable visible scrollbar
-        (tool-bar-mode -1)          ; Disable the toolbar
-        (tooltip-mode -1)           ; Disable tooltips
-        (set-fringe-mode 10)        ; Give some breathing room
+  (scroll-bar-mode -1)        ; Disable visible scrollbar
+  (tool-bar-mode -1)          ; Disable the toolbar
+  (tooltip-mode -1)           ; Disable tooltips
+  (set-fringe-mode 10)        ; Give some breathing room
 
-        (menu-bar-mode -1)            ; Disable the menu bar
+  (menu-bar-mode -1)            ; Disable the menu bar
 
-        ;; Set up the visible bell
-        (setq visible-bell t)
+  ;; Set up the visible bell
+  (setq visible-bell t)
 
-        (column-number-mode)
-        ;; (global-display-line-numbers-mode t)
-        (global-hl-line-mode 1)
-        
-        ;; Set frame transparency
-        ;; (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
-        ;; (add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
-        ;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-        ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
+  (column-number-mode)
+  ;; (global-display-line-numbers-mode t)
+  (global-hl-line-mode 1)
 
-        ;;
-        ;; Disable line numbers for some modes
-        (dolist (mode '(org-mode-hook
-                        term-mode-hook
-                        shell-mode-hook
-                        treemacs-mode-hook
-                        eshell-mode-hook))
-          (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  ;; Set frame transparency
+  ;; (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
+  ;; (add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
+  ;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+  ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+  ;;
+  ;; Disable line numbers for some modes
+  (dolist (mode '(org-mode-hook
+                  term-mode-hook
+                  shell-mode-hook
+                  treemacs-mode-hook
+                  eshell-mode-hook))
+    (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
   (setq make-backup-files nil) ; stop creating backup~ files
   (setq auto-save-default nil) ; stop creating #autosave# files
@@ -140,9 +140,9 @@
 
   ;; 7. Better Window Management
   (use-package windmove
-      :ensure nil
-      :config
-      (windmove-default-keybindings 'super))
+    :ensure nil
+    :config
+    (windmove-default-keybindings 'super))
 
   ;; Ace-window - for more complex window management
   (use-package ace-window
@@ -175,7 +175,7 @@
 
   (use-package all-the-icons
     :ensure t)
-  
+
   ;; ;; Font rendering options
   ;; (setq-default inhibit-compacting-font-caches t)  ; Improve performance
 
@@ -228,28 +228,28 @@
 
   ;; Configure the Modus Themes' appearance
   (use-package modus-themes
-      :ensure t
-      :config
-      (setq modus-themes-mode-line '(accented borderless)
-            modus-themes-bold-constructs t
-            modus-themes-italic-constructs t
-            modus-themes-fringes 'subtle
-            modus-themes-tabs-accented t
-            modus-themes-paren-match '(bold intense)
-            modus-themes-prompts '(bold intense)
-            modus-themes-completions '((matches . (extrabold underline))
-              (selection . (semibold)))
-            modus-themes-org-blocks 'tinted-background
-            modus-themes-scale-headings t
-            modus-themes-region '(bg-only)
-            modus-themes-headings
-            '((1 . (rainbow overline background 1.2))
-              (2 . (rainbow background 1.1))
-              (3 . (rainbow bold 1.1))
-              (t . (semilight 1.1))))
+    :ensure t
+    :config
+    (setq modus-themes-mode-line '(accented borderless)
+          modus-themes-bold-constructs t
+          modus-themes-italic-constructs t
+          modus-themes-fringes 'subtle
+          modus-themes-tabs-accented t
+          modus-themes-paren-match '(bold intense)
+          modus-themes-prompts '(bold intense)
+          modus-themes-completions '((matches . (extrabold underline))
+  				   (selection . (semibold)))
+          modus-themes-org-blocks 'tinted-background
+          modus-themes-scale-headings t
+          modus-themes-region '(bg-only)
+          modus-themes-headings
+          '((1 . (rainbow overline background 1.2))
+            (2 . (rainbow background 1.1))
+            (3 . (rainbow bold 1.1))
+            (t . (semilight 1.1))))
 
-      ;; Load the dark theme by default
-      (load-theme 'modus-vivendi t ))
+    ;; Load the dark theme by default
+    (load-theme 'modus-vivendi t ))
 
 #+end_src
 
@@ -257,77 +257,99 @@
 
 #+begin_src emacs-lisp
 
-  (use-package undo-tree
-    :ensure t
-    :config
-    (setq undo-tree-auto-save-history nil)
-    (global-undo-tree-mode 1))
+    (use-package undo-tree
+      :ensure t
+      :config
+      (setq undo-tree-auto-save-history nil)
+      (global-undo-tree-mode 1))
 
 
-  (use-package evil
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
-    (setq evil-want-C-u-scroll t)
-    (setq evil-want-C-i-jump nil)
-    (setq evil-respect-visual-line-mode t)
-    (setq evil-undo-system 'undo-tree)
+    (use-package evil
+      :init
+      (setq evil-want-integration t)
+      (setq evil-want-keybinding nil)
+      (setq evil-want-C-u-scroll t)
+      (setq evil-want-C-i-jump nil)
+      (setq evil-respect-visual-line-mode t)
+      (setq evil-undo-system 'undo-tree)
 
-    (straight-use-package 'evil)
-    :config
-    (evil-mode 1)
+      (straight-use-package 'evil)
+      :config
+      (evil-mode 1)
 
-    ;; Set Emacs state modes
-    (dolist (mode '(custom-mode
-                    eshell-mode
-                    git-rebase-mode
-                    erc-mode
-                    circe-server-mode
-                    circe-chat-mode
-                    circe-query-mode
-                    sauron-mode
-                    term-mode))
-      (add-to-list 'evil-emacs-state-modes mode))
+      ;; Set Emacs state modes
+      (dolist (mode '(custom-mode
+                      eshell-mode
+                      git-rebase-mode
+                      erc-mode
+                      circe-server-mode
+                      circe-chat-mode
+                      circe-query-mode
+                      sauron-mode
+                      term-mode))
+        (add-to-list 'evil-emacs-state-modes mode))
 
-    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+      (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
-    ;; Clear the binding of C-k so that it doesn't conflict with Corfu
-    (define-key evil-insert-state-map (kbd "C-k") nil)
+      ;; Clear the binding of C-k so that it doesn't conflict with Corfu
+      (define-key evil-insert-state-map (kbd "C-k") nil)
 
-    ;; Use visual line motions even outside of visual-line-mode buffers
-    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-    (evil-set-initial-state 'messages-buffer-mode 'normal)
-    (evil-set-initial-state 'dashboard-mode 'normal))
+      ;; Use visual line motions even outside of visual-line-mode buffers
+      (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+      (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+      (evil-set-initial-state 'messages-buffer-mode 'normal)
+      (evil-set-initial-state 'dashboard-mode 'normal))
 
     (use-package evil-collection
-  	:after evil
-  	:ensure t
-  	:config
-  	(evil-collection-init '(not python)))
+      :after evil
+      :ensure t
+      :config
+      (evil-collection-init '(not python)))
 
     ;; Example: ysiw"  surround word with quotes
     ;;          ds"    delete surrounding quotes
     ;;          cs'   change surrounding quotes to single quotes
-  (use-package evil-surround
-    :ensure t
-    :config"
-    (global-evil-surround-mode 1))
+    (use-package evil-surround
+      :ensure t
+      :config"
+      (global-evil-surround-mode 1))
 
-  (use-package evil-commentary
+    (use-package evil-commentary
+    :ensure t
+    :config
+    (evil-commentary-mode))
+
+      (use-package evil-matchit
+      :ensure t
+      :config
+      (global-evil-matchit-mode 1))
+
+(use-package expand-region
   :ensure t
   :config
-  (evil-commentary-mode))
+  ;; Define for all programming modes
+  (define-key prog-mode-map (kbd "C-{") 'er/expand-region)
+  
+  ;; If using Evil, add Evil bindings for all programming modes
+  (evil-define-key '(normal visual) prog-mode-map
+    (kbd "C-{") 'er/expand-region))
+
+
+    ;; Org block navigation
+    (with-eval-after-load 'org
+      (define-key org-mode-map (kbd "C-c n") #'org-next-block)
+      (define-key org-mode-map (kbd "C-c p") #'org-previous-block) 
 
 #+end_src
 
 * Some helpful key bindings
 
 #+begin_src emacs-lisp
-  
+
   (global-set-key [C-tab] 'other-window)
   (global-set-key [M-.] 'lsp-find-definition)
+  (global-unset-key (kbd "C-="))
 #+end_src
   
 * Python configuration
@@ -413,10 +435,10 @@
     :ensure t
     :after python
     :commands (pytest-one
-		pytest-pdb-one
-		pytest-all
-		pytest-module
-		pytest-last-failed))
+  	     pytest-pdb-one
+  	     pytest-all
+  	     pytest-module
+  	     pytest-last-failed))
 #+end_src
 
 * Org Mode configuration
@@ -504,8 +526,8 @@
 * useful key binding
 
 #+begin_src emacs-lisp
-;; ESC cancels all
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+  ;; ESC cancels all
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 #+end_src
 
@@ -541,20 +563,20 @@
     (add-hook 'project-find-functions #'my/project-try-deps-edn)
     (add-hook 'project-find-functions #'my/project-try-project-clj))
 
-    (setq project-vc-extra-root-markers '("pyproject.toml" "setup.py" ".git" "requirements.txt"))
-    
-      ;; Convenient keybindings for project.el
-      (global-set-key (kbd "C-c p f") #'project-find-file)
-      (global-set-key (kbd "C-c p d") #'project-find-dir)
-      (global-set-key (kbd "C-c p b") #'project-switch-to-buffer)
-      (global-set-key (kbd "C-c p p") #'project-switch-project)
-      (global-set-key (kbd "C-c p s") #'project-shell)
-      (global-set-key (kbd "C-c p g") #'project-find-regexp)
-      (global-set-key (kbd "C-c p e") #'project-eshell)
+  (setq project-vc-extra-root-markers '("pyproject.toml" "setup.py" ".git" "requirements.txt"))
+
+  ;; Convenient keybindings for project.el
+  (global-set-key (kbd "C-c p f") #'project-find-file)
+  (global-set-key (kbd "C-c p d") #'project-find-dir)
+  (global-set-key (kbd "C-c p b") #'project-switch-to-buffer)
+  (global-set-key (kbd "C-c p p") #'project-switch-project)
+  (global-set-key (kbd "C-c p s") #'project-shell)
+  (global-set-key (kbd "C-c p g") #'project-find-regexp)
+  (global-set-key (kbd "C-c p e") #'project-eshell)
 
   (setq project-additional-project-dirs 
-      '("~/automation_scripts" "pyprojects"
-        ))
+        '("~/automation_scripts" "pyprojects"
+  	))
 
 #+end_src
 * vertico configuration
@@ -604,117 +626,117 @@
 
 #+begin_src emacs-lisp
 
-    ;; Example configuration for Consult
-    (use-package consult
-      :ensure t
-      ;; Replace bindings. Lazily loaded by `use-package'.
-      :bind (;; C-c bindings in `mode-specific-map'
-             ("C-c M-x" . consult-mode-command)
-             ("C-c h" . consult-history)
-             ("C-c k" . consult-kmacro)
-             ("C-c m" . consult-man)
-             ("C-c i" . consult-info)
-             ([remap Info-search] . consult-info)
-             ;; C-x bindings in `ctl-x-map'
-             ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-             ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-             ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-             ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-             ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
-             ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-             ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-             ;; Custom M-# bindings for fast register access
-             ("M-#" . consult-register-load)
-             ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-             ("C-M-#" . consult-register)
-             ;; Other custom bindings
-             ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-             ;; M-g bindings in `goto-map'
-             ("M-g e" . consult-compile-error)
-             ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-             ("M-g g" . consult-goto-line)             ;; orig. goto-line
-             ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-             ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-             ("M-g m" . consult-mark)
-             ("M-g k" . consult-global-mark)
-             ("M-g i" . consult-imenu)
-             ("M-g I" . consult-imenu-multi)
-             ;; M-s bindings in `search-map'
-             ("M-s d" . consult-find)                  ;; Alternative: consult-fd
-             ("M-s c" . consult-locate)
-             ("M-s g" . consult-grep)
-             ("M-s G" . consult-git-grep)
-             ("M-s r" . consult-ripgrep)
-             ("M-s l" . consult-line)
-             ("M-s L" . consult-line-multi)
-             ("M-s k" . consult-keep-lines)
-             ("M-s u" . consult-focus-lines)
-             ;; Isearch integration
-             ("M-s e" . consult-isearch-history)
-             :map isearch-mode-map
-             ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-             ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-             ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-             ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
-             ;; Minibuffer history
-             :map minibuffer-local-map
-             ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-             ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+  ;; Example configuration for Consult
+  (use-package consult
+    :ensure t
+    ;; Replace bindings. Lazily loaded by `use-package'.
+    :bind (;; C-c bindings in `mode-specific-map'
+           ("C-c M-x" . consult-mode-command)
+           ("C-c h" . consult-history)
+           ("C-c k" . consult-kmacro)
+           ("C-c m" . consult-man)
+           ("C-c i" . consult-info)
+           ([remap Info-search] . consult-info)
+           ;; C-x bindings in `ctl-x-map'
+           ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+           ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+           ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+           ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+           ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+           ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+           ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+           ;; Custom M-# bindings for fast register access
+           ("M-#" . consult-register-load)
+           ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+           ("C-M-#" . consult-register)
+           ;; Other custom bindings
+           ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+           ;; M-g bindings in `goto-map'
+           ("M-g e" . consult-compile-error)
+           ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+           ("M-g g" . consult-goto-line)             ;; orig. goto-line
+           ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+           ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+           ("M-g m" . consult-mark)
+           ("M-g k" . consult-global-mark)
+           ("M-g i" . consult-imenu)
+           ("M-g I" . consult-imenu-multi)
+           ;; M-s bindings in `search-map'
+           ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+           ("M-s c" . consult-locate)
+           ("M-s g" . consult-grep)
+           ("M-s G" . consult-git-grep)
+           ("M-s r" . consult-ripgrep)
+           ("M-s l" . consult-line)
+           ("M-s L" . consult-line-multi)
+           ("M-s k" . consult-keep-lines)
+           ("M-s u" . consult-focus-lines)
+           ;; Isearch integration
+           ("M-s e" . consult-isearch-history)
+           :map isearch-mode-map
+           ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+           ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+           ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+           ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+           ;; Minibuffer history
+           :map minibuffer-local-map
+           ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+           ("M-r" . consult-history))                ;; orig. previous-matching-history-element
 
-      ;; Enable automatic preview at point in the *Completions* buffer. This is
-      ;; relevant when you use the default completion UI.
-      :hook (completion-list-mode . consult-preview-at-point-mode)
+    ;; Enable automatic preview at point in the *Completions* buffer. This is
+    ;; relevant when you use the default completion UI.
+    :hook (completion-list-mode . consult-preview-at-point-mode)
 
-      ;; The :init configuration is always executed (Not lazy)
-      :init
+    ;; The :init configuration is always executed (Not lazy)
+    :init
 
-      ;; Optionally configure the register formatting. This improves the register
-      ;; preview for `consult-register', `consult-register-load',
-      ;; `consult-register-store' and the Emacs built-ins.
-      (setq register-preview-delay 0.5
-            register-preview-function #'consult-register-format)
+    ;; Optionally configure the register formatting. This improves the register
+    ;; preview for `consult-register', `consult-register-load',
+    ;; `consult-register-store' and the Emacs built-ins.
+    (setq register-preview-delay 0.5
+          register-preview-function #'consult-register-format)
 
-      ;; Optionally tweak the register preview window.
-      ;; This adds thin lines, sorting and hides the mode line of the window.
-      (advice-add #'register-preview :override #'consult-register-window)
+    ;; Optionally tweak the register preview window.
+    ;; This adds thin lines, sorting and hides the mode line of the window.
+    (advice-add #'register-preview :override #'consult-register-window)
 
-      ;; Use Consult to select xref locations with preview
-      (setq xref-show-xrefs-function #'consult-xref
-            xref-show-definitions-function #'consult-xref)
+    ;; Use Consult to select xref locations with preview
+    (setq xref-show-xrefs-function #'consult-xref
+          xref-show-definitions-function #'consult-xref)
 
-      ;; Configure other variables and modes in the :config section,
-      ;; after lazily loading the package.
-      :config
+    ;; Configure other variables and modes in the :config section,
+    ;; after lazily loading the package.
+    :config
 
-      ;; Optionally configure preview. The default value
-      ;; is 'any, such that any key triggers the preview.
-      ;; (setq consult-preview-key 'any)
-      ;; (setq consult-preview-key "M-.")
-      ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-      ;; For some commands and buffer sources it is useful to configure the
-      ;; :preview-key on a per-command basis using the `consult-customize' macro.
-      (consult-customize
-       consult-theme :preview-key '(:debounce 0.2 any)
-       consult-ripgrep consult-git-grep consult-grep
-       consult-bookmark consult-recent-file consult-xref
-       consult--source-bookmark consult--source-file-register
-       consult--source-recent-file consult--source-project-recent-file
-       ;; :preview-key "M-."
-       :preview-key '(:debounce 0.4 any))
+    ;; Optionally configure preview. The default value
+    ;; is 'any, such that any key triggers the preview.
+    ;; (setq consult-preview-key 'any)
+    ;; (setq consult-preview-key "M-.")
+    ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+    ;; For some commands and buffer sources it is useful to configure the
+    ;; :preview-key on a per-command basis using the `consult-customize' macro.
+    (consult-customize
+     consult-theme :preview-key '(:debounce 0.2 any)
+     consult-ripgrep consult-git-grep consult-grep
+     consult-bookmark consult-recent-file consult-xref
+     consult--source-bookmark consult--source-file-register
+     consult--source-recent-file consult--source-project-recent-file
+     ;; :preview-key "M-."
+     :preview-key '(:debounce 0.4 any))
 
-      ;; Optionally configure the narrowing key.
-      ;; Both < and C-+ work reasonably well.
-      (setq consult-narrow-key "<") ;; "C-+"
+    ;; Optionally configure the narrowing key.
+    ;; Both < and C-+ work reasonably well.
+    (setq consult-narrow-key "<") ;; "C-+"
 
-      ;; Optionally make narrowing help available in the minibuffer.
-      ;; You may want to use `embark-prefix-help-command' or which-key instead.
-      ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
-      )
+    ;; Optionally make narrowing help available in the minibuffer.
+    ;; You may want to use `embark-prefix-help-command' or which-key instead.
+    ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
+    )
 
-    (use-package consult-lsp
-      :ensure t
-      
-      )
+  (use-package consult-lsp
+    :ensure t
+    
+    )
 
   (use-package consult-project-extra
     :ensure t
@@ -763,7 +785,7 @@
     :ensure t ; only need to install it, embark loads it after consult if found
     :hook
     (embark-collect-mode . consult-preview-at-point-mode))
-  
+
 #+end_src
 
 * Orderless configuration
@@ -793,8 +815,8 @@
     (add-to-list 'completion-at-point-functions #'cape-file)
     (add-to-list 'completion-at-point-functions #'cape-dabbrev)
     :hook (python-ts-mode . (lambda ()
-                             (add-to-list 'completion-at-point-functions #'cape-file)
-                             (add-to-list 'completion-at-point-functions #'cape-dabbrev)))
+                              (add-to-list 'completion-at-point-functions #'cape-file)
+                              (add-to-list 'completion-at-point-functions #'cape-dabbrev)))
     :config
     ;; Enhance Clojure completion with Cape
     (with-eval-after-load 'clojure-mode
@@ -807,30 +829,30 @@
 
 #+begin_src emacs-lisp
 
-    (use-package corfu
-      :ensure t
-      :custom
-      (corfu-auto t)  ; Enable auto completion
-      (corfu-auto-delay 0.2)
-      (corfu-auto-prefix 2)
-      (corfu-preview-current nil)
-      (corfu-quit-at-boundary 'separator)
+  (use-package corfu
+    :ensure t
+    :custom
+    (corfu-auto t)  ; Enable auto completion
+    (corfu-auto-delay 0.2)
+    (corfu-auto-prefix 2)
+    (corfu-preview-current nil)
+    (corfu-quit-at-boundary 'separator)
 
-      :init
-      (global-corfu-mode)
+    :init
+    (global-corfu-mode)
 
-      :hook
-      ((clojure-mode . corfu-mode)
-       (cider-repl-mode . corfu-mode)
-       (python-ts-mode . corfu-mode)))
+    :hook
+    ((clojure-mode . corfu-mode)
+     (cider-repl-mode . corfu-mode)
+     (python-ts-mode . corfu-mode)))
 
-    ;; Optional: Enable Corfu in the minibuffer
-    (defun corfu-enable-in-minibuffer ()
-      "Enable Corfu in the minibuffer if `completion-at-point' is bound."
-      (when (where-is-internal #'completion-at-point (list (current-local-map)))
-        (corfu-mode 1)))
+  ;; Optional: Enable Corfu in the minibuffer
+  (defun corfu-enable-in-minibuffer ()
+    "Enable Corfu in the minibuffer if `completion-at-point' is bound."
+    (when (where-is-internal #'completion-at-point (list (current-local-map)))
+      (corfu-mode 1)))
 
-    (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
+  (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
 #+end_src
 
 * Which Key Configuration
@@ -850,33 +872,33 @@
 
 #+begin_src emacs-lisp
 
-      (use-package clojure-mode
-        :ensure t
-        :custom
-        (clojure-align-forms-automatically t)
+  (use-package clojure-mode
+    :ensure t
+    :custom
+    (clojure-align-forms-automatically t)
 
-      (use-package cider
-        :ensure t
-        :custom
-          (cider-repl-pop-to-buffer-on-connect nil)
-          (cider-save-file-on-load t)
-          (cider-save-file-on-load t)
-        :config
+    (use-package cider
+      :ensure t
+      :custom
+      (cider-repl-pop-to-buffer-on-connect nil)
+      (cider-save-file-on-load t)
+      (cider-save-file-on-load t)
+      :config
 
-        (setq cider-repl-display-help-banner nil)
-        (setq cider-print-fn 'puget)
-        (setq cider-repl-use-pretty-printing t)
-        (setq cider-clojure-cli-aliases ":dev:cider"))
+      (setq cider-repl-display-help-banner nil)
+      (setq cider-print-fn 'puget)
+      (setq cider-repl-use-pretty-printing t)
+      (setq cider-clojure-cli-aliases ":dev:cider"))
 
-      (use-package paredit
-        :ensure t
-        :hook ((clojure-mode . paredit-mode)
-              (cider-repl-mode . paredit-mode)))
+    (use-package paredit
+      :ensure t
+      :hook ((clojure-mode . paredit-mode)
+             (cider-repl-mode . paredit-mode)))
 
-      (use-package rainbow-delimiters
-        :ensure t
-        :hook ((clojure-mode . rainbow-delimiters-mode)
-              (cider-repl-mode . rainbow-delimiters-mode)))
+    (use-package rainbow-delimiters
+      :ensure t
+      :hook ((clojure-mode . rainbow-delimiters-mode)
+             (cider-repl-mode . rainbow-delimiters-mode)))
 #+end_src
 
 * Cider REPL Configuration
@@ -920,12 +942,12 @@
 * treemacs configuration
 #+begin_src emacs-lisp
 
-    (use-package treemacs
-      :ensure t
-      :config
+  (use-package treemacs
+    :ensure t
+    :config
 
-      ;; Basic settings
-      (setq treemacs-indentation 1
+    ;; Basic settings
+    (setq treemacs-indentation 1
       	treemacs-indentation-string "  "
       	treemacs-width 35
       	treemacs-show-hidden-files t
@@ -933,32 +955,32 @@
       	treemacs-no-png-images t
       	treemacs-collapse-dirs 3)
 
-      ;; Faces configuration - make sure these are AFTER the basic settings
-  (custom-set-faces
-   '(treemacs-root-face ((t (:inherit variable-pitch :height 0.9))))
-   '(treemacs-file-face ((t (:inherit variable-pitch :height 0.9))))
-   '(treemacs-directory-face ((t (:inherit variable-pitch :height 0.9))))
-   '(treemacs-git-modified-face ((t (:inherit variable-pitch :height 0.9))))
-   '(treemacs-git-untracked-face ((t (:inherit variable-pitch :height 0.9)))))
+    ;; Faces configuration - make sure these are AFTER the basic settings
+    (custom-set-faces
+     '(treemacs-root-face ((t (:inherit variable-pitch :height 0.9))))
+     '(treemacs-file-face ((t (:inherit variable-pitch :height 0.9))))
+     '(treemacs-directory-face ((t (:inherit variable-pitch :height 0.9))))
+     '(treemacs-git-modified-face ((t (:inherit variable-pitch :height 0.9))))
+     '(treemacs-git-untracked-face ((t (:inherit variable-pitch :height 0.9)))))
 
-      :bind
-      (:map global-map
+    :bind
+    (:map global-map
       	("C-c t t" . treemacs)
       	("C-c t f" . treemacs-select-window)))
 
-    (add-hook 'treemacs-mode-hook
-    	    (lambda() (display-line-numbers-mode -1)))
+  (add-hook 'treemacs-mode-hook
+    	  (lambda() (display-line-numbers-mode -1)))
 
-    (use-package treemacs-all-the-icons
-      :ensure t)
+  (use-package treemacs-all-the-icons
+    :ensure t)
 
-    (treemacs-load-theme "all-the-icons")
+  (treemacs-load-theme "all-the-icons")
 
-    (with-eval-after-load 'all-the-icons
-      (set-face-attribute 'treemacs-directory-face nil
+  (with-eval-after-load 'all-the-icons
+    (set-face-attribute 'treemacs-directory-face nil
                         :family "Source Sans Pro"
                         :height 0.9)
-      (set-face-attribute 'treemacs-file-face nil
+    (set-face-attribute 'treemacs-file-face nil
                         :inherit 'treemacs-directory-face))
 
   (with-eval-after-load 'treemacs
@@ -966,12 +988,12 @@
       :config
       (progn
         (set-face-attribute 'treemacs-directory-face nil
-                        :family "Source Sans Pro"
-                        :height 0.9)
-  	(set-face-attribute 'treemacs-file-face nil
-                        :inherit 'treemacs-directory-face))))
+  			  :family "Source Sans Pro"
+  			  :height 0.9)
+        (set-face-attribute 'treemacs-file-face nil
+  			  :inherit 'treemacs-directory-face))))
 
- #+end_src
+#+end_src
 
 * debugging with dap-mode?
 
@@ -983,20 +1005,86 @@
 
 #+begin_src emacs-lisp
 
-    (use-package json-mode
-      :ensure t)
+   ;; JSON navigation with TAB behavior similar to org-mode
+  (defun my/json-next-element ()
+   "Move to next element in a JSON array, handling nested structures."
+   (interactive)
+   (let ((depth 0)
+         (in-string nil))
+     ;; Keep moving forward until we find a comma at our nesting level
+     (while (and (< (point) (point-max))  ; don't go past end of buffer
+                 (or (/= depth 0)          ; keep going if we're in nested structure
+                     (not (looking-at-p ","))))  ; or haven't found a comma
+       ;; Track if we're in a string
+       (when (and (looking-at-p "\"")
+                  (not (save-excursion (backward-char) (looking-at-p "\\\\"))))
+         (setq in-string (not in-string)))
+       
+       ;; Only count brackets when not in string
+       (when (not in-string)
+         (cond ((looking-at-p "[[{]")
+                (setq depth (1+ depth)))
+               ((looking-at-p "[]}]")
+                (setq depth (1- depth)))))
+       
+       (forward-char))
+     
+     ;; If we found a comma, move past it and any whitespace
+     (when (looking-at-p ",")
+       (forward-char)
+       (skip-chars-forward "[:space:]\n")))) 
 
-    (use-package yafolding
-      :ensure t)
+  (defun my/json-previous-element ()
+  "Move to previous element in a JSON array, handling nested structures."
+  (interactive)
+  (let ((depth 0)
+        (in-string nil))
+    ;; Keep moving backward until we find a comma at our nesting level
+    (while (and (> (point) (point-min))  ; don't go past start of buffer
+                (or (/= depth 0)          ; keep going if we're in nested structure
+                    (not (looking-back "," 1))))  ; or haven't found a comma
+      (backward-char)
+      
+      ;; Track if we're in a string
+      (when (and (looking-at-p "\"")
+                 (not (save-excursion (backward-char) (looking-at-p "\\\\"))))
+        (setq in-string (not in-string)))
+      
+      ;; Only count brackets when not in string
+      (when (not in-string)
+        (cond ((looking-at-p "[]}]")
+               (setq depth (1+ depth)))
+              ((looking-at-p "[[{]")
+               (setq depth (1- depth))))))
+    
+    ;; If we found a comma, skip backward over whitespace
+    (when (looking-back "," 1)
+      (backward-char)
+      (skip-chars-backward "[:space:]\n"))))
 
-    (use-package yasnippet-capf
-      :ensure t
-      :after cape
-      :init
-	(defun my/yasnippet-capf-h ()
-	    (add-to-list 'completion-at-point-function #'yasnippet-capf))
-	:hook
-	(emacs-lisp-mode . my/yasnippet-capf-h))
+  (use-package json-mode
+  :ensure t
+  :config
+  ;; First, unbind Evil's default C-n and C-p in normal state
+  (define-key evil-normal-state-map (kbd "C-n") nil)
+  (define-key evil-normal-state-map (kbd "C-p") nil)
+  
+  ;; Then bind our JSON navigation functions
+  (evil-define-key 'normal json-mode-map
+    (kbd "C-n") 'my/json-next-element
+    (kbd "C-p") 'my/json-previous-element))
+
+   (use-package yafolding
+     :ensure t)
+
+   (use-package yasnippet-capf
+     :ensure t
+     :after cape
+     :init
+     (defun my/yasnippet-capf-h ()
+       (add-to-list 'completion-at-point-function #'yasnippet-capf))
+     :hook
+     (emacs-lisp-mode . my/yasnippet-capf-h))
 
 #+end_src
 
@@ -1016,7 +1104,7 @@
     (setq yas-snippet-dirs
           '("~/.emacs.d/snippets"  ;; personal snippets
             yasnippet-snippets-dir ;; collection from yasnippet-snippets package
-           ))
+            ))
     :bind
     (:map yas-minor-mode-map
           ("C-c y n" . yas-new-snippet)
@@ -1042,5 +1130,29 @@
   (use-package consult-yasnippet
     :ensure t
     :bind ("C-c y" . consult-yasnippet))
+
+(use-package yafolding
+  :ensure t
+  :hook ((json-mode . yafolding-mode)
+         (python-ts-mode . yafolding-mode)
+         (clojure-mode . yafolding-mode))
+  :config
+  ;; Global yafolding bindings
+  (with-eval-after-load 'yafolding
+    (define-key yafolding-mode-map (kbd "C-c C-f") 'yafolding-toggle-element)
+    (define-key yafolding-mode-map (kbd "C-c C-a") 'yafolding-toggle-all)
+    (define-key yafolding-mode-map (kbd "C-c C-s") 'yafolding-show-all)
+    (define-key yafolding-mode-map (kbd "C-c C-h") 'yafolding-hide-all)
+    (define-key yafolding-mode-map (kbd "C-c [") 'yafolding-hide-region)
+    (define-key yafolding-mode-map (kbd "C-c ]") 'yafolding-show-region))
+  
+  ;; JSON-specific evil bindings with higher precedence
+  (with-eval-after-load 'json-mode
+    ;; Remove TAB from global map in json-mode
+    (define-key json-mode-map (kbd "TAB") nil)
+    ;; Define evil normal state binding
+    (evil-define-key 'normal json-mode-map
+      [tab] 'yafolding-toggle-element
+      (kbd "TAB") 'yafolding-toggle-element)))  
 
 #+end_src
