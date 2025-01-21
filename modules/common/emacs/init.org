@@ -162,12 +162,12 @@
   ;; Set default fonts
   (set-face-attribute 'default nil
                       :family "JetBrains Mono"
-                      :height 110)
+                      :height 90)
 
   ;; Ensure programming modes and code use fixed-pitch
   (set-face-attribute 'fixed-pitch nil 
                       :family "JetBrains Mono"
-                      :height 110)
+                      :height 90)
 
   (set-face-attribute 'variable-pitch nil
                       :family "Source Sans Pro"
@@ -312,7 +312,7 @@
     ;;          cs'   change surrounding quotes to single quotes
     (use-package evil-surround
       :ensure t
-      :config"
+      :config
       (global-evil-surround-mode 1))
 
     (use-package evil-commentary
@@ -339,19 +339,10 @@
     ;; Org block navigation
     (with-eval-after-load 'org
       (define-key org-mode-map (kbd "C-c n") #'org-next-block)
-      (define-key org-mode-map (kbd "C-c p") #'org-previous-block) 
+      (define-key org-mode-map (kbd "C-c p") #'org-previous-block) )
 
 #+end_src
 
-* Some helpful key bindings
-
-#+begin_src emacs-lisp
-
-  (global-set-key [C-tab] 'other-window)
-  (global-set-key [M-.] 'lsp-find-definition)
-  (global-unset-key (kbd "C-="))
-#+end_src
-  
 * Python configuration
 
 #+begin_src emacs-lisp
@@ -421,24 +412,72 @@
     (when (treesit-available-p)
       (evil-collection-init '(python))))
 
+  ;; Define the smart reference finder
+  (defun my/smart-find-references ()
+    "Enhanced reference finder that auto-jumps when there are exactly two references."
+    (interactive)
+    (let* ((orig-buf (current-buffer))
+  	 (orig-pos (point))
+  	 (refs (lsp-request "textDocument/references"
+                              (lsp--make-reference-params nil nil)))
+  	 (num-refs (length refs)))
+      (cond
+       ;; No references found
+       ((= num-refs 0)
+        (message "No references found"))
+       
+       ;; Exactly two references - try to jump to the other one
+       ((= num-refs 2)
+        (let* ((current-uri (lsp--buffer-uri))
+               (other-ref (car (seq-filter
+                                (lambda (ref)
+  				(let ((ref-uri (lsp:location-uri ref)))
+  				  (or (not (string= ref-uri current-uri))
+                                        (let* ((range (lsp:location-range ref))
+                                               (start (lsp:range-start range))
+                                               (line (lsp:position-line start))
+                                               (character (lsp:position-character start))
+                                               (cur-line (line-number-at-pos))
+                                               (cur-char (current-column)))
+  					(or (/= (1+ line) cur-line)
+                                              (/= character cur-char))))))
+                                refs))))
+  	(if other-ref
+              (lsp-goto-location other-ref)
+            (message "Cannot determine other reference location"))))
+       
+       ;; More than two references - show all references
+       (t (lsp-find-references)))))
+
   ;; Python development keybindings
   (add-hook 'python-ts-mode-hook
-            (lambda ()
-              (let ((map python-ts-mode-map))
-                (define-key map (kbd "C-c C-f") 'python-black-buffer)
-                (define-key map (kbd "C-c C-i") 'py-isort-buffer)
-                (define-key map (kbd "C-c d") 'lsp-ui-doc-show)
-                (define-key map (kbd "C-c C-d") 'lsp-find-definition)
-                (define-key map (kbd "C-c C-r") 'lsp-find-references))))
+  	  (lambda ()
+  	    (let ((map python-ts-mode-map))
+  	      (define-key map (kbd "C-c C-f") 'python-black-buffer)
+  	      (define-key map (kbd "C-c C-i") 'py-isort-buffer)
+  	      (define-key map (kbd "C-c d") 'lsp-ui-doc-show)
+  	      (define-key map (kbd "C-c C-d") 'lsp-find-definition)
+  	      (define-key map (kbd "C-c C-r") 'lsp-find-references)
+  	      (define-key map (kbd "M-.") 'lsp-find-definition)
+  	      (define-key map [f3] 'lsp-find-definition)
+  	      (define-key map [f4] 'my/smart-find-references)
+  	      (define-key map [M-left] 'xref-go-back))))
+
+
+  ;; Override Evil keybindings for Python
+  (with-eval-after-load 'evil
+    (evil-define-key '(normal insert visual) python-ts-mode-map 
+      (kbd "M-.") 'lsp-find-definition
+      (kbd "M-,") 'xref-go-back))
 
   (use-package pytest
     :ensure t
     :after python
     :commands (pytest-one
-  	     pytest-pdb-one
-  	     pytest-all
-  	     pytest-module
-  	     pytest-last-failed))
+      	     pytest-pdb-one
+      	     pytest-all
+      	     pytest-module
+      	     pytest-last-failed))
 #+end_src
 
 * Org Mode configuration
@@ -520,14 +559,6 @@
     (add-to-list 'org-structure-template-alist '("go" . "src go"))
     (add-to-list 'org-structure-template-alist '("yaml" . "src yaml"))
     (add-to-list 'org-structure-template-alist '("json" . "src json")))
-
-#+end_src
-
-* useful key binding
-
-#+begin_src emacs-lisp
-  ;; ESC cancels all
-  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 #+end_src
 
@@ -849,7 +880,7 @@
   ;; Optional: Enable Corfu in the minibuffer
   (defun corfu-enable-in-minibuffer ()
     "Enable Corfu in the minibuffer if `completion-at-point' is bound."
-    (when (where-is-internal #'completion-at-point (list (current-local-map)))
+    (when (where-is-internal #'completion-at-points (list (current-local-map)))
       (corfu-mode 1)))
 
   (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
@@ -875,30 +906,44 @@
   (use-package clojure-mode
     :ensure t
     :custom
-    (clojure-align-forms-automatically t)
+    (clojure-align-forms-automatically t))
 
-    (use-package cider
-      :ensure t
-      :custom
-      (cider-repl-pop-to-buffer-on-connect nil)
-      (cider-save-file-on-load t)
-      (cider-save-file-on-load t)
-      :config
+  (use-package cider
+    :ensure t
+    :custom
+    (cider-repl-pop-to-buffer-on-connect nil)
+    (cider-save-file-on-load t)
+    (cider-save-file-on-load t)
+    :config
 
-      (setq cider-repl-display-help-banner nil)
-      (setq cider-print-fn 'puget)
-      (setq cider-repl-use-pretty-printing t)
-      (setq cider-clojure-cli-aliases ":dev:cider"))
+    (setq cider-repl-display-help-banner nil)
+    (setq cider-print-fn 'puget)
+    (setq cider-repl-use-pretty-printing t)
+    (setq cider-clojure-cli-aliases ":dev:cider"))
 
-    (use-package paredit
-      :ensure t
-      :hook ((clojure-mode . paredit-mode)
-             (cider-repl-mode . paredit-mode)))
+  (use-package paredit
+    :ensure t
+    :hook ((clojure-mode . paredit-mode)
+           (cider-repl-mode . paredit-mode)))
 
-    (use-package rainbow-delimiters
-      :ensure t
-      :hook ((clojure-mode . rainbow-delimiters-mode)
-             (cider-repl-mode . rainbow-delimiters-mode)))
+  (use-package rainbow-delimiters
+    :ensure t
+    :hook ((clojure-mode . rainbow-delimiters-mode)
+           (cider-repl-mode . rainbow-delimiters-mode)))
+
+  ;; In your Clojure configuration section, add these key bindings:
+  (with-eval-after-load 'clojure-mode
+    (define-key clojure-mode-map [f3] 'cider-find-var)  ; equivalent to lsp-find-definition
+    (define-key clojure-mode-map [f4] 'cider-xref-fn-refs-select) ; equivalent to lsp-find-references
+    (define-key clojure-mode-map (kbd "M-.") 'cider-find-var)
+    (define-key clojure-mode-map (kbd "M-,") 'cider-pop-back))
+
+  ;; Also add Evil bindings if needed
+  (with-eval-after-load 'evil
+    (evil-define-key '(normal visual) clojure-mode-map
+      (kbd "M-.") 'cider-find-var
+      (kbd "M-,") 'cider-pop-back))
+
 #+end_src
 
 * Cider REPL Configuration
@@ -942,18 +987,50 @@
 * treemacs configuration
 #+begin_src emacs-lisp
 
+  (defun my/treemacs-peek ()
+    "Peek at file content in a temporary window without creating a permanent buffer."
+    (interactive)
+    (when-let* ((window (selected-window))
+                (btn (treemacs-current-button))
+                (file (treemacs-button-get btn :path)))
+      (when (file-exists-p file)
+        (if-let ((peek-window (next-window)))
+            (with-selected-window peek-window
+              (find-file file)
+              (read-only-mode -1))  ; Make buffer writable
+          (split-window-right)
+          (other-window 1)
+          (find-file file)
+          (read-only-mode -1))  ; Make buffer writable
+        (message "Peek mode: press q to close"))))
+
+  (defun my/treemacs-close-peek ()
+    "Close the peek window if it exists."
+    (interactive)
+    (when (and (eq major-mode 'treemacs-mode)
+               (> (count-windows) 1))
+      (delete-window (next-window))))
+
   (use-package treemacs
     :ensure t
     :config
 
     ;; Basic settings
     (setq treemacs-indentation 1
-      	treemacs-indentation-string "  "
-      	treemacs-width 35
-      	treemacs-show-hidden-files t
-      	treemacs-show-git-status t
-      	treemacs-no-png-images t
-      	treemacs-collapse-dirs 3)
+    	treemacs-indentation-string "  "
+    	treemacs-width 35
+    	treemacs-show-hidden-files t
+    	treemacs-show-git-status t
+    	treemacs-no-png-images t
+    	treemacs-collapse-dirs 3
+    	treemacs-follow-mode t
+    	treemacs-project-follow-mode t)
+
+    ;; (setq treemacs-is-never-other-window t)
+
+    (with-eval-after-load 'treemacs
+      (define-key treemacs-mode-map (kbd "P") #'my/treemacs-peek)
+      (define-key treemacs-mode-map (kbd "q") #'my/treemacs-close-peek))
 
     ;; Faces configuration - make sure these are AFTER the basic settings
     (custom-set-faces
@@ -963,128 +1040,130 @@
      '(treemacs-git-modified-face ((t (:inherit variable-pitch :height 0.9))))
      '(treemacs-git-untracked-face ((t (:inherit variable-pitch :height 0.9)))))
 
+
+    (add-hook 'treemacs-mode-hook
+        	    (lambda() (display-line-numbers-mode -1)))
+
+    (use-package treemacs-all-the-icons
+      :ensure t)
+
+    (treemacs-load-theme "all-the-icons")
+
+    (with-eval-after-load 'all-the-icons
+      (set-face-attribute 'treemacs-directory-face nil
+  			:family "Source Sans Pro"
+  			:height 0.9)
+      (set-face-attribute 'treemacs-file-face nil
+  			:inherit 'treemacs-directory-face))
+
+    (with-eval-after-load 'treemacs
+      (treemacs-modify-theme "all-the-icons"
+        :config
+        (progn
+  	(set-face-attribute 'treemacs-directory-face nil
+      			    :family "Source Sans Pro"
+      			    :height 0.9)
+  	(set-face-attribute 'treemacs-file-face nil
+      			    :inherit 'treemacs-directory-face))))
+
     :bind
     (:map global-map
-      	("C-c t t" . treemacs)
-      	("C-c t f" . treemacs-select-window)))
-
-  (add-hook 'treemacs-mode-hook
-    	  (lambda() (display-line-numbers-mode -1)))
-
-  (use-package treemacs-all-the-icons
-    :ensure t)
-
-  (treemacs-load-theme "all-the-icons")
-
-  (with-eval-after-load 'all-the-icons
-    (set-face-attribute 'treemacs-directory-face nil
-                        :family "Source Sans Pro"
-                        :height 0.9)
-    (set-face-attribute 'treemacs-file-face nil
-                        :inherit 'treemacs-directory-face))
-
-  (with-eval-after-load 'treemacs
-    (treemacs-modify-theme "all-the-icons"
-      :config
-      (progn
-        (set-face-attribute 'treemacs-directory-face nil
-  			  :family "Source Sans Pro"
-  			  :height 0.9)
-        (set-face-attribute 'treemacs-file-face nil
-  			  :inherit 'treemacs-directory-face))))
-
+  	("C-c t t" . treemacs)
+  	("C-c t f" . treemacs-select-window)))
 #+end_src
 
 * debugging with dap-mode?
 
 #+begin_src emacs-lisp
 
+  ;; will implement later.
+  
 #+end_src
 
 * Some packages that make it easy to work with JSON-MEM
 
 #+begin_src emacs-lisp
 
-   ;; JSON navigation with TAB behavior similar to org-mode
+  ;; JSON navigation with TAB behavior similar to org-mode
   (defun my/json-next-element ()
-   "Move to next element in a JSON array, handling nested structures."
-   (interactive)
-   (let ((depth 0)
-         (in-string nil))
-     ;; Keep moving forward until we find a comma at our nesting level
-     (while (and (< (point) (point-max))  ; don't go past end of buffer
-                 (or (/= depth 0)          ; keep going if we're in nested structure
-                     (not (looking-at-p ","))))  ; or haven't found a comma
-       ;; Track if we're in a string
-       (when (and (looking-at-p "\"")
-                  (not (save-excursion (backward-char) (looking-at-p "\\\\"))))
-         (setq in-string (not in-string)))
-       
-       ;; Only count brackets when not in string
-       (when (not in-string)
-         (cond ((looking-at-p "[[{]")
-                (setq depth (1+ depth)))
-               ((looking-at-p "[]}]")
-                (setq depth (1- depth)))))
-       
-       (forward-char))
-     
-     ;; If we found a comma, move past it and any whitespace
-     (when (looking-at-p ",")
-       (forward-char)
-       (skip-chars-forward "[:space:]\n")))) 
+    "Move to next element in a JSON array, handling nested structures."
+    (interactive)
+    (let ((depth 0)
+  	(in-string nil))
+      ;; Keep moving forward until we find a comma at our nesting level
+      (while (and (< (point) (point-max))  ; don't go past end of buffer
+  		(or (/= depth 0)          ; keep going if we're in nested structure
+                      (not (looking-at-p ","))))  ; or haven't found a comma
+        ;; Track if we're in a string
+        (when (and (looking-at-p "\"")
+                   (not (save-excursion (backward-char) (looking-at-p "\\\\"))))
+  	(setq in-string (not in-string)))
+        
+        ;; Only count brackets when not in string
+        (when (not in-string)
+  	(cond ((looking-at-p "[[{]")
+                 (setq depth (1+ depth)))
+                ((looking-at-p "[]}]")
+                 (setq depth (1- depth)))))
+        
+        (forward-char))
+      
+      ;; If we found a comma, move past it and any whitespace
+      (when (looking-at-p ",")
+        (forward-char)
+        (skip-chars-forward "[:space:]\n")))) 
 
   (defun my/json-previous-element ()
-  "Move to previous element in a JSON array, handling nested structures."
-  (interactive)
-  (let ((depth 0)
-        (in-string nil))
-    ;; Keep moving backward until we find a comma at our nesting level
-    (while (and (> (point) (point-min))  ; don't go past start of buffer
-                (or (/= depth 0)          ; keep going if we're in nested structure
-                    (not (looking-back "," 1))))  ; or haven't found a comma
-      (backward-char)
+    "Move to previous element in a JSON array, handling nested structures."
+    (interactive)
+    (let ((depth 0)
+  	(in-string nil))
+      ;; Keep moving backward until we find a comma at our nesting level
+      (while (and (> (point) (point-min))  ; don't go past start of buffer
+  		(or (/= depth 0)          ; keep going if we're in nested structure
+                      (not (looking-back "," 1))))  ; or haven't found a comma
+        (backward-char)
+        
+        ;; Track if we're in a string
+        (when (and (looking-at-p "\"")
+  		 (not (save-excursion (backward-char) (looking-at-p "\\\\"))))
+  	(setq in-string (not in-string)))
+        
+        ;; Only count brackets when not in string
+        (when (not in-string)
+  	(cond ((looking-at-p "[]}]")
+                 (setq depth (1+ depth)))
+                ((looking-at-p "[[{]")
+                 (setq depth (1- depth))))))
       
-      ;; Track if we're in a string
-      (when (and (looking-at-p "\"")
-                 (not (save-excursion (backward-char) (looking-at-p "\\\\"))))
-        (setq in-string (not in-string)))
-      
-      ;; Only count brackets when not in string
-      (when (not in-string)
-        (cond ((looking-at-p "[]}]")
-               (setq depth (1+ depth)))
-              ((looking-at-p "[[{]")
-               (setq depth (1- depth))))))
-    
-    ;; If we found a comma, skip backward over whitespace
-    (when (looking-back "," 1)
-      (backward-char)
-      (skip-chars-backward "[:space:]\n"))))
+      ;; If we found a comma, skip backward over whitespace
+      (when (looking-back "," 1)
+        (backward-char)
+        (skip-chars-backward "[:space:]\n"))))
 
   (use-package json-mode
-  :ensure t
-  :config
-  ;; First, unbind Evil's default C-n and C-p in normal state
-  (define-key evil-normal-state-map (kbd "C-n") nil)
-  (define-key evil-normal-state-map (kbd "C-p") nil)
-  
-  ;; Then bind our JSON navigation functions
-  (evil-define-key 'normal json-mode-map
-    (kbd "C-n") 'my/json-next-element
-    (kbd "C-p") 'my/json-previous-element))
+    :ensure t
+    :config
+    ;; First, unbind Evil's default C-n and C-p in normal state
+    (define-key evil-normal-state-map (kbd "C-n") nil)
+    (define-key evil-normal-state-map (kbd "C-p") nil)
 
-   (use-package yafolding
-     :ensure t)
+    ;; Then bind our JSON navigation functions
+    (evil-define-key 'normal json-mode-map
+      (kbd "C-n") 'my/json-next-element
+      (kbd "C-p") 'my/json-previous-element))
 
-   (use-package yasnippet-capf
-     :ensure t
-     :after cape
-     :init
-     (defun my/yasnippet-capf-h ()
-       (add-to-list 'completion-at-point-function #'yasnippet-capf))
-     :hook
-     (emacs-lisp-mode . my/yasnippet-capf-h))
+  (use-package yafolding
+    :ensure t)
+
+  (use-package yasnippet-capf
+    :ensure t
+    :after cape
+    :init
+    (defun my/yasnippet-capf-h ()
+      (add-to-list 'completion-at-point-functions #'yasnippet-capf))
+    :hook
+    (emacs-lisp-mode . my/yasnippet-capf-h))
 
 #+end_src
 
@@ -1131,28 +1210,218 @@
     :ensure t
     :bind ("C-c y" . consult-yasnippet))
 
-(use-package yafolding
-  :ensure t
-  :hook ((json-mode . yafolding-mode)
-         (python-ts-mode . yafolding-mode)
-         (clojure-mode . yafolding-mode))
-  :config
-  ;; Global yafolding bindings
-  (with-eval-after-load 'yafolding
-    (define-key yafolding-mode-map (kbd "C-c C-f") 'yafolding-toggle-element)
-    (define-key yafolding-mode-map (kbd "C-c C-a") 'yafolding-toggle-all)
-    (define-key yafolding-mode-map (kbd "C-c C-s") 'yafolding-show-all)
-    (define-key yafolding-mode-map (kbd "C-c C-h") 'yafolding-hide-all)
-    (define-key yafolding-mode-map (kbd "C-c [") 'yafolding-hide-region)
-    (define-key yafolding-mode-map (kbd "C-c ]") 'yafolding-show-region))
-  
-  ;; JSON-specific evil bindings with higher precedence
-  (with-eval-after-load 'json-mode
-    ;; Remove TAB from global map in json-mode
-    (define-key json-mode-map (kbd "TAB") nil)
-    ;; Define evil normal state binding
-    (evil-define-key 'normal json-mode-map
-      [tab] 'yafolding-toggle-element
-      (kbd "TAB") 'yafolding-toggle-element)))  
+  (use-package yafolding
+    :ensure t
+    :hook ((json-mode . yafolding-mode)
+           (python-ts-mode . yafolding-mode)
+           (clojure-mode . yafolding-mode))
+    :config
+    ;; Global yafolding bindings
+    (with-eval-after-load 'yafolding
+      (define-key yafolding-mode-map (kbd "C-c C-a") 'yafolding-toggle-all)
+      (define-key yafolding-mode-map (kbd "C-c C-s") 'yafolding-show-all)
+      (define-key yafolding-mode-map (kbd "C-c C-h") 'yafolding-hide-all)
+      (define-key yafolding-mode-map (kbd "C-c [") 'yafolding-hide-region)
+      (define-key yafolding-mode-map (kbd "C-c ]") 'yafolding-show-region)
 
+      (evil-define-key 'normal yafolding-mode-map
+        (kbd "TAB") 'yafolding-toggle-element))
+    
+    ;; JSON-specific evil bindings with higher precedence
+    (with-eval-after-load 'json-mode
+      ;; Remove TAB from global map in json-mode
+      (define-key json-mode-map (kbd "TAB") nil)
+      ;; Define evil normal state binding
+      (evil-define-key 'normal json-mode-map
+        [tab] 'yafolding-toggle-element
+        (kbd "TAB") 'yafolding-toggle-element)))  
+
+#+end_src
+* REST support
+
+#+begin_src emacs-lisp
+
+  (use-package restclient
+    :ensure t
+    :mode ("\\.http\\'" . restclient-mode))
+  
+#+end_src
+
+* useful key binding
+
+#+begin_src emacs-lisp
+  ;; ESC cancels all
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+  (global-set-key [C-tab] 'other-window)
+
+  (defun my/consult-find-across-projects ()
+    "Find files across all known projects."
+    (interactive)
+    (let* ((projects (project-known-project-roots))
+           (dirs (cl-remove-if-not #'file-exists-p projects)))
+      (consult-find dirs)))
+
+  ;; Bind it to a key
+  (global-set-key (kbd "C-c p F") #'my/consult-find-across-projects)
+
+  (defun run-uvicorn-server ()
+    "Start the uvicorn server for FastAPI development."
+    (interactive)
+    (let ((default-directory (project-root (project-current t))))
+      (compile "PYTHONPATH=$PYTHONPATH:. uvicorn app.iOCR_app:app --reload --port 8123 --host 0.0.0.0")))
+
+  (global-set-key (kbd "C-c u") 'run-uvicorn-server)  
+
+  ;; Prevent auto-centering
+  (setq scroll-conservatively 101)
+  ;; (setq scroll-margin 0)
+  ;; (setq scroll-preserve-screen-position t)
+
+  ;; If you're using Evil mode, you might also want:
+  ;; (setq evil-scroll-line-to-center nil)
+
+  ;; Quick buffer toggle with Function button
+  (defun my/toggle-previous-buffer ()
+    "Toggle between current and previous buffer."
+    (interactive)
+    (switch-to-buffer (other-buffer (current-buffer) t)))
+
+  (global-set-key [f12] 'my/toggle-previous-buffer)
+  (global-set-key [f5] 'revert-buffer)
+  (global-set-key (kbd "C-!") 'eval-expression)
+
+  (defun my/kill-current-buffer ()
+    "Kill current buffer without confirmation."
+    (interactive)
+    (kill-buffer (current-buffer)))
+
+  (global-set-key [C-f4] 'my/kill-current-buffer)
+
+  (with-eval-after-load 'evil
+    (evil-define-key '(normal visual) emacs-lisp-mode-map
+      (kbd "]e") 'evil-cp-end-of-defun    ; Jump to end of top-level form
+      (kbd "[e") 'evil-cp-beginning-of-defun  ; Jump to start of top-level form
+      (kbd "M-j") 'evil-cp-next-sexp      ; Jump to next sexp
+      (kbd "M-k") 'evil-cp-previous-sexp)) ; Jump to previous sexp
+#+end_src
+
+* Custom editor file cycling for prog-mode
+#+begin_src emacs-lisp
+
+  (defun my/cycle-same-extension-buffers (&optional reverse)
+    "Cycle through buffers with same extension as current buffer."
+    (interactive)
+    (when (derived-mode-p 'prog-mode)
+      (let* ((curr-ext (my/get-buffer-extension))
+             (current-buf (current-buffer))
+             ;; Get all matching buffers and sort them by name
+             (same-ext-buffers
+              (sort 
+               (seq-filter
+                (lambda (buf)
+                  (with-current-buffer buf
+                    (and (buffer-file-name buf)
+                         (derived-mode-p 'prog-mode)
+                         (when-let ((ext (my/get-buffer-extension buf)))
+                           (string= ext curr-ext)))))
+                (buffer-list))
+               (lambda (a b) 
+                 (string< (buffer-name a) (buffer-name b)))))
+             ;; Find current position
+             (current-index (cl-position current-buf same-ext-buffers))
+             (total (length same-ext-buffers)))
+        
+        (when (and current-index (> total 1))
+          ;; Calculate next position with wrapping
+          (let* ((next-index (if reverse
+                                 (if (= current-index 0) 
+                                     (1- total) 
+                                   (1- current-index))
+                               (if (= current-index (1- total)) 
+                                   0 
+                                 (1+ current-index))))
+                 (next-buf (nth next-index same-ext-buffers)))
+            
+            ;; Switch buffer with messages suppressed
+            (let ((inhibit-message t))
+              (switch-to-buffer next-buf)
+              ;; Show simple status message
+              (message "[%d/%d] %s" 
+                       (1+ next-index) 
+                       total
+                       (buffer-name next-buf))))))))
+
+  (defun my/cycle-same-extension-buffers-backward ()
+    "Cycle through buffers with same extension as current buffer backwards."
+    (interactive)
+    (my/cycle-same-extension-buffers t))
+
+  ;; Bind to F8 and Shift-F8
+  (define-key prog-mode-map [f8] 'my/cycle-same-extension-buffers)
+
+#+end_src
+* Custom Configuration
+
+#+begin_src emacs-lisp
+
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(safe-local-variable-values
+     '((eval add-hook 'cider-connected-hook
+  	   (lambda nil
+  	     (shell-command "npx shadow-cljs server")
+  	     (sleep-for 5)
+  	     (shell-command "npm run watch:css &"))
+  	   nil 'local)
+       (auto-save-default)
+       (make-backup-files)
+       (eval pyvenv-activate
+  	   (expand-file-name ".venv"
+  			     (project-root
+  			      (project-current)))))))
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(org-block ((t (:inherit fixed-pitch))))
+   '(org-code ((t (:inherit (shadow fixed-pitch)))))
+   '(org-document-info ((t (:foreground "dark orange"))))
+   '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+   '(org-document-title ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 2.0 :underline nil))))
+   '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
+   '(org-level-1 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.25))))
+   '(org-level-2 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.15))))
+   '(org-level-3 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.1))))
+   '(org-level-4 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.0))))
+   '(org-level-5 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
+   '(org-level-6 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
+   '(org-level-7 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
+   '(org-level-8 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
+   '(org-link ((t (:foreground "royal blue" :underline t))))
+   '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+   '(org-property-value ((t (:inherit fixed-pitch))))
+   '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+   '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
+   '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+   '(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
+   '(treemacs-directory-face ((t (:inherit variable-pitch :height 0.9))))
+   '(treemacs-file-face ((t (:inherit variable-pitch :height 0.9))))
+   '(treemacs-git-modified-face ((t (:inherit variable-pitch :height 0.9))))
+   '(treemacs-git-untracked-face ((t (:inherit variable-pitch :height 0.9))))
+   '(treemacs-root-face ((t (:inherit variable-pitch :height 0.9)))))
+
+
+#+end_src
+* For one off updates in existing buffers
+#+begin_src emacs-lisp
+
+  (when (boundp 'python-ts-mode-map)
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+        (when (derived-mode-p 'python-ts-mode)
+  	(define-key python-ts-mode-map [f4] 'my/smart-find-references)))))
 #+end_src
