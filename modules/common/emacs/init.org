@@ -1303,6 +1303,47 @@
       (kbd "[e") 'evil-cp-beginning-of-defun  ; Jump to start of top-level form
       (kbd "M-j") 'evil-cp-next-sexp      ; Jump to next sexp
       (kbd "M-k") 'evil-cp-previous-sexp)) ; Jump to previous sexp
+
+
+  (defun my/cycle-output-buffers ()
+    "Cycle through compilation, cider and repl buffers."
+    (interactive)
+    (let* ((buffer-patterns '("\\*compilation\\*"
+                              "\\*cider\\-repl.*\\*"
+                              "\\*repl.*\\*"))
+           ;; Get list of matching buffers
+           (matching-buffers
+            (seq-filter
+             (lambda (buf)
+               (let ((buf-name (buffer-name buf)))
+                 (seq-some (lambda (pattern)
+                             (string-match-p pattern buf-name))
+                           buffer-patterns)))
+             (buffer-list)))
+           ;; Sort them by name for consistent cycling
+           (sorted-buffers (sort matching-buffers
+                                 (lambda (a b)
+                                   (string< (buffer-name a)
+                                            (buffer-name b)))))
+           ;; Find current buffer's position
+           (current-pos (seq-position sorted-buffers (current-buffer)))
+           (num-buffers (length sorted-buffers)))
+      
+      (cond
+       ((null sorted-buffers)
+        (message "No matching buffers found"))
+       ((null current-pos)
+        ;; If current buffer isn't in the list, switch to first matching buffer
+        (switch-to-buffer (car sorted-buffers)))
+       (t
+        ;; Switch to next buffer in cycle
+        (switch-to-buffer
+         (nth (mod (1+ current-pos) num-buffers)
+              sorted-buffers))))))
+
+  ;; Bind to F6
+  (global-set-key [f6] 'my/cycle-output-buffers)
+
 #+end_src
 
 * Custom editor file cycling for prog-mode
