@@ -92,6 +92,20 @@
 \item \key{C-f} - Full page down
 \end{itemize}  
 
+\section*{Lisp Navigation}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{C-M-e} - End of current top-level sexp
+\item \key{C-M-a} - Start of current/prev top-level sexp
+\item \key{C-M-n} - Forward sexp
+\item \key{C-M-p} - Backward sexp
+\item \key{C-M-u} - Up sexp
+\item \key{C-M-d} - Down sexp
+\item \key{]} \key{e} - End of top-level form (Evil)
+\item \key{[} \key{e} - Start of top-level form (Evil)
+\item \key{M-j} - Next sexp (Evil)
+\item \key{M-k} - Previous sexp (Evil)
+\end{itemize}
+
 \section*{Evil Operators}
 \begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
 \item \key{d\{motion\}} - Delete
@@ -207,6 +221,8 @@
 
 \section*{LSP Commands}
 \begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{F3} - Find definition
+\item \key{F4} - Smart find references
 \item \key{M-.} - Find definition
 \item \key{M-,} - Pop back
 \item \key{M-?} - Find references
@@ -232,6 +248,7 @@
 \item \key{C-c p e} - Project eshell
 \item \key{C-c p c} - Compile project
 \item \key{C-c p !} - Run command in root
+\item \key{C-c p F} - Find across all projects
 \end{itemize}
 
 \section*{Consult/Search}
@@ -359,8 +376,9 @@
 \item \key{R} - Rename
 \item \key{d} - Delete
 \item \key{?} - Show help
-\item \key{q} - Quit
+\item \key{q} - Quit/Close peek
 \item \key{r} - Refresh
+\item \key{P} - Peek at file
 \end{itemize}
 
 \section*{Rectangle Operations}
@@ -413,6 +431,15 @@
 \item \key{M->} - End of buffer
 \item \key{C-x C-q} - Toggle read-only
 \item \key{C-x C-v} - Find alternate file
+\item \key{<escape>} - Cancel all
+\item \key{C-tab} - Other window
+\item \key{F12} - Toggle previous buffer
+\item \key{F5} - Revert buffer
+\item \key{C-!} - Eval expression
+\item \key{C-F4} - Kill current buffer
+\item \key{F8} - Cycle same-extension buffers
+\item \key{C-c u} - Run uvicorn server
+\item \key{C-\{} - Expand region
 \end{itemize}
 
 \section*{Text Editing}
@@ -458,7 +485,21 @@
 \item \key{C-c C-o} - Clear output
 \end{itemize}
 
-\section*{Custom Functions}
+\section*{Count and Range Operations}
+\begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
+\item \key{[number] + motion} - Repeat motion n times
+\item \key{5j} - Move down 5 lines
+\item \key{3w} - Move forward 3 words
+\item \key{7dw} - Delete next 7 words
+\item \key{4dd} - Delete 4 lines
+\item \key{3yy} - Yank 3 lines
+\item \key{:.,\$s/foo/bar/g} - Replace from cursor to end
+\item \key{:.,+5s/foo/bar/g} - Replace in next 5 lines
+\item \key{:-5,.s/foo/bar/g} - Replace in previous 5 lines
+\item \key{:10,20s/foo/bar/g} - Replace between lines 10-20
+\end{itemize}
+
+[... continue with a\section*{Custom Functions}
 \begin{itemize}[leftmargin=*,itemsep=0pt,parsep=0pt,topsep=0pt]
 \item \key{M-:} - Eval expression
 \item \key{M-x} - Execute command
