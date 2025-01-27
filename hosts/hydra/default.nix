@@ -45,8 +45,11 @@ inputs.nixpkgs.lib.nixosSystem {
         wslConf.network.generateResolvConf = true; # Turn off if it breaks VPN
         interop.includePath = false; # Including Windows PATH will slow down Neovim command mode
       };
-
-
+      virtualisation.docker = {
+        enable = true;
+        enableOnBoot = true;
+      };
+      users.users.nixos.extraGroups = [ "docker" ];
       services.emacs.enable = true;
       services.xserver.enable = true;
       # vscode.enable = true;
@@ -58,6 +61,7 @@ inputs.nixpkgs.lib.nixosSystem {
       dotfiles.enable = true;
       lua.enable = true;
       clojure.enable = true;
+      docker.enable = true;
       python.enable = true;
     }
   ];

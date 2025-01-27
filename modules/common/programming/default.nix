@@ -9,5 +9,6 @@
     ./rust.nix
     ./terraform.nix
     ./clojure.nix
+    ./docker.nix
   ];
 }

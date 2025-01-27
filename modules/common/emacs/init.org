@@ -88,6 +88,7 @@
 #+end_src
 
 * SSH Tunnel Configuration (need external library that uses pem key and secrets)
+Need to externalize secrets and put this in a github repo as a package so that this can be loaded from other machines without having to copy it around
 
 #+begin_src emacs-lisp
 
@@ -501,7 +502,7 @@
     (org-hide-leading-stars t)
     (org-pretty-entities t)
     (org-ellipsis "…")
-    
+
     :config
     (custom-theme-set-faces
      'user
@@ -520,7 +521,7 @@
 
     (let* ((variable-tuple
             (cond ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
-  		((x-list-fonts "ETBembo")         '(:font "ETBembo"))
+    		((x-list-fonts "ETBembo")         '(:font "ETBembo"))
                   ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
                   ((x-list-fonts "Verdana")         '(:font "Verdana"))
                   ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
@@ -560,11 +561,45 @@
     (add-to-list 'org-structure-template-alist '("yaml" . "src yaml"))
     (add-to-list 'org-structure-template-alist '("json" . "src json")))
 
+  (with-eval-after-load 'org
+    (setq org-src-preserve-indentation nil)
+    (setq org-edit-src-content-indentation 0)
+    (setq org-src-tab-acts-natively t))
+  
+#+end_src
+
+* Org mode wrapping
+** Automatic wrapping: Enable auto-fill-mode for automatic wrapping as you type:
+
+#+begin_src emacs-lisp
+  ;; (add-hook 'org-mode-hook 'auto-fill-mode)
+#+end_src
+  
+** Visual wrapping (doesn't modify text, just displays it wrapped):
+
+#+begin_src emacs-lisp
+  ;; (add-hook 'org-mode-hook 'visual-line-mode)
+#+end_src
+
+** Auto wrap to window size
+
+#+begin_src emacs-lisp
+
+  (defun my/set-org-visual-wrap ()
+    "Enable visual line wrapping for org-mode."
+    (visual-line-mode 1)             
+    (setq word-wrap t)               
+    (setq truncate-lines nil))       
+
+    (add-hook 'org-mode-hook 'my/set-org-visual-wrap)
+  
 #+end_src
 
 * Buffer customizations (prot tips to ensure they open in specific windows)
+Need to borrow some useful configuration to control mini buffer from Prot's youtube video.  I have deferred this for a while.  Once i live with my configuration for a while i will be in a better position to understand what exactly i am missing.  Better not start with what someone feels is a good way to configure buffers. 
 
 * Project.el configuration
+
 #+begin_src emacs-lisp
 
   ;; Project configuration
@@ -606,11 +641,10 @@
   (global-set-key (kbd "C-c p e") #'project-eshell)
 
   (setq project-additional-project-dirs 
-        '("~/automation_scripts" "pyprojects"
-  	))
+        '("~/automation_scripts" "pyprojects"))
 
 #+end_src
-* vertico configuration
+* Vertico configuration
 
 #+begin_src emacs-lisp
   ;; Enable vertico
@@ -894,8 +928,6 @@
     :config
     (which-key-mode))
 #+end_src
-
-* do we need acewindow to navigate easily between windows 
 
 * magit to start working with Git.
 
@@ -1247,12 +1279,28 @@
   
 #+end_src
 
-* useful key binding
+* Basic emacs configuration
 
 #+begin_src emacs-lisp
   ;; ESC cancels all
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
   (global-set-key [C-tab] 'other-window)
+
+  ;; Prevent auto-centering
+  (setq scroll-conservatively 101)
+  ;; (setq scroll-margin 0)
+  ;; (setq scroll-preserve-screen-position t)
+
+  ;; If you're using Evil mode, you might also want:
+  ;; (setq evil-scroll-line-to-center nil)
+
+  (global-set-key [f5] 'revert-buffer)
+  (global-set-key (kbd "C-!") 'eval-expression)
+#+end_src
+
+* Search across all projects
+
+#+begin_src emacs-lisp
 
   (defun my/consult-find-across-projects ()
     "Find files across all known projects."
@@ -1263,32 +1311,70 @@
 
   ;; Bind it to a key
   (global-set-key (kbd "C-c p F") #'my/consult-find-across-projects)
+  (global-set-key (kbd "M-s F") #'my/consult-find-across-projects)
 
-  (defun run-uvicorn-server ()
-    "Start the uvicorn server for FastAPI development."
-    (interactive)
-    (let ((default-directory (project-root (project-current t))))
-      (compile "PYTHONPATH=$PYTHONPATH:. uvicorn app.iOCR_app:app --reload --port 8123 --host 0.0.0.0")))
+#+end_src
 
-  (global-set-key (kbd "C-c u") 'run-uvicorn-server)  
+* Uvicron compilation mappings for FastAPI projects
 
-  ;; Prevent auto-centering
-  (setq scroll-conservatively 101)
-  ;; (setq scroll-margin 0)
-  ;; (setq scroll-preserve-screen-position t)
+#+begin_src emacs-lisp
+  ;; Create a keymap for uvicorn commands
+  (defvar uvicorn-command-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "1") 
+                  (lambda () 
+                    (interactive)
+                    (let ((default-directory (project-root (project-current t)))
+                          (compilation-buffer-name-function
+                           (lambda (_mode) "*uvicorn-iOCR*")))
+                      (compile "PYTHONPATH=$PYTHONPATH:. uvicorn app.iOCR_app:app --reload --port 8123 --host 0.0.0.0"))))
+      
+      (define-key map (kbd "2")
+                  (lambda ()
+                    (interactive)
+                    (let ((default-directory (project-root (project-current t)))
+                          (compilation-buffer-name-function
+                           (lambda (_mode) "*uvicorn-CVC*")))
+                      (compile "PYTHONPATH=$PYTHONPATH:. uvicorn app.CVC_app:app --reload --port 8124 --host 0.0.0.0"))))
 
-  ;; If you're using Evil mode, you might also want:
-  ;; (setq evil-scroll-line-to-center nil)
+      (define-key map (kbd "3")
+                  (lambda ()
+                    (interactive)
+                    (let ((default-directory (project-root (project-current t)))
+                          (compilation-buffer-name-function
+                           (lambda (_mode) "*uvicorn-Blens*")))
+                      (compile "PYTHONPATH=$PYTHONPATH:. uvicorn app.blens_app:app --reload --port 8125 --host 0.0.0.0"))))
+      map))
+
+  ;; Create the prefix key binding
+  (global-set-key (kbd "C-c u") uvicorn-command-map)
+
+  ;; Add which-key descriptions
+  (with-eval-after-load 'which-key
+    (which-key-add-key-based-replacements
+      "C-c u" "uvicorn"
+      "C-c u 1" "start iOCR"
+      "C-c u 2" "start CVC"
+      "C-c u 3" "start Billi"))  
+#+end_src
+
+* Toggle between two most recent buffers using F12
+Note: this doesnt seem to be necessary anymore,  discovered that evil-buffer (c-^) pretty much does the same thing
+
+#+begin_src emacs-lisp
 
   ;; Quick buffer toggle with Function button
-  (defun my/toggle-previous-buffer ()
-    "Toggle between current and previous buffer."
-    (interactive)
-    (switch-to-buffer (other-buffer (current-buffer) t)))
+  ;; (defun my/toggle-previous-buffer ()
+    ;; "Toggle between current and previous buffer."
+    ;; (interactive)
+    ;; (switch-to-buffer (other-buffer (current-buffer) t)))
+;; 
+  ;; (global-set-key [f12] 'my/toggle-previous-buffer)
+#+end_src
 
-  (global-set-key [f12] 'my/toggle-previous-buffer)
-  (global-set-key [f5] 'revert-buffer)
-  (global-set-key (kbd "C-!") 'eval-expression)
+* Use standard windows shortcut to close tabs for quickly killing buffers
+
+#+begin_src emacs-lisp
 
   (defun my/kill-current-buffer ()
     "Kill current buffer without confirmation."
@@ -1297,14 +1383,24 @@
 
   (global-set-key [C-f4] 'my/kill-current-buffer)
 
+#+end_src
+
+* TODO this doesnt seem to be working as expected.  messing up the code
+
+#+begin_src emacs-lisp
+
   (with-eval-after-load 'evil
     (evil-define-key '(normal visual) emacs-lisp-mode-map
       (kbd "]e") 'evil-cp-end-of-defun    ; Jump to end of top-level form
       (kbd "[e") 'evil-cp-beginning-of-defun  ; Jump to start of top-level form
       (kbd "M-j") 'evil-cp-next-sexp      ; Jump to next sexp
       (kbd "M-k") 'evil-cp-previous-sexp)) ; Jump to previous sexp
+#+end_src
 
+* Cycle through programming mode output buffers quickly using F6
+This takes a list of regexp that identify buffers to cycle through.  useful for quickly getting to python compilation and clojure REPL buffers
 
+#+begin_src emacs-lisp
   (defun my/cycle-output-buffers ()
     "Cycle through compilation, cider and repl buffers."
     (interactive)
@@ -1343,11 +1439,61 @@
 
   ;; Bind to F6
   (global-set-key [f6] 'my/cycle-output-buffers)
+#+end_src
+
+* this overrides evil behaviour of using Esc to close special buffers.
+
+#+begin_src emacs-lisp
+
+  ;; Prevent ESC from closing windows in special buffers
+  (with-eval-after-load 'evil
+    (evil-define-key 'normal special-mode-map [escape] 'evil-normal-state)
+    (evil-define-key 'normal compilation-mode-map [escape] 'evil-normal-state)
+    (evil-define-key 'normal cider-repl-mode-map [escape] 'evil-normal-state))
+
+  ;; Alternative approach if the above doesn't work for all cases
+  (defun my/prevent-escape-window-close ()
+    "Prevent escape from closing windows in special buffers."
+    (local-set-key [escape] 'evil-normal-state))
+
+  (add-hook 'compilation-mode-hook #'my/prevent-escape-window-close)
+  (add-hook 'special-mode-hook #'my/prevent-escape-window-close)
+  (add-hook 'cider-repl-mode-hook #'my/prevent-escape-window-close)
 
 #+end_src
 
-* Custom editor file cycling for prog-mode
+* copy Buffer message.
+Useful stuff.  this is to avoid having to go to the Messages buffer to copy.  I use this mostly to query copilots for fixes as the last error that is flashed in mini buffer is usually the thing we use to research or debug
+
 #+begin_src emacs-lisp
+
+  (defvar my/last-minibuffer-message nil)
+
+  (advice-add 'message :after 
+              (lambda (&rest args)
+                (when (car args)
+                  (setq my/last-minibuffer-message (apply #'format-message args)))))
+
+  (global-set-key (kbd "C-c w") (lambda () 
+    				(interactive)
+    				(when my/last-minibuffer-message
+    				  (kill-new my/last-minibuffer-message)
+    				  (let ((message-log-max nil)) ; prevent recursive message capture
+    				    (message "Copied: %s" my/last-minibuffer-message)))))
+#+end_src
+
+* Custom editor file cycling for prog-mode
+use F8 to cycle through open buffers matching the file extension of the current buffer. This is useful when you have some 4-5 py or clj files open and you want to find one of them by using a single key. probably not very useful in cases when too many such buffers are open unless we can get a completion popup.  that is the next step in the evolution of this customization
+The grand plan is to get a popup completion so that a file can be picked,  that is still work in progress, even now it only toggles
+between the open files which is ok when there aren't too many files open
+
+#+begin_src emacs-lisp
+
+  (defun my/get-buffer-extension (&optional buffer)
+    "Get the file extension of BUFFER or current buffer."
+    (when-let* ((buffer (or buffer (current-buffer)))
+                (file-name (buffer-file-name buffer)))
+      (file-name-extension file-name)))
 
   (defun my/cycle-same-extension-buffers (&optional reverse)
     "Cycle through buffers with same extension as current buffer."
@@ -1401,7 +1547,30 @@
   (define-key prog-mode-map [f8] 'my/cycle-same-extension-buffers)
 
 #+end_src
-* Custom Configuration
+
+* Buffer management customizations
+#+begin_src emacs-lisp
+
+  (defvar my/saved-window-config nil 
+    "Store window configuration for maximize/restore.")
+
+  (defun my/maximize-window ()
+    "Maximize current window, keeping config for restore."
+    (interactive)
+    (if my/saved-window-config
+        (progn
+          (set-window-configuration my/saved-window-config)
+          (setq my/saved-window-config nil)
+          (message "Layout restored"))
+      (setq my/saved-window-config (current-window-configuration))
+      (delete-other-windows)
+      (message "Window maximized - run command again to restore")))
+
+  ;; Bind to a key of your choice later
+  (global-set-key (kbd "<f12>") 'my/maximize-window)
+  
+#+end_src
+* MANAGED BY EMACS
 
 #+begin_src emacs-lisp
 
@@ -1465,4 +1634,5 @@
       (with-current-buffer buffer
         (when (derived-mode-p 'python-ts-mode)
   	(define-key python-ts-mode-map [f4] 'my/smart-find-references)))))
+
 #+end_src
