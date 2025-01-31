@@ -22,7 +22,13 @@ inputs.nixpkgs.lib.nixosSystem {
     inputs.home-manager.nixosModules.home-manager
     inputs.vscode-server.nixosModules.default
     ({ config, pkgs, ... }: {
-      services.vscode-server.enable = true;
+        services.vscode-server.enable = true;
+	environment.systemPackages = with pkgs; [
+          xorg.xorgserver
+          wayland
+      	];
+        services.xserver.enable = true;
+        services.emacs.enable = true;
     })
     {
       networking.hostName = "hydra";
@@ -50,8 +56,6 @@ inputs.nixpkgs.lib.nixosSystem {
         enableOnBoot = true;
       };
       users.users.nixos.extraGroups = [ "docker" ];
-      services.emacs.enable = true;
-      services.xserver.enable = true;
       # vscode.enable = true;
       emacs.enable = true;
       # neovim.enable = true;

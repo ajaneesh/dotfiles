@@ -1,11 +1,12 @@
 #+PROPERTY: header-args :tangle ~/.emacs.d/init.el :tangle-dir "~/.emacs.d/"
 
 * start server process
+I  am commenting this out for now as i have emacs service running in systemd.  Assuming these do the same thing. 
 
 #+begin_src emacs-lisp
-  ;; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; -*-
 
-  (server-start)
+;; (server-start)
 
 #+end_src
 
