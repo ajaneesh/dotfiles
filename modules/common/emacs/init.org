@@ -293,7 +293,8 @@ Need to externalize secrets and put this in a github repo as a package so that t
 
       (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
       (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-
+      (define-key evil-normal-state-map (kbd "C-<left>") 'backward-word)
+      (define-key evil-normal-state-map (kbd "C-<right>") 'forward-word)
       ;; Clear the binding of C-k so that it doesn't conflict with Corfu
       (define-key evil-insert-state-map (kbd "C-k") nil)
 
@@ -812,45 +813,77 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
 
 #+end_src
     
+* dgrep for search and replace across files (not buffers)
+this will allow us to make changes across multiple unopened files in file system within a project using a combination of consult-ripgrep, embark-act and wgrep-change-to-wgrep-mode
+
+#+begin_src emacs-lisp
+
+(use-package wgrep
+  :ensure t
+  :config
+  ;; Allow editing in `grep` buffers
+  (setq wgrep-auto-save-buffer t) ; Automatically save changes when finishing edits
+  (setq wgrep-change-readonly-file t) ; Allow editing read-only files
+
+  ;; Keybindings for `wgrep` mode
+  (define-key wgrep-mode-map (kbd "C-c C-c") 'wgrep-finish-edit) ; Save changes
+  (define-key wgrep-mode-map (kbd "C-c C-k") 'wgrep-abort-changes)) ; Abort changes
+
+(defun my/embark-collect-wgrep-mode ()
+  "Enable `wgrep` mode in the current `embark-collect` buffer."
+  (interactive)
+  (message "Enabling wgrep-mode...")
+  (wgrep-change-to-wgrep-mode)) ; Enable `wgrep` mode
+
+(with-eval-after-load 'embark
+  ;; Bind `e` to enable `wgrep` mode in `embark-collect` buffers
+  (evil-define-key 'normal embark-collect-mode-map (kbd "e") 'my/embark-collect-wgrep-mode))
+
+(with-eval-after-load 'evil
+  ;; Ensure `C-c C-c` works in `wgrep-mode` with `evil-mode`
+  (evil-define-key 'normal wgrep-mode-map (kbd "C-c C-c") 'wgrep-finish-edit))
+
+#+end_src
+
 * Embark configuration
 
 #+begin_src emacs-lisp
 
-  (use-package embark
-    :ensure t
+(use-package embark
+  :ensure t
 
-    :bind
-    (("C-." . embark-act)         ;; pick some comfortable binding
-     ("C-;" . embark-dwim)        ;; good alternative: M-.
-     ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C->" . embark-become)      ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
 
-    :init
+  :init
 
-    ;; Optionally replace the key help with a completing-read interface
-    (setq prefix-help-command #'embark-prefix-help-command)
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
 
-    ;; Show the Embark target at point via Eldoc. You may adjust the
-    ;; Eldoc strategy, if you want to see the documentation from
-    ;; multiple providers. Beware that using this can be a little
-    ;; jarring since the message shown in the minibuffer can be more
-    ;; than one line, causing the modeline to move up and down:
+  ;; Show the Embark target at point via Eldoc. You may adjust the
+  ;; Eldoc strategy, if you want to see the documentation from
+  ;; multiple providers. Beware that using this can be a little
+  ;; jarring since the message shown in the minibuffer can be more
+  ;; than one line, causing the modeline to move up and down:
 
-    ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
-    ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+  ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+  ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
 
-    :config
+  :config
 
-    ;; Hide the mode line of the Embark live/completions buffers
-    (add-to-list 'display-buffer-alist
-                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                   nil
-                   (window-parameters (mode-line-format . none)))))
-
-  ;; Consult users will also want the embark-consult package.
-  (use-package embark-consult
-    :ensure t ; only need to install it, embark loads it after consult if found
-    :hook
-    (embark-collect-mode . consult-preview-at-point-mode))
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+;; Consult users will also want the embark-consult package.
+(use-package embark-consult
+  :ensure t ; only need to install it, embark loads it after consult if found
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
 
 #+end_src
 
@@ -884,11 +917,19 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
                               (add-to-list 'completion-at-point-functions #'cape-file)
                               (add-to-list 'completion-at-point-functions #'cape-dabbrev)))
     :config
-    ;; Enhance Clojure completion with Cape
-    (with-eval-after-load 'clojure-mode
-      (add-hook 'clojure-mode-hook
-                (lambda ()
-                  (add-to-list 'completion-at-point-functions #'cape-symbol)))))
+    ;; Define a list of completion sources
+    (setq cape-completion-sources
+          '(cape-file
+            cape-dabbrev
+            cape-history
+            cape-keyword
+            cape-tex
+            cape-abbrev))
+    
+    ;; Add all sources to completion-at-point-functions
+    (dolist (source cape-completion-sources)
+      (add-to-list 'completion-at-point-functions source)))
+
 #+end_src
 
 * Corfu Configuration
@@ -1627,7 +1668,9 @@ between the open files which is ok when there aren't too many files open
 
 
 #+end_src
+
 * For one off updates in existing buffers
+
 #+begin_src emacs-lisp
 
   (when (boundp 'python-ts-mode-map)
@@ -1635,5 +1678,82 @@ between the open files which is ok when there aren't too many files open
       (with-current-buffer buffer
         (when (derived-mode-p 'python-ts-mode)
   	(define-key python-ts-mode-map [f4] 'my/smart-find-references)))))
+
+#+end_src
+
+* Some embark specific global settings
+
+#+begin_src emacs-lisp
+
+
+#+end_src
+
+* Tramp specific setup
+
+#+begin_src emacs-lisp
+;; Prevent TRAMP from hanging with Vertico
+(setq remote-file-name-inhibit-cache nil)
+;; (setq tramp-shell-prompt-pattern "\\(?:^\\|\r\\)[^]#$%>\n]*#?[]#$%>].* *\\(^[\\[[0-9;]*[a-zA-Z] *\\)*")
+(setq tramp-verbose 1)
+
+;; Improve TRAMP performance with Vertico/Marginalia
+(setq tramp-completion-reread-directory-timeout nil)
+
+;; Disable Corfu on remote files
+(add-hook 'corfu-mode-hook
+          (lambda ()
+            (when (file-remote-p default-directory)
+              (corfu-mode -1))))
+
+;; Adjust Project.el for better TRAMP handling
+(setq project-switch-commands 'project-find-file)
+
+;; Optional: Disable Cape file completion on remote files
+(setq cape-file-directory-must-exist nil)
+#+end_src
+
+* Editor customization for clojure
+
+#+begin_src emacs-lisp
+
+(use-package move-text
+  :ensure t
+  :bind
+  (("C-M-<up>" . move-text-up)
+   ("C-M-<down>" . move-text-down)))
+
+(use-package paredit
+  :hook ((emacs-lisp-mode
+          clojure-mode
+          clojurescript-mode
+          cider-repl-mode) . paredit-mode)
+  :config
+  ;; Bind paredit commands in insert state for elisp
+  (evil-define-key 'insert emacs-lisp-mode-map
+    (kbd "C-<left>") 'paredit-backward-slurp-sexp
+    (kbd "C-<right>") 'paredit-forward-slurp-sexp
+    (kbd "C-M-<left>") 'paredit-backward-barf-sexp
+    (kbd "C-M-<right>") 'paredit-forward-barf-sexp)
+  
+  ;; Same bindings for clojure modes
+  (evil-define-key 'insert clojure-mode-map
+    (kbd "C-<left>") 'paredit-backward-slurp-sexp
+    (kbd "C-<right>") 'paredit-forward-slurp-sexp
+    (kbd "C-M-<left>") 'paredit-backward-barf-sexp
+    (kbd "C-M-<right>") 'paredit-forward-barf-sexp)
+  
+  ;; Also for ClojureScript
+  (evil-define-key 'insert clojurescript-mode-map
+    (kbd "C-<left>") 'paredit-backward-slurp-sexp
+    (kbd "C-<right>") 'paredit-forward-slurp-sexp
+    (kbd "C-M-<left>") 'paredit-backward-barf-sexp
+    (kbd "C-M-<right>") 'paredit-forward-barf-sexp)
+  
+  ;; And CIDER REPL
+  (evil-define-key 'insert cider-repl-mode-map
+    (kbd "C-<left>") 'paredit-backward-slurp-sexp
+    (kbd "C-<right>") 'paredit-forward-slurp-sexp
+    (kbd "C-M-<left>") 'paredit-backward-barf-sexp
+    (kbd "C-M-<right>") 'paredit-forward-barf-sexp))
 
 #+end_src
