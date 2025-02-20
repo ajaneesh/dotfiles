@@ -36,7 +36,7 @@ in {
           address = cfg.gmail.address;
           realName = cfg.gmail.realName;
           userName = cfg.gmail.address;
-          passwordCommand = "age-decrypt /home/${config.user}/.config/age/secrets/gmail-password.age";
+          passwordCommand = "/home/${config.user}/.config/age/bin/age-decrypt /home/${config.user}/.config/age/secrets/gmail-password.age";
           
           imap = {
             host = "imap.gmail.com";
@@ -53,6 +53,12 @@ in {
           mbsync = {
             enable = true;
             create = "maildir";
+            extraConfig.channel = {
+              MaxMessages = 5000;
+              MaxSize = "1m";
+              Pattern = "SINCE \"21 days ago\"";
+              # PipelineLength = 50;
+            };
           };
 
           msmtp.enable = true;

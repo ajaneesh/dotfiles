@@ -27,6 +27,7 @@ inputs.nixpkgs.lib.nixosSystem {
         environment.systemPackages = with pkgs; [
           xorg.xorgserver
           wayland
+          mu
       	];
         services.xserver.enable = true;
         services.emacs.enable = true;
@@ -64,7 +65,7 @@ inputs.nixpkgs.lib.nixosSystem {
         enable = true;
         gmail = {
           enable = true;
-          address = "ajaneesh.rajashekharaiah@gmail.com";
+          address = "ajaneesh.rajashekharaiah@ihx.in";
           realName = "Ajaneesh Rajashekharaiah";
         };
       };

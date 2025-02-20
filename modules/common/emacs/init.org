@@ -1719,7 +1719,7 @@ assuming in here that the relevant dependencies have been managed in nixos build
 (use-package mu4e
         :ensure nil
         :config
-        (setq mu4e-maildir "~/.mail"
+        (setq mu4e-maildir "~/Mail"
               mu4e-get-mail-command "mbsync -a"
               mu4e-update-interval 300
               mu4e-compose-signature-auto-include t
