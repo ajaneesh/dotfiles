@@ -27,6 +27,7 @@
       # Create a home directory for human user
       isNormalUser = true;
 
+
       # Automatically create a password to start
       hashedPassword = config.passwordHash;
 
@@ -39,8 +40,14 @@
     # Probably shouldn't make this a habit
     environment.localBinInPath = true;
 
+    home-manager.backupFileExtension = "backup";
     home-manager.users.${config.user}.xdg = {
 
+      enable = true;
+      configHome = "/home/${config.user}/.config";
+      dataHome = "/home/${config.user}/.local/share";
+      cacheHome = "/home/${config.user}/.cache";
+      
       # Allow Nix to manage the default applications list
       mimeApps.enable = true;
 

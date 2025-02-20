@@ -1712,6 +1712,31 @@ between the open files which is ok when there aren't too many files open
 (setq cape-file-directory-must-exist nil)
 #+end_src
 
+* mu4e configuration
+assuming in here that the relevant dependencies have been managed in nixos build
+
+#+begin_src emacs-lisp
+(use-package mu4e
+        :ensure nil
+        :config
+        (setq mu4e-maildir "~/.mail"
+              mu4e-get-mail-command "mbsync -a"
+              mu4e-update-interval 300
+              mu4e-compose-signature-auto-include t
+              mu4e-view-show-images t
+              mu4e-view-show-addresses t
+              mu4e-compose-format-flowed t
+              mu4e-change-filenames-when-moving t
+              mu4e-attachment-dir "~/Downloads"
+              message-send-mail-function 'message-send-mail-with-msmtp)
+
+        ;; Gmail-specific settings
+        (setq mu4e-sent-folder "/gmail/[Gmail].Sent Mail"
+              mu4e-drafts-folder "/gmail/[Gmail].Drafts"
+              mu4e-trash-folder "/gmail/[Gmail].Trash"
+              mu4e-refile-folder "/gmail/[Gmail].All Mail"))
+#+end_src
+
 * Editor customization for clojure
 
 #+begin_src emacs-lisp

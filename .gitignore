@@ -9,3 +9,4 @@ templates/**/flake.lock
 !private/**.age
 modules/common/emacs/init.el
 /.venv/
+project_context.md

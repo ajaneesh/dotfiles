@@ -21,9 +21,10 @@ inputs.nixpkgs.lib.nixosSystem {
     inputs.wsl.nixosModules.wsl
     inputs.home-manager.nixosModules.home-manager
     inputs.vscode-server.nixosModules.default
+    inputs.agenix.nixosModules.age 
     ({ config, pkgs, ... }: {
         services.vscode-server.enable = true;
-	environment.systemPackages = with pkgs; [
+        environment.systemPackages = with pkgs; [
           xorg.xorgserver
           wayland
       	];
@@ -58,6 +59,15 @@ inputs.nixpkgs.lib.nixosSystem {
       users.users.nixos.extraGroups = [ "docker" ];
       # vscode.enable = true;
       emacs.enable = true;
+      age-manager.enable = true;
+      email-manager = {
+        enable = true;
+        gmail = {
+          enable = true;
+          address = "ajaneesh.rajashekharaiah@gmail.com";
+          realName = "Ajaneesh Rajashekharaiah";
+        };
+      };
       # neovim.enable = true;
       # mail.enable = true;
       # mail.aerc.enable = true;
