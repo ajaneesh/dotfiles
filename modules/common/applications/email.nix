@@ -54,9 +54,9 @@ in {
             enable = true;
             create = "maildir";
             extraConfig.channel = {
-              MaxMessages = 5000;
+              MaxMessages = 50;
               MaxSize = "1m";
-              Pattern = "SINCE \"21 days ago\"";
+              Pattern = "SINCE \"7 days ago\"";
               # PipelineLength = 50;
             };
           };

@@ -16,6 +16,7 @@
         babashka
         clojure-lsp
         cider
+        emacsPackages.mu4e
         emacsPackages.ob-clojurescript
         emacsPackages.flycheck-clojure
         emacsPackages.clojure-ts-mode

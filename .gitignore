@@ -10,3 +10,4 @@ templates/**/flake.lock
 modules/common/emacs/init.el
 /.venv/
 project_context.md
+generate_project_context.py

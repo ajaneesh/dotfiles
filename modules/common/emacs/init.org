@@ -1718,6 +1718,7 @@ assuming in here that the relevant dependencies have been managed in nixos build
 #+begin_src emacs-lisp
 (use-package mu4e
         :ensure nil
+	:load-path "/nix/store/97ymyq978919zfqva4p15r4ddzzkkz0l-emacs-mu4e-1.12.7/share/emacs/site-lisp/elpa/mu4e-1.12.7"
         :config
         (setq mu4e-maildir "~/Mail"
               mu4e-get-mail-command "mbsync -a"
@@ -1733,7 +1734,7 @@ assuming in here that the relevant dependencies have been managed in nixos build
         ;; Gmail-specific settings
         (setq mu4e-sent-folder "/gmail/[Gmail].Sent Mail"
               mu4e-drafts-folder "/gmail/[Gmail].Drafts"
-              mu4e-trash-folder "/gmail/[Gmail].Trash"
+              mu4e-trash-folder "/gmail/[Gmail].Bin"
               mu4e-refile-folder "/gmail/[Gmail].All Mail"))
 #+end_src
 
