@@ -48,6 +48,7 @@ in {
             host = "smtp.gmail.com";
             port = 587;
             tls.enable = true;
+            tls.useStartTls = true;
           };
 
           mbsync = {
@@ -65,7 +66,16 @@ in {
             };
           };
 
-          msmtp.enable = true;
+        msmtp = {
+            enable = true;
+            extraConfig = {
+                auth = "on";
+                tls = "on";
+                tls_starttls = "on";
+                tls_trust_file = "/etc/ssl/certs/ca-certificates.crt";
+            };
+        };          
+
         };
       };
     };

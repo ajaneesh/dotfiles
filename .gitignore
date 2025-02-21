@@ -11,3 +11,6 @@ modules/common/emacs/init.el
 /.venv/
 project_context.md
 generate_project_context.py
+**/.nrepl-port
+**/.cider-repl-history
+**/#*#
