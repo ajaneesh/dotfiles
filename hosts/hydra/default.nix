@@ -23,16 +23,73 @@ inputs.nixpkgs.lib.nixosSystem {
     inputs.vscode-server.nixosModules.default
     inputs.agenix.nixosModules.age 
     ({ config, pkgs, ... }: {
-        services.vscode-server.enable = true;
-        environment.systemPackages = with pkgs; [
-          xorg.xorgserver
-          wayland
-          mu
-      	];
-        services.xserver.enable = true;
-        services.emacs.enable = true;
+      environment.systemPackages = with pkgs; [
+        xorg.xhost
+        xorg.xorgserver
+        wayland
+        mu
+
+        # Theming
+        adwaita-qt
+        gtk-engine-murrine
+        gtk_engines
+        gsettings-desktop-schemas
+        adwaita-icon-theme
+
+        # Font improvements
+        dejavu_fonts
+        noto-fonts
+        noto-fonts-emoji
+
+        # Compositor for smooth rendering
+        picom
+
+        # Optional - notification daemon
+        dunst
+      ];
+
+      # Font configuration
+      fonts = {
+        fontDir.enable = true;
+        enableGhostscriptFonts = true;
+        fonts = with pkgs; [
+          dejavu_fonts
+          noto-fonts
+          noto-fonts-emoji
+        ];
+      };
     })
     {
+      # Core X server settings that don't depend on pkgs/runtime args
+      services.xserver = {
+        enable = true;
+        displayManager.startx.enable = false;
+        exportConfiguration = true;
+        # Enable basic X server appearance improvements
+        desktopManager.wallpaper.mode = "scale";
+        
+        # Enable a lightweight window manager
+        windowManager.qtile = {
+          enable = true;
+        };
+      };
+      # GTK theme configuration
+      programs.dconf.enable = true;
+      
+      # Qt theme to match GTK
+      qt = {
+        enable = true;
+        platformTheme = "gtk2";
+        style = "adwaita-dark";
+      };
+      # Environment variables are also static configuration
+      environment.sessionVariables = {
+        DISPLAY = ":0";
+        LIBGL_ALWAYS_INDIRECT = "1";
+        GTK_THEME = "Adwaita-dark";
+      };
+      services.emacs.enable = true;
+      services.vscode-server.enable = true;
       networking.hostName = "hydra";
       nixpkgs.overlays = overlays;
       identityFile = "/home/${globals.user}/.ssh/id_ed25519";
