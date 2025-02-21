@@ -1716,26 +1716,48 @@ between the open files which is ok when there aren't too many files open
 assuming in here that the relevant dependencies have been managed in nixos build
 
 #+begin_src emacs-lisp
-(use-package mu4e
-        :ensure nil
-	:load-path "/nix/store/97ymyq978919zfqva4p15r4ddzzkkz0l-emacs-mu4e-1.12.7/share/emacs/site-lisp/elpa/mu4e-1.12.7"
-        :config
-        (setq mu4e-maildir "~/Mail"
-              mu4e-get-mail-command "mbsync -a"
-              mu4e-update-interval 300
-              mu4e-compose-signature-auto-include t
-              mu4e-view-show-images t
-              mu4e-view-show-addresses t
-              mu4e-compose-format-flowed t
-              mu4e-change-filenames-when-moving t
-              mu4e-attachment-dir "~/Downloads"
-              message-send-mail-function 'message-send-mail-with-msmtp)
 
-        ;; Gmail-specific settings
-        (setq mu4e-sent-folder "/gmail/[Gmail].Sent Mail"
-              mu4e-drafts-folder "/gmail/[Gmail].Drafts"
-              mu4e-trash-folder "/gmail/[Gmail].Bin"
-              mu4e-refile-folder "/gmail/[Gmail].All Mail"))
+(use-package mu4e
+  :ensure nil
+  :load-path "/nix/store/97ymyq978919zfqva4p15r4ddzzkkz0l-emacs-mu4e-1.12.7/share/emacs/site-lisp/elpa/mu4e-1.12.7"
+  :config
+  (setq mu4e-maildir "~/Mail"
+        mu4e-get-mail-command "mbsync -a"
+        mu4e-update-interval 300
+        ;; Only show recent messages by default
+        mu4e-headers-skip-duplicates t
+        mu4e-headers-include-related nil
+        ;; Show most recent messages first
+        mu4e-headers-sort-direction 'descending
+        ;; Other settings
+        mu4e-compose-signature-auto-include t
+        mu4e-view-show-images t
+        mu4e-view-show-addresses t
+        mu4e-compose-format-flowed t
+        mu4e-change-filenames-when-moving t
+        mu4e-attachment-dir "~/Downloads"
+        message-send-mail-function 'message-send-mail-with-msmtp)
+
+  ;; Gmail-specific settings
+  (setq mu4e-sent-folder "/[Gmail].Sent Mail"
+        mu4e-drafts-folder "/[Gmail].Drafts"
+        mu4e-trash-folder "/[Gmail].Bin"
+        mu4e-refile-folder "/[Gmail].All Mail")
+
+  ;; Set up maildir shortcuts
+  (setq mu4e-maildir-shortcuts
+        '(("/INBOX" . ?i)
+          ("/[Gmail].Sent Mail" . ?s)))
+
+  ;; Default query to show only recent emails
+  (setq mu4e-headers-search-skip-duplicates t)
+  (setq mu4e-headers-date-format "%Y-%m-%d")
+  (setq mu4e-headers-fields
+        '((:date . 12)
+          (:flags . 6)
+          (:from . 25)
+          (:subject))))
+
 #+end_src
 
 * Editor customization for clojure

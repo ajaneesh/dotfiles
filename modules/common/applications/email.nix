@@ -53,11 +53,15 @@ in {
           mbsync = {
             enable = true;
             create = "maildir";
+            patterns = [ "INBOX" "[Gmail]/Sent Mail" ];
             extraConfig.channel = {
-              MaxMessages = 50;
-              MaxSize = "1m";
-              Pattern = "SINCE \"7 days ago\"";
-              # PipelineLength = 50;
+                MaxMessages = 1000;
+                MaxSize = "100m";
+                # Expunge = "both";
+                # Remove = "both";
+                # CopyArrivalDate = "yes";
+                # Sync = "Pull New";  # Only pull new messages from server
+                # TimeLimit = "7d";   # Only get messages from last 7 days
             };
           };
 
