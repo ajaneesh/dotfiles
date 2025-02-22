@@ -63,15 +63,15 @@ I  am commenting this out for now as i have emacs service running in systemd.  A
 #+begin_src emacs-lisp
 
 (use-package which-key
-  :ensure t
+  :ensure nil
   :config
   (which-key-mode))
 
 (use-package ligature
-  :ensure t)
+  :ensure nil)
 
 (use-package pyvenv
-  :ensure t)
+  :ensure nil)
 
 #+end_src
 
@@ -167,7 +167,7 @@ Need to externalize secrets and put this in a github repo as a package so that t
 
   ;; Ace-window - for more complex window management
   (use-package ace-window
-    :ensure t
+    :ensure nil
     :bind (("M-o" . ace-window))
     :custom
     (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)) ; Use letters instead of numbers
@@ -195,7 +195,7 @@ Need to externalize secrets and put this in a github repo as a package so that t
                       :height 120)
 
   (use-package all-the-icons
-    :ensure t)
+    :ensure nil)
 
   ;; ;; Font rendering options
   ;; (setq-default inhibit-compacting-font-caches t)  ; Improve performance
@@ -249,7 +249,7 @@ Need to externalize secrets and put this in a github repo as a package so that t
 
   ;; Configure the Modus Themes' appearance
   (use-package modus-themes
-    :ensure t
+    :ensure nil
     :config
     (setq modus-themes-mode-line '(accented borderless)
           modus-themes-bold-constructs t
@@ -279,7 +279,7 @@ Need to externalize secrets and put this in a github repo as a package so that t
 #+begin_src emacs-lisp
 
     (use-package undo-tree
-      :ensure t
+      :ensure nil
       :config
       (setq undo-tree-auto-save-history nil)
       (global-undo-tree-mode 1))
@@ -294,7 +294,6 @@ Need to externalize secrets and put this in a github repo as a package so that t
       (setq evil-respect-visual-line-mode t)
       (setq evil-undo-system 'undo-tree)
 
-      (straight-use-package 'evil)
       :config
       (evil-mode 1)
 
@@ -325,7 +324,7 @@ Need to externalize secrets and put this in a github repo as a package so that t
 
     (use-package evil-collection
       :after evil
-      :ensure t
+      :ensure nil
       :config
       (evil-collection-init '(not python)))
 
@@ -333,22 +332,22 @@ Need to externalize secrets and put this in a github repo as a package so that t
     ;;          ds"    delete surrounding quotes
     ;;          cs'   change surrounding quotes to single quotes
     (use-package evil-surround
-      :ensure t
+      :ensure nil
       :config
       (global-evil-surround-mode 1))
 
     (use-package evil-commentary
-    :ensure t
+    :ensure nil
     :config
     (evil-commentary-mode))
 
       (use-package evil-matchit
-      :ensure t
+      :ensure nil
       :config
       (global-evil-matchit-mode 1))
 
 (use-package expand-region
-  :ensure t
+  :ensure nil
   :config
   ;; Define for all programming modes
   (define-key prog-mode-map (kbd "C-{") 'er/expand-region)
@@ -412,7 +411,7 @@ Need to externalize secrets and put this in a github repo as a package so that t
   (setq lsp-pyright-auto-import-completions t))
 
 (use-package lsp-pyright
-  :ensure t
+  :ensure nil
   :hook (python-ts-mode . (lambda ()
                             (require 'lsp-pyright)
                             (lsp-deferred))))
@@ -494,7 +493,7 @@ Need to externalize secrets and put this in a github repo as a package so that t
     (kbd "M-,") 'xref-go-back))
 
 (use-package pytest
-  :ensure t
+  :ensure nil
   :after python
   :commands (pytest-one
     	     pytest-pdb-one
@@ -512,7 +511,7 @@ Need to externalize secrets and put this in a github repo as a package so that t
 
   ;; Org-mode specific settings
   (use-package org
-    :ensure t
+    :ensure nil
     :custom
     (org-startup-indented t)
     (org-startup-folded t)
@@ -564,7 +563,7 @@ Need to externalize secrets and put this in a github repo as a package so that t
        `(org-document-title ((t (,@headline ,@variable-tuple :height 2.0 :underline nil)))))))
 
   (use-package org-superstar
-    :ensure t
+    :ensure nil
     :after org
     :hook (org-mode . org-superstar-mode)
     :custom
@@ -671,7 +670,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
 #+begin_src emacs-lisp
   ;; Enable vertico
   (use-package vertico
-    :ensure t
+    :ensure nil
     :custom
     ;; (vertico-scroll-margin 0) ;; Different scroll margin
     ;; (vertico-count 20) ;; Show more candidates
@@ -682,7 +681,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
 
   ;; Persist history over Emacs restarts. Vertico sorts by history position.
   (use-package savehist
-    :ensure t
+    :ensure nil
     :init
     (savehist-mode))  
 #+end_src
@@ -693,7 +692,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
 
   ;; Enable rich annotations using the Marginalia package
   (use-package marginalia
-    :ensure t
+    :ensure nil
     ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
     ;; available in the *Completions* buffer, add it to the
     ;; `completion-list-mode-map'.
@@ -715,7 +714,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
 
   ;; Example configuration for Consult
   (use-package consult
-    :ensure t
+    :ensure nil
     ;; Replace bindings. Lazily loaded by `use-package'.
     :bind (;; C-c bindings in `mode-specific-map'
            ("C-c M-x" . consult-mode-command)
@@ -821,12 +820,12 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
     )
 
   (use-package consult-lsp
-    :ensure t
+    :ensure nil
     
     )
 
   (use-package consult-project-extra
-    :ensure t
+    :ensure nil
     :bind
     (("C-c p f" . consult-project-extra-find)
      ("C-c p o" . consult-project-extra-find-other-window)))
@@ -839,7 +838,7 @@ this will allow us to make changes across multiple unopened files in file system
 #+begin_src emacs-lisp
 
 (use-package wgrep
-  :ensure t
+  :ensure nil
   :config
   ;; Allow editing in `grep` buffers
   (setq wgrep-auto-save-buffer t) ; Automatically save changes when finishing edits
@@ -870,7 +869,7 @@ this will allow us to make changes across multiple unopened files in file system
 #+begin_src emacs-lisp
 
 (use-package embark
-  :ensure t
+  :ensure nil
 
   :bind
   (("C-." . embark-act)         ;; pick some comfortable binding
@@ -901,7 +900,7 @@ this will allow us to make changes across multiple unopened files in file system
                  (window-parameters (mode-line-format . none)))))
 ;; Consult users will also want the embark-consult package.
 (use-package embark-consult
-  :ensure t ; only need to install it, embark loads it after consult if found
+  :ensure nil ; only need to install it, embark loads it after consult if found
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
@@ -912,7 +911,7 @@ this will allow us to make changes across multiple unopened files in file system
 #+begin_src emacs-lisp
 
   (use-package orderless
-    :ensure t
+    :ensure nil
     :custom
     (completion-styles '(orderless basic))
     (completion-category-defaults nil)
@@ -928,7 +927,7 @@ this will allow us to make changes across multiple unopened files in file system
 
   ;; Completion Setup with Cape and Corfu
   (use-package cape
-    :ensure t
+    :ensure nil
     :init
     ;; Add useful defaults completion sources from Cape
     (add-to-list 'completion-at-point-functions #'cape-file)
@@ -957,7 +956,7 @@ this will allow us to make changes across multiple unopened files in file system
 #+begin_src emacs-lisp
 
   (use-package corfu
-    :ensure t
+    :ensure nil
     :custom
     (corfu-auto t)  ; Enable auto completion
     (corfu-auto-delay 0.2)
@@ -989,12 +988,12 @@ this will allow us to make changes across multiple unopened files in file system
 #+begin_src emacs-lisp
 
   (use-package clojure-mode
-    :ensure t
+    :ensure nil
     :custom
     (clojure-align-forms-automatically t))
 
   (use-package cider
-    :ensure t
+    :ensure nil
     :custom
     (cider-repl-pop-to-buffer-on-connect nil)
     (cider-save-file-on-load t)
@@ -1007,12 +1006,12 @@ this will allow us to make changes across multiple unopened files in file system
     (setq cider-clojure-cli-aliases ":dev:cider"))
 
   (use-package paredit
-    :ensure t
+    :ensure nil
     :hook ((clojure-mode . paredit-mode)
            (cider-repl-mode . paredit-mode)))
 
   (use-package rainbow-delimiters
-    :ensure t
+    :ensure nil
     :hook ((clojure-mode . rainbow-delimiters-mode)
            (cider-repl-mode . rainbow-delimiters-mode)))
 
@@ -1046,16 +1045,16 @@ this will allow us to make changes across multiple unopened files in file system
 
   ;; Optional but Recommended Packages
   (use-package clj-refactor
-    :ensure t
+    :ensure nil
     :config
     (cljr-add-keybindings-with-prefix "C-c C-m")
     :hook (clojure-mode . clj-refactor-mode))
 
   (use-package flycheck-clj-kondo
-    :ensure t)
+    :ensure nil)
 
   (use-package aggressive-indent
-    :ensure t
+    :ensure nil
     :hook (clojure-mode . aggressive-indent-mode))
 
   ;; Testing Setup  
@@ -1097,7 +1096,7 @@ this will allow us to make changes across multiple unopened files in file system
       (delete-window (next-window))))
 
   (use-package treemacs
-    :ensure t
+    :ensure nil
     :config
 
     ;; Basic settings
@@ -1130,7 +1129,7 @@ this will allow us to make changes across multiple unopened files in file system
         	    (lambda() (display-line-numbers-mode -1)))
 
     (use-package treemacs-all-the-icons
-      :ensure t)
+      :ensure nil)
 
     (treemacs-load-theme "all-the-icons")
 
@@ -1227,7 +1226,7 @@ this will allow us to make changes across multiple unopened files in file system
         (skip-chars-backward "[:space:]\n"))))
 
   (use-package json-mode
-    :ensure t
+    :ensure nil
     :config
     ;; First, unbind Evil's default C-n and C-p in normal state
     (define-key evil-normal-state-map (kbd "C-n") nil)
@@ -1239,10 +1238,10 @@ this will allow us to make changes across multiple unopened files in file system
       (kbd "C-p") 'my/json-previous-element))
 
   (use-package yafolding
-    :ensure t)
+    :ensure nil)
 
   (use-package yasnippet-capf
-    :ensure t
+    :ensure nil
     :after cape
     :init
     (defun my/yasnippet-capf-h ()
@@ -1257,7 +1256,7 @@ this will allow us to make changes across multiple unopened files in file system
 #+begin_src emacs-lisp
   ;; Basic YASnippet setup
   (use-package yasnippet
-    :straight t
+    :ensure nil
     :hook ((prog-mode . yas-minor-mode)
            (org-mode . yas-minor-mode)
            (text-mode . yas-minor-mode)
@@ -1277,12 +1276,12 @@ this will allow us to make changes across multiple unopened files in file system
 
   ;; Install the main snippet collection
   (use-package yasnippet-snippets
-    :straight t
+    :ensure nil
     :after yasnippet)
 
   ;; Optional: Add Clojure snippets if you work with Clojure
   (use-package clojure-snippets
-    :straight t
+    :ensure nil
     :after (yasnippet clojure-mode))
 
 
@@ -1292,11 +1291,11 @@ this will allow us to make changes across multiple unopened files in file system
 
   ;; Add Consult integration for better snippet selection
   (use-package consult-yasnippet
-    :ensure t
+    :ensure nil
     :bind ("C-c y" . consult-yasnippet))
 
   (use-package yafolding
-    :ensure t
+    :ensure nil
     :hook ((json-mode . yafolding-mode)
            (python-ts-mode . yafolding-mode)
            (clojure-mode . yafolding-mode))
@@ -1327,7 +1326,7 @@ this will allow us to make changes across multiple unopened files in file system
 #+begin_src emacs-lisp
 
   (use-package restclient
-    :ensure t
+    :ensure nil
     :mode ("\\.http\\'" . restclient-mode))
   
 #+end_src
@@ -1814,10 +1813,10 @@ assuming in here that the relevant dependencies have been managed in nixos build
 
 #+begin_src emacs-lisp
 (use-package transient
-  :ensure t)
+  :ensure nil)
 
 (use-package nix-mode
-  :ensure t
+  :ensure nil
   )
 #+end_src
 
@@ -1826,7 +1825,7 @@ assuming in here that the relevant dependencies have been managed in nixos build
 #+begin_src emacs-lisp
 
 (use-package move-text
-  :ensure t
+  :ensure nil
   :bind
   (("C-M-<up>" . move-text-up)
    ("C-M-<down>" . move-text-down)))
