@@ -6,7 +6,9 @@ I  am commenting this out for now as i have emacs service running in systemd.  A
 #+begin_src emacs-lisp
 ;; -*- lexical-binding: t; -*-
 
-;; (server-start)
+(require 'server)
+(unless (server-running-p)
+  (server-start))
 
 #+end_src
 
@@ -53,6 +55,23 @@ I  am commenting this out for now as i have emacs service running in systemd.  A
   (package-initialize)
   (unless package-archive-contents
     (package-refresh-contents))
+
+#+end_src
+
+* Some required packages
+
+#+begin_src emacs-lisp
+
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode))
+
+(use-package ligature
+  :ensure t)
+
+(use-package pyvenv
+  :ensure t)
 
 #+end_src
 
@@ -350,137 +369,138 @@ Need to externalize secrets and put this in a github repo as a package so that t
 
 #+begin_src emacs-lisp
 
-  ;; Remove ELPA python package from load path
-  (setq load-path 
-        (cl-remove-if
-         (lambda (path)
-           (string-match-p "python-0\\.28" path))
-         load-path))
+;; Remove ELPA python package from load path
+(setq load-path 
+      (cl-remove-if
+       (lambda (path)
+         (string-match-p "python-0\\.28" path))
+       load-path))
 
-  ;; Force load the built-in python.el first
-  (load "/nix/store/ypkhlc24d7skgal25f58bnnbp9rp49li-emacs-29.4/share/emacs/29.4/lisp/progmodes/python")
+;; Force load the built-in python.el first
+(load "/nix/store/ypkhlc24d7skgal25f58bnnbp9rp49li-emacs-29.4/share/emacs/29.4/lisp/progmodes/python")
 
-  ;; TreeSit and Python configuration
-  (use-package treesit
-    :ensure nil
-    :config
-    (setq treesit-language-source-alist
-          '((python "https://github.com/tree-sitter/tree-sitter-python")))
+;; TreeSit and Python configuration
+(use-package treesit
+  :ensure nil
+  :config
+  (setq treesit-language-source-alist
+        '((python "https://github.com/tree-sitter/tree-sitter-python")))
 
-    (when (treesit-available-p)
-      ;; Install grammar if needed
-      (unless (treesit-language-available-p 'python)
-        (treesit-install-language-grammar 'python))
-      
-      ;; Set up python-ts-mode
-      (defvar python-ts-mode-map (make-sparse-keymap))
-      (add-to-list 'major-mode-remap-alist
-                   '(python-mode . python-ts-mode))
-      (add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))))
+  (when (treesit-available-p)
+    ;; Install grammar if needed
+    (unless (treesit-language-available-p 'python)
+      (treesit-install-language-grammar 'python))
+    
+    ;; Set up python-ts-mode
+    (defvar python-ts-mode-map (make-sparse-keymap))
+    (add-to-list 'major-mode-remap-alist
+                 '(python-mode . python-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))))
 
-  ;; LSP and development tools configuration
-  (use-package lsp-mode
-    :hook ((python-ts-mode . lsp-deferred))
-    :custom
-    (lsp-idle-delay 0.5)
-    (lsp-log-io nil)
-    (lsp-completion-provider :capf)
-    (lsp-keymap-prefix "C-c l")
-    :config
-    (lsp-enable-which-key-integration t)
-    (setq lsp-pyright-use-library-code-for-types t)
-    (setq lsp-pyright-diagnostic-mode "workspace")
-    (setq lsp-pyright-auto-import-completions t))
+;; LSP and development tools configuration
+(use-package lsp-mode
+  :hook ((python-ts-mode . lsp-deferred))
+  :custom
+  (lsp-idle-delay 0.5)
+  (lsp-log-io nil)
+  (lsp-completion-provider :capf)
+  (lsp-keymap-prefix "C-c l")
+  :config
+  (lsp-enable-which-key-integration t)
+  (setq lsp-pyright-use-library-code-for-types t)
+  (setq lsp-pyright-diagnostic-mode "workspace")
+  (setq lsp-pyright-auto-import-completions t))
 
-  (use-package lsp-pyright
-    :hook (python-ts-mode . (lambda ()
-                              (require 'lsp-pyright)
-                              (lsp-deferred))))
+(use-package lsp-pyright
+  :ensure t
+  :hook (python-ts-mode . (lambda ()
+                            (require 'lsp-pyright)
+                            (lsp-deferred))))
 
-  ;; Development tools
-  (use-package python-black
-    :after python
-    :hook (python-ts-mode . python-black-on-save-mode))
+;; Development tools
+(use-package python-black
+  :after python
+  :hook (python-ts-mode . python-black-on-save-mode))
 
-  (use-package py-isort
-    :hook (python-ts-mode . py-isort-before-save))
+(use-package py-isort
+  :hook (python-ts-mode . py-isort-before-save))
 
-  ;; Environment Management
-  (use-package pyvenv
-    :config
-    (pyvenv-mode 1))
+;; Environment Management
+(use-package pyvenv
+  :config
+  (pyvenv-mode 1))
 
-  ;; Initialize evil-collection for python after everything is set up
-  (with-eval-after-load 'evil-collection
-    (when (treesit-available-p)
-      (evil-collection-init '(python))))
+;; Initialize evil-collection for python after everything is set up
+(with-eval-after-load 'evil-collection
+  (when (treesit-available-p)
+    (evil-collection-init '(python))))
 
-  ;; Define the smart reference finder
-  (defun my/smart-find-references ()
-    "Enhanced reference finder that auto-jumps when there are exactly two references."
-    (interactive)
-    (let* ((orig-buf (current-buffer))
-  	 (orig-pos (point))
-  	 (refs (lsp-request "textDocument/references"
-                              (lsp--make-reference-params nil nil)))
-  	 (num-refs (length refs)))
-      (cond
-       ;; No references found
-       ((= num-refs 0)
-        (message "No references found"))
-       
-       ;; Exactly two references - try to jump to the other one
-       ((= num-refs 2)
-        (let* ((current-uri (lsp--buffer-uri))
-               (other-ref (car (seq-filter
-                                (lambda (ref)
-  				(let ((ref-uri (lsp:location-uri ref)))
-  				  (or (not (string= ref-uri current-uri))
-                                        (let* ((range (lsp:location-range ref))
-                                               (start (lsp:range-start range))
-                                               (line (lsp:position-line start))
-                                               (character (lsp:position-character start))
-                                               (cur-line (line-number-at-pos))
-                                               (cur-char (current-column)))
-  					(or (/= (1+ line) cur-line)
-                                              (/= character cur-char))))))
-                                refs))))
-  	(if other-ref
-              (lsp-goto-location other-ref)
-            (message "Cannot determine other reference location"))))
-       
-       ;; More than two references - show all references
-       (t (lsp-find-references)))))
+;; Define the smart reference finder
+(defun my/smart-find-references ()
+  "Enhanced reference finder that auto-jumps when there are exactly two references."
+  (interactive)
+  (let* ((orig-buf (current-buffer))
+	 (orig-pos (point))
+	 (refs (lsp-request "textDocument/references"
+                            (lsp--make-reference-params nil nil)))
+	 (num-refs (length refs)))
+    (cond
+     ;; No references found
+     ((= num-refs 0)
+      (message "No references found"))
+     
+     ;; Exactly two references - try to jump to the other one
+     ((= num-refs 2)
+      (let* ((current-uri (lsp--buffer-uri))
+             (other-ref (car (seq-filter
+                              (lambda (ref)
+				(let ((ref-uri (lsp:location-uri ref)))
+				  (or (not (string= ref-uri current-uri))
+                                      (let* ((range (lsp:location-range ref))
+                                             (start (lsp:range-start range))
+                                             (line (lsp:position-line start))
+                                             (character (lsp:position-character start))
+                                             (cur-line (line-number-at-pos))
+                                             (cur-char (current-column)))
+					(or (/= (1+ line) cur-line)
+                                            (/= character cur-char))))))
+                              refs))))
+	(if other-ref
+            (lsp-goto-location other-ref)
+          (message "Cannot determine other reference location"))))
+     
+     ;; More than two references - show all references
+     (t (lsp-find-references)))))
 
-  ;; Python development keybindings
-  (add-hook 'python-ts-mode-hook
-  	  (lambda ()
-  	    (let ((map python-ts-mode-map))
-  	      (define-key map (kbd "C-c C-f") 'python-black-buffer)
-  	      (define-key map (kbd "C-c C-i") 'py-isort-buffer)
-  	      (define-key map (kbd "C-c d") 'lsp-ui-doc-show)
-  	      (define-key map (kbd "C-c C-d") 'lsp-find-definition)
-  	      (define-key map (kbd "C-c C-r") 'lsp-find-references)
-  	      (define-key map (kbd "M-.") 'lsp-find-definition)
-  	      (define-key map [f3] 'lsp-find-definition)
-  	      (define-key map [f4] 'my/smart-find-references)
-  	      (define-key map [M-left] 'xref-go-back))))
+;; Python development keybindings
+(add-hook 'python-ts-mode-hook
+	  (lambda ()
+	    (let ((map python-ts-mode-map))
+	      (define-key map (kbd "C-c C-f") 'python-black-buffer)
+	      (define-key map (kbd "C-c C-i") 'py-isort-buffer)
+	      (define-key map (kbd "C-c d") 'lsp-ui-doc-show)
+	      (define-key map (kbd "C-c C-d") 'lsp-find-definition)
+	      (define-key map (kbd "C-c C-r") 'lsp-find-references)
+	      (define-key map (kbd "M-.") 'lsp-find-definition)
+	      (define-key map [f3] 'lsp-find-definition)
+	      (define-key map [f4] 'my/smart-find-references)
+	      (define-key map [M-left] 'xref-go-back))))
 
 
-  ;; Override Evil keybindings for Python
-  (with-eval-after-load 'evil
-    (evil-define-key '(normal insert visual) python-ts-mode-map 
-      (kbd "M-.") 'lsp-find-definition
-      (kbd "M-,") 'xref-go-back))
+;; Override Evil keybindings for Python
+(with-eval-after-load 'evil
+  (evil-define-key '(normal insert visual) python-ts-mode-map 
+    (kbd "M-.") 'lsp-find-definition
+    (kbd "M-,") 'xref-go-back))
 
-  (use-package pytest
-    :ensure t
-    :after python
-    :commands (pytest-one
-      	     pytest-pdb-one
-      	     pytest-all
-      	     pytest-module
-      	     pytest-last-failed))
+(use-package pytest
+  :ensure t
+  :after python
+  :commands (pytest-one
+    	     pytest-pdb-one
+    	     pytest-all
+    	     pytest-module
+    	     pytest-last-failed))
 #+end_src
 
 * Org Mode configuration
@@ -904,7 +924,7 @@ this will allow us to make changes across multiple unopened files in file system
 #+begin_src emacs-lisp
 
   ;; diabling company as we have corfu and cape for completions.
-  (global-company-mode -1)
+  ;; (global-company-mode -1)
 
   ;; Completion Setup with Cape and Corfu
   (use-package cape
@@ -960,15 +980,6 @@ this will allow us to make changes across multiple unopened files in file system
       (corfu-mode 1)))
 
   (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
-#+end_src
-
-* Which Key Configuration
-
-#+begin_src emacs-lisp
-
-  (use-package which-key
-    :config
-    (which-key-mode))
 #+end_src
 
 * magit to start working with Git.
@@ -1427,7 +1438,7 @@ Note: this doesnt seem to be necessary anymore,  discovered that evil-buffer (c-
 
 #+end_src
 
-* TODO this doesnt seem to be working as expected.  messing up the code
+* this doesnt seem to be working as expected.  messing up the code
 
 #+begin_src emacs-lisp
 
@@ -1796,6 +1807,17 @@ assuming in here that the relevant dependencies have been managed in nixos build
   ;;                          (string-prefix-p "/gmail" (mu4e-message-field msg :maildir))))
   ;;           :vars '((user-mail-address . "ajaneesh.rajashekharaiah@ihx.in")
   ;;                  (user-full-name    . "Ajaneesh Rajashekharaiah")))))
+  )
+#+end_src
+
+* Nix mode
+
+#+begin_src emacs-lisp
+(use-package transient
+  :ensure t)
+
+(use-package nix-mode
+  :ensure t
   )
 #+end_src
 

@@ -52,12 +52,19 @@ inputs.nixpkgs.lib.nixosSystem {
       fonts = {
         fontDir.enable = true;
         enableGhostscriptFonts = true;
-        fonts = with pkgs; [
+         packages= with pkgs; [
           dejavu_fonts
           noto-fonts
           noto-fonts-emoji
         ];
       };
+      services.emacs = {
+ 	enable = true;
+ 	defaultEditor = true;
+ 	# startupWithUserSession = true;  # This is important
+ 	package = pkgs.emacs;  # Ensure this matches your main emacs package
+      };
+      emacs.enable = true;
     })
     {
       # Core X server settings that don't depend on pkgs/runtime args
@@ -88,7 +95,6 @@ inputs.nixpkgs.lib.nixosSystem {
         LIBGL_ALWAYS_INDIRECT = "1";
         GTK_THEME = "Adwaita-dark";
       };
-      services.emacs.enable = true;
       services.vscode-server.enable = true;
       networking.hostName = "hydra";
       nixpkgs.overlays = overlays;
@@ -116,7 +122,6 @@ inputs.nixpkgs.lib.nixosSystem {
       };
       users.users.nixos.extraGroups = [ "docker" ];
       # vscode.enable = true;
-      emacs.enable = true;
       age-manager.enable = true;
       email-manager = {
         enable = true;

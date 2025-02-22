@@ -166,27 +166,6 @@
         "type": "github"
       }
     },
-    "emacs": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "nixpkgs-stable": "nixpkgs-stable"
-      },
-      "locked": {
-        "lastModified": 1735895739,
-        "narHash": "sha256-TBhp9fnocT3QTjcXO6RZlxrmY1lUN34rDptMNM6gOfA=",
-        "owner": "nix-community",
-        "repo": "emacs-overlay",
-        "rev": "f056a3b82aa523aa3b3a033fe8ffe77d29461079",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "emacs-overlay",
-        "type": "github"
-      }
-    },
     "fidget-nvim-src": {
       "flake": false,
       "locked": {
@@ -633,22 +612,6 @@
     },
     "nixpkgs-stable": {
       "locked": {
-        "lastModified": 1735669367,
-        "narHash": "sha256-tfYRbFhMOnYaM4ippqqid3BaLOXoFNdImrfBfCp4zn0=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "edf04b75c13c2ac0e54df5ec5c543e300f76f1c9",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-24.11",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs-stable_2": {
-      "locked": {
         "lastModified": 1734017764,
         "narHash": "sha256-msOfmyJSjAHgIygI/JD0Ae3JsDv4rT54Nlfr5t6MQMQ=",
         "owner": "nixos",
@@ -823,7 +786,6 @@
         "cmp-nvim-lsp-src": "cmp-nvim-lsp-src",
         "darwin": "darwin_2",
         "disko": "disko",
-        "emacs": "emacs",
         "fidget-nvim-src": "fidget-nvim-src",
         "firefox-darwin": "firefox-darwin",
         "gh-collaborators": "gh-collaborators",
@@ -839,7 +801,7 @@
         "nixos-generators": "nixos-generators",
         "nixpkgs": "nixpkgs",
         "nixpkgs-caddy": "nixpkgs-caddy",
-        "nixpkgs-stable": "nixpkgs-stable_2",
+        "nixpkgs-stable": "nixpkgs-stable",
         "nur": "nur",
         "nvim-lint-src": "nvim-lint-src",
         "nvim-lspconfig-src": "nvim-lspconfig-src",
