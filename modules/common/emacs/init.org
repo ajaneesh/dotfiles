@@ -73,6 +73,12 @@ I  am commenting this out for now as i have emacs service running in systemd.  A
 (use-package pyvenv
   :ensure nil)
 
+(use-package all-the-icons
+  :ensure nil)
+
+(use-package treemacs-all-the-icons
+  :ensure nil)
+
 #+end_src
 
 * using straight.el for package management

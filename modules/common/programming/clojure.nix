@@ -16,6 +16,7 @@
         babashka
         clojure-lsp
         cider
+        clj-kondo
        #emacsPackages.mu4e
        #emacsPackages.ob-clojurescript
        #emacsPackages.flycheck-clojure

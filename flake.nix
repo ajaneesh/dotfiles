@@ -74,11 +74,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-#     emacs = {
-#      url = "github:nix-community/emacs-overlay";
-#      inputs.nixpkgs.follows = "nixpkgs";
-#    };
-
     # Neovim plugins
     base16-nvim-src = {
       url = "github:RRethy/base16-nvim";
