@@ -16,6 +16,7 @@
         enable = true;
 	      extraPackages = epkgs: with epkgs; [
           all-the-icons
+          aggressive-indent
           treemacs-all-the-icons
 	        which-key
 	        ligature
@@ -33,11 +34,13 @@
 	        vertico
 	        marginalia
 	        consult-lsp
+          consult-project-extra
 	        wgrep
 	        orderless
 	        cape
 	        corfu
 	        clojure-mode
+          clj-refactor
 	        cider
 	        flycheck-clj-kondo
 	        json-mode
@@ -47,6 +50,12 @@
           transient
           magit-section
           treemacs
+          yasnippet
+          yasnippet-snippets
+          yasnippet-capf
+          clojure-snippets
+          paredit
+          rainbow-delimiters
 	      ];
       };
 
