@@ -16,6 +16,8 @@
         enable = true;
 	      extraPackages = epkgs: with epkgs; [
           all-the-icons
+          all-the-icons-completion
+          mixed-pitch
           aggressive-indent
           treemacs-all-the-icons
 	        which-key
@@ -56,6 +58,9 @@
           clojure-snippets
           paredit
           rainbow-delimiters
+          org-superstar
+          olivetti
+          mu4e-alert
 	      ];
       };
 

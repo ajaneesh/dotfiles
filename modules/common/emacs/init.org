@@ -1748,73 +1748,165 @@ assuming in here that the relevant dependencies have been managed in nixos build
         mu4e-headers-sort-direction 'descending
         mu4e-split-view 'vertical
         mu4e-headers-search-skip-duplicates t
-        mu4e-headers-fields '((:date . 12)
-			      (:flags . 6)
-			      (:from . 25)
-			      (:subject))
+        mu4e-headers-fields '((:date . 12) (:flags . 6) (:from . 25) (:subject))
+        mu4e-view-fields '(:from :to :cc :subject :flags :date :maildir :mailing-list :tags :attachments :signature)
+        mu4e-view-header-separator (propertize "\n" 'face '(:background "gray90" :height 0.5))
         mu4e-headers-visible-lines 15  
         mu4e-split-view-width 50       
         mu4e-view-show-images t
         mu4e-view-auto-mark-as-read t
         mu4e-compose-signature-auto-include t
-        mu4e-view-show-images t
+        mu4e-view-image-max-width 800               
+        mu4e-use-fancy-chars t                      
+        fill-column 80                               
         mu4e-view-show-addresses t
         mu4e-view-header-field-format "%s: %s\n"
         mu4e-view-show-addresses t
         line-spacing 0.1
+	mu4e-use-color t
+	mu4e-view-prefer-html t
         mu4e-compose-format-flowed t
         mu4e-change-filenames-when-moving t
         mu4e-attachment-dir "~/Downloads"
-	user-full-name "Ajaneesh Rajashekharaiah"
+        user-full-name "Ajaneesh Rajashekharaiah"
         user-mail-address "ajaneesh.rajashekharaiah@ihx.in"
         mu4e-compose-signature "-Ajaneesh"
-	mu4e-sent-folder "/[Gmail].Sent Mail"
+        mu4e-sent-folder "/[Gmail].Sent Mail"
         mu4e-drafts-folder "/[Gmail].Drafts"
         mu4e-trash-folder "/[Gmail].Bin"
         mu4e-refile-folder "/[Gmail].All Mail"
         mu4e-maildir-shortcuts '(("/INBOX" . ?i)
                                  ("/[Gmail].Sent Mail" . ?s)))
-
   (setq send-mail-function 'message-send-mail-with-sendmail
         sendmail-program "/etc/profiles/per-user/nixos/bin/msmtp"
         message-sendmail-f-is-evil t
         message-sendmail-extra-arguments '("--read-envelope-from")
         message-send-mail-function 'message-send-mail-with-sendmail)
 
-  ;; Font customization with correct face names
-  (set-face-attribute 'mu4e-header-face nil :height 100)
-  (set-face-attribute 'mu4e-header-title-face nil :height 100)
-  (set-face-attribute 'mu4e-header-key-face nil :height 100)
-  (set-face-attribute 'mu4e-header-value-face nil :height 100)
-  (set-face-attribute 'mu4e-contact-face nil :height 100)
-  (set-face-attribute 'mu4e-context-face nil :height 100)
-  (set-face-attribute 'mu4e-link-face nil :height 100)
-  ;; (set-face-attribute 'mu4e-cited-1-face nil :height 100)
-  ;; (set-face-attribute 'mu4e-cited-2-face nil :height 100)
-  ;; (set-face-attribute 'mu4e-cited-3-face nil :height 100)
-  ;; (set-face-attribute 'mu4e-cited-4-face nil :height 100)
-  ;; (set-face-attribute 'mu4e-cited-5-face nil :height 100)
-  ;; (set-face-attribute 'mu4e-cited-6-face nil :height 100)
-  ;; (set-face-attribute 'mu4e-cited-7-face nil :height 100) 
-
-  ;; Show the first mail automatically
-  ;; (add-hook 'mu4e-headers-mode-hook
-  ;;           (lambda ()
-  ;;             (when (eq mu4e-split-view 'vertical)
-  ;;               (mu4e-headers-view-message))))
-
-  ;; Set up contexts for different email accounts if needed
-  ;; (setq mu4e-contexts
-  ;;       `(,(make-mu4e-context
-  ;;           :name "gmail"
-  ;;           :match-func (lambda (msg)
-  ;;                        (when msg
-  ;;                          (string-prefix-p "/gmail" (mu4e-message-field msg :maildir))))
-  ;;           :vars '((user-mail-address . "ajaneesh.rajashekharaiah@ihx.in")
-  ;;                  (user-full-name    . "Ajaneesh Rajashekharaiah")))))
+  ;; ;; Font customization with correct face names
+  ;; (set-face-attribute 'mu4e-header-face nil :height 100)
+  ;; (set-face-attribute 'mu4e-header-title-face nil :height 100)
+  ;; (set-face-attribute 'mu4e-header-key-face nil :height 100)
+  ;; (set-face-attribute 'mu4e-header-value-face nil :height 100)
+  ;; (set-face-attribute 'mu4e-contact-face nil :height 100)
+  ;; (set-face-attribute 'mu4e-context-face nil :height 100)
+  ;; (set-face-attribute 'mu4e-link-face nil :height 100)
   )
+
+(add-hook 'mu4e-view-mode-hook
+          (lambda ()
+            (variable-pitch-mode 1)                 ;; Use proportional font
+            (setq line-spacing 0.2)))               ;; Add a bit of line spacing
+
+;; Use xwidgets (Webkit) if available for better HTML rendering
+(when (fboundp 'xwidget-webkit-browse-url)
+  (setq mu4e-view-html-plaintext-ratio-heuristic most-positive-fixnum
+        mu4e-view-use-xwidget t))
+
+;; ;; Alternatively (instead of xwidget), improve standard HTML rendering
+;; (setq shr-color-visible-luminance-min 80)           ;; Improve color contrast
+;; (setq shr-use-colors t)                             ;; Enable colors
+;; (setq shr-use-fonts t)                              ;; Use fonts
+;; (setq shr-max-width 80)                             ;; Wrap at 80 chars
+;; (setq shr-discard-aria-hidden t)                    ;; Clean up HTML
+
+
+(use-package olivetti
+  :ensure nil
+  :config
+  (setq olivetti-body-width 80)
+  (add-hook 'mu4e-view-mode-hook 'olivetti-mode))
+
+(use-package visual-fill-column
+  :ensure t
+  :config
+  (setq visual-fill-column-width 90
+        visual-fill-column-center-text t)
+  (add-hook 'mu4e-view-mode-hook 'visual-fill-column-mode))
+
+(use-package emojify
+  :ensure t
+  :hook (mu4e-view-mode . emojify-mode))
+
+
+;; Ensure that mu4e headers are well-differentiated in modus themes
+(setq mu4e-use-fancy-chars t)
+(setq mu4e-headers-draft-mark     '("D" . "🖊️"))  ;; Draft
+(setq mu4e-headers-flagged-mark   '("F" . "⚑"))   ;; Flagged
+(setq mu4e-headers-new-mark       '("N" . "✱"))   ;; New
+(setq mu4e-headers-passed-mark    '("P" . "➥"))   ;; Passed/Forwarded
+(setq mu4e-headers-replied-mark   '("R" . "↵"))   ;; Replied
+(setq mu4e-headers-seen-mark      '("S" . "✓"))   ;; Seen
+(setq mu4e-headers-trashed-mark   '("T" . "♻"))   ;; Trashed
+(setq mu4e-headers-attach-mark    '("a" . "📎"))  ;; Attachment
+(setq mu4e-headers-encrypted-mark '("x" . "🔒"))  ;; Encrypted
+(setq mu4e-headers-signed-mark    '("s" . "🔑"))  ;; Signed
+(setq mu4e-headers-unread-mark    '("u" . "●"))   ;; Unread
+
+;; Modus themes compatibility for headers
+(with-eval-after-load 'modus-themes
+  (setq modus-themes-mail-citations 'intense)  ;; Make citations more distinct
+  (setq modus-themes-completions '((matches . (extrabold))
+                                   (selection . (semibold accented))
+                                   (popup . (accented intense))))
+  
+  ;; If using modus-vivendi (dark theme)
+  (when (eq (modus-themes--current-theme) 'modus-vivendi)
+    (set-face-attribute 'mu4e-header-highlight-face nil
+                         :background (modus-themes-get-color-value 'bg-hl-alt)
+                         :underline nil)))
+
+(when (fboundp 'xwidget-webkit-browse-url)
+  (setq mu4e-view-prefer-html t
+        mu4e-view-html-plaintext-ratio-heuristic most-positive-fixnum
+        mu4e-view-use-xwidget t))
+
+
+;; (setq shr-color-visible-luminance-min 80) 
+;; (setq shr-use-colors t)
+;; (setq shr-use-fonts t)
+;; (setq shr-max-width 80)
+;; (setq shr-discard-aria-hidden t)
+
+
+(use-package all-the-icons
+  :ensure nil)
+  
+(use-package all-the-icons-completion
+  :ensure nil
+  :after (marginalia all-the-icons)
+  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup))
+
+(use-package mu4e-alert
+  :ensure nil
+  :config
+  (mu4e-alert-set-default-style 'libnotify)
+  (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
+  (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
+
+
 #+end_src
 
+* EWW configuration
+
+#+begin_src emacs-lisp :tangle yes
+
+;; EWW configuration
+(require 'eww)
+(setq browse-url-browser-function 'eww-browse-url) ;; Use EWW as default browser
+(setq eww-search-prefix "https://duckduckgo.com/html?q=") ;; Set search engine
+
+;; Nicer rendering
+(setq shr-use-colors nil) ;; No colors
+(setq shr-use-fonts t)    ;; Use fonts
+(setq shr-max-width 80)   ;; Wrap at 80 chars
+(setq shr-discard-aria-hidden t)
+
+;; Key bindings for EWW
+(global-set-key (kbd "C-c w") 'eww)
+(global-set-key (kbd "C-c o") 'browse-url-external) ;; Open in external browser when needed
+
+#+end_src
 * Nix mode
 
 #+begin_src emacs-lisp
