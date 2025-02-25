@@ -293,6 +293,7 @@
         (import ./overlays/osc.nix inputs)
         (import ./overlays/ren-rep.nix inputs)
         (import ./overlays/volnoti.nix)
+        (import ./overlays/emacs-packages.nix)
       ];
 
       # System types to support.

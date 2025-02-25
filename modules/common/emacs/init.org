@@ -876,7 +876,6 @@ this will allow us to make changes across multiple unopened files in file system
 
 (use-package embark
   :ensure nil
-
   :bind
   (("C-." . embark-act)         ;; pick some comfortable binding
    ("C->" . embark-become)      ;; pick some comfortable binding
@@ -1547,62 +1546,62 @@ between the open files which is ok when there aren't too many files open
 
 #+begin_src emacs-lisp
 
-  (defun my/get-buffer-extension (&optional buffer)
-    "Get the file extension of BUFFER or current buffer."
-    (when-let* ((buffer (or buffer (current-buffer)))
-                (file-name (buffer-file-name buffer)))
-      (file-name-extension file-name)))
+(defun my/get-buffer-extension (&optional buffer)
+  "Get the file extension of BUFFER or current buffer."
+  (when-let* ((buffer (or buffer (current-buffer)))
+              (file-name (buffer-file-name buffer)))
+    (file-name-extension file-name)))
 
-  (defun my/cycle-same-extension-buffers (&optional reverse)
-    "Cycle through buffers with same extension as current buffer."
-    (interactive)
-    (when (derived-mode-p 'prog-mode)
-      (let* ((curr-ext (my/get-buffer-extension))
-             (current-buf (current-buffer))
-             ;; Get all matching buffers and sort them by name
-             (same-ext-buffers
-              (sort 
-               (seq-filter
-                (lambda (buf)
-                  (with-current-buffer buf
-                    (and (buffer-file-name buf)
-                         (derived-mode-p 'prog-mode)
-                         (when-let ((ext (my/get-buffer-extension buf)))
-                           (string= ext curr-ext)))))
-                (buffer-list))
-               (lambda (a b) 
-                 (string< (buffer-name a) (buffer-name b)))))
-             ;; Find current position
-             (current-index (cl-position current-buf same-ext-buffers))
-             (total (length same-ext-buffers)))
-        
-        (when (and current-index (> total 1))
-          ;; Calculate next position with wrapping
-          (let* ((next-index (if reverse
-                                 (if (= current-index 0) 
-                                     (1- total) 
-                                   (1- current-index))
-                               (if (= current-index (1- total)) 
-                                   0 
-                                 (1+ current-index))))
-                 (next-buf (nth next-index same-ext-buffers)))
-            
-            ;; Switch buffer with messages suppressed
-            (let ((inhibit-message t))
-              (switch-to-buffer next-buf)
-              ;; Show simple status message
-              (message "[%d/%d] %s" 
-                       (1+ next-index) 
-                       total
-                       (buffer-name next-buf))))))))
+(defun my/cycle-same-extension-buffers (&optional reverse)
+  "Cycle through buffers with same extension as current buffer."
+  (interactive)
+  (when (derived-mode-p 'prog-mode)
+    (let* ((curr-ext (my/get-buffer-extension))
+           (current-buf (current-buffer))
+           ;; Get all matching buffers and sort them by name
+           (same-ext-buffers
+            (sort 
+             (seq-filter
+              (lambda (buf)
+                (with-current-buffer buf
+                  (and (buffer-file-name buf)
+                       (derived-mode-p 'prog-mode)
+                       (when-let ((ext (my/get-buffer-extension buf)))
+                         (string= ext curr-ext)))))
+              (buffer-list))
+             (lambda (a b) 
+               (string< (buffer-name a) (buffer-name b)))))
+           ;; Find current position
+           (current-index (cl-position current-buf same-ext-buffers))
+           (total (length same-ext-buffers)))
+      
+      (when (and current-index (> total 1))
+        ;; Calculate next position with wrapping
+        (let* ((next-index (if reverse
+                               (if (= current-index 0) 
+                                   (1- total) 
+                                 (1- current-index))
+                             (if (= current-index (1- total)) 
+                                 0 
+                               (1+ current-index))))
+               (next-buf (nth next-index same-ext-buffers)))
+          
+          ;; Switch buffer with messages suppressed
+          (let ((inhibit-message t))
+            (switch-to-buffer next-buf)
+            ;; Show simple status message
+            (message "[%d/%d] %s" 
+                     (1+ next-index) 
+                     total
+                     (buffer-name next-buf))))))))
 
-  (defun my/cycle-same-extension-buffers-backward ()
-    "Cycle through buffers with same extension as current buffer backwards."
-    (interactive)
-    (my/cycle-same-extension-buffers t))
+(defun my/cycle-same-extension-buffers-backward ()
+  "Cycle through buffers with same extension as current buffer backwards."
+  (interactive)
+  (my/cycle-same-extension-buffers t))
 
-  ;; Bind to F8 and Shift-F8
-  (define-key prog-mode-map [f8] 'my/cycle-same-extension-buffers)
+;; Bind to F8 and Shift-F8
+(define-key prog-mode-map [f8] 'my/cycle-same-extension-buffers)
 
 #+end_src
 
@@ -1737,51 +1736,52 @@ assuming in here that the relevant dependencies have been managed in nixos build
   :ensure nil
   :load-path "/nix/store/97ymyq978919zfqva4p15r4ddzzkkz0l-emacs-mu4e-1.12.7/share/emacs/site-lisp/elpa/mu4e-1.12.7"
   :config
-  (setq mu4e-maildir "~/Mail"
-        mu4e-get-mail-command "mbsync -a"
-        mu4e-update-interval 300
-        mu4e-headers-skip-duplicates t
-        mu4e-headers-include-related nil
-        mu4e-headers-long-date-format  "%Y-%m-%d %H:%M"        
-        mu4e-headers-date-format "%Y-%m-%d %H:%M"              
-        mu4e-headers-time-format "%H:%M"
-        mu4e-headers-sort-direction 'descending
-        mu4e-split-view 'vertical
-        mu4e-headers-search-skip-duplicates t
-        mu4e-headers-fields '((:date . 12) (:flags . 6) (:from . 25) (:subject))
-        mu4e-view-fields '(:from :to :cc :subject :flags :date :maildir :mailing-list :tags :attachments :signature)
-        mu4e-view-header-separator (propertize "\n" 'face '(:background "gray90" :height 0.5))
-        mu4e-headers-visible-lines 15  
-        mu4e-split-view-width 50       
-        mu4e-view-show-images t
-        mu4e-view-auto-mark-as-read t
-        mu4e-compose-signature-auto-include t
-        mu4e-view-image-max-width 800               
-        mu4e-use-fancy-chars t                      
-        fill-column 80                               
-        mu4e-view-show-addresses t
-        mu4e-view-header-field-format "%s: %s\n"
-        mu4e-view-show-addresses t
-        line-spacing 0.1
-	mu4e-use-color t
-	mu4e-view-prefer-html t
-        mu4e-compose-format-flowed t
-        mu4e-change-filenames-when-moving t
-        mu4e-attachment-dir "~/Downloads"
-        user-full-name "Ajaneesh Rajashekharaiah"
-        user-mail-address "ajaneesh.rajashekharaiah@ihx.in"
-        mu4e-compose-signature "-Ajaneesh"
-        mu4e-sent-folder "/[Gmail].Sent Mail"
-        mu4e-drafts-folder "/[Gmail].Drafts"
-        mu4e-trash-folder "/[Gmail].Bin"
-        mu4e-refile-folder "/[Gmail].All Mail"
-        mu4e-maildir-shortcuts '(("/INBOX" . ?i)
-                                 ("/[Gmail].Sent Mail" . ?s)))
-  (setq send-mail-function 'message-send-mail-with-sendmail
-        sendmail-program "/etc/profiles/per-user/nixos/bin/msmtp"
-        message-sendmail-f-is-evil t
-        message-sendmail-extra-arguments '("--read-envelope-from")
-        message-send-mail-function 'message-send-mail-with-sendmail)
+  (setq
+   fill-column 80                               
+   line-spacing 0.1
+   message-send-mail-function 'message-send-mail-with-sendmail
+   message-sendmail-extra-arguments '("--read-envelope-from")
+   message-sendmail-f-is-evil t
+   mu4e-attachment-dir "~/Downloads"
+   mu4e-change-filenames-when-moving t
+   mu4e-compose-format-flowed t
+   mu4e-compose-signature "-Ajaneesh"
+   mu4e-compose-signature-auto-include t
+   mu4e-drafts-folder "/[Gmail].Drafts"
+   mu4e-get-mail-command "mbsync -a"
+   mu4e-headers-date-format "%Y-%m-%d %H:%M"              
+   mu4e-headers-fields '((:date . 12) (:flags . 6) (:from . 25) (:subject))
+   mu4e-headers-include-related nil
+   mu4e-headers-long-date-format  "%Y-%m-%d %H:%M"        
+   mu4e-headers-search-skip-duplicates t
+   mu4e-headers-skip-duplicates t
+   mu4e-headers-sort-direction 'descending
+   mu4e-headers-time-format "%H:%M"
+   mu4e-headers-visible-lines 15  
+   mu4e-maildir "~/Mail"
+   mu4e-maildir-shortcuts '(("/INBOX" . ?i) ("/[Gmail].Sent Mail" . ?s))
+   mu4e-refile-folder "/[Gmail].All Mail"
+   mu4e-sent-folder "/[Gmail].Sent Mail"
+   mu4e-split-view 'vertical
+   mu4e-split-view-width 10       
+   mu4e-trash-folder "/[Gmail].Bin"
+   mu4e-update-interval 300
+   mu4e-use-color t
+   mu4e-use-fancy-chars t                      
+   mu4e-view-auto-mark-as-read t
+   mu4e-view-fields '(:from :to :cc :subject :flags :date :maildir :mailing-list :tags :attachments :signature)
+   mu4e-view-header-field-format "%s: %s\n"
+   mu4e-view-header-separator (propertize "\n" 'face '(:background "gray90" :height 0.5))
+   mu4e-view-image-max-width 800               
+   mu4e-view-prefer-html t
+   mu4e-view-show-addresses t
+   mu4e-view-show-images t
+   send-mail-function 'message-send-mail-with-sendmail
+   sendmail-program "/etc/profiles/per-user/nixos/bin/msmtp"
+   user-full-name "Ajaneesh Rajashekharaiah"
+   user-mail-address "ajaneesh.rajashekharaiah@ihx.in"
+   variable-pitch-mode 1
+   )
 
   ;; ;; Font customization with correct face names
   ;; (set-face-attribute 'mu4e-header-face nil :height 100)
@@ -1792,11 +1792,6 @@ assuming in here that the relevant dependencies have been managed in nixos build
   ;; (set-face-attribute 'mu4e-context-face nil :height 100)
   ;; (set-face-attribute 'mu4e-link-face nil :height 100)
   )
-
-(add-hook 'mu4e-view-mode-hook
-          (lambda ()
-            (variable-pitch-mode 1)                 ;; Use proportional font
-            (setq line-spacing 0.2)))               ;; Add a bit of line spacing
 
 ;; Use xwidgets (Webkit) if available for better HTML rendering
 (when (fboundp 'xwidget-webkit-browse-url)
@@ -1814,7 +1809,7 @@ assuming in here that the relevant dependencies have been managed in nixos build
 (use-package olivetti
   :ensure nil
   :config
-  (setq olivetti-body-width 80)
+  (setq olivetti-body-width 120)
   (add-hook 'mu4e-view-mode-hook 'olivetti-mode))
 
 (use-package visual-fill-column
@@ -1853,8 +1848,8 @@ assuming in here that the relevant dependencies have been managed in nixos build
   ;; If using modus-vivendi (dark theme)
   (when (eq (modus-themes--current-theme) 'modus-vivendi)
     (set-face-attribute 'mu4e-header-highlight-face nil
-                         :background (modus-themes-get-color-value 'bg-hl-alt)
-                         :underline nil)))
+                        :background (modus-themes-get-color-value 'bg-hl-alt)
+                        :underline nil)))
 
 (when (fboundp 'xwidget-webkit-browse-url)
   (setq mu4e-view-prefer-html t
@@ -1871,7 +1866,7 @@ assuming in here that the relevant dependencies have been managed in nixos build
 
 (use-package all-the-icons
   :ensure nil)
-  
+
 (use-package all-the-icons-completion
   :ensure nil
   :after (marginalia all-the-icons)
@@ -1916,6 +1911,59 @@ assuming in here that the relevant dependencies have been managed in nixos build
 (use-package nix-mode
   :ensure nil
   )
+#+end_src
+
+* Editor customization for python
+
+#+begin_src emacs-lisp :tangle yes
+(use-package smartparens
+  :ensure nil 
+  :config
+  ;; Load the default configuration
+  (require 'smartparens-config)
+  
+  ;; Enable smartparens in Python mode
+  (add-hook 'python-mode-hook #'smartparens-mode)
+  
+  ;; Optional: Use strict mode for even better structural editing
+  ;; (add-hook 'python-mode-hook #'smartparens-strict-mode)
+  
+  ;; Python-specific pairs
+  (sp-local-pair 'python-mode "'" "'" :unless '(sp-in-comment-p sp-in-string-p))
+  (sp-local-pair 'python-mode "\"" "\"" :unless '(sp-in-comment-p sp-in-string-p))
+  (sp-local-pair 'python-mode "'''" "'''")
+  (sp-local-pair 'python-mode "\"\"\"" "\"\"\"")
+  
+  ;; Useful keybindings for Python
+  :bind (:map smartparens-mode-map
+              ("C-M-f" . sp-forward-sexp)
+              ("C-M-b" . sp-backward-sexp)
+              ("C-<left>" . sp-backward-slurp-sexp)
+              ("C-<right>" . sp-forward-slurp-sexp)
+              ("C-M-<left>" . sp-backward-barf-sexp)
+	      ("C-M-<right>" . sp-forward-barf-sexp)
+              ))
+
+#+end_src
+
+* mu4e-dashboard
+
+#+begin_src emacs-lisp :tangle yes
+
+;; Load mu4e-dashboard
+(use-package mu4e-dashboard
+  :after mu4e
+  :config
+  ;; Set the dashboard file
+  (setq mu4e-dashboard-file "~/.config/emacs/mu4e-dashboard.org")
+  
+  ;; If you want a default dashboard, you might need to create one
+  ;; or copy the example from the repository
+  
+  ;; Optional: bind a key to open the dashboard
+  :bind (:map mu4e-main-mode-map
+              ("d" . mu4e-dashboard)))
+
 #+end_src
 
 * Editor customization for clojure
