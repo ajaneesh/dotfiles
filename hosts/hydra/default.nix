@@ -22,68 +22,70 @@ inputs.nixpkgs.lib.nixosSystem {
     inputs.home-manager.nixosModules.home-manager
     inputs.vscode-server.nixosModules.default
     inputs.agenix.nixosModules.age 
-    ({ config, pkgs, ... }: {
-      environment.systemPackages = with pkgs; [
-        xorg.xhost
-        xorg.xorgserver
-        wayland
-        mu
+    ({ config, pkgs, lib, ... }: {
+      systemd.services.display-manager.enable = lib.mkForce false;
+      
+      # X Server configuration for WSLg
+      services.xserver = {
+        enable = lib.mkIf config.wsl.enable true;
+        displayManager = {
+          lightdm.enable = lib.mkIf config.wsl.enable false;
+          defaultSession = "none+i3";
+          startx.enable = false;  # Using WSLg's built-in display manager
+        };
+        # Enable i3 window manager
+        windowManager.i3 = {
+          enable = true;
+          # No need for special WSL configurations here - basic setup is sufficient
+        };
+      };
 
-        # Theming
-        adwaita-qt
-        gtk-engine-murrine
-        gtk_engines
-        gsettings-desktop-schemas
-        adwaita-icon-theme
+      # Environment setup for WSLg
+      environment = {
+        systemPackages = with pkgs; [
+          # X11 utilities
+          xorg.xhost
+          xorg.xorgserver
+          wayland
 
-        # Font improvements
-        dejavu_fonts
-        noto-fonts
-        noto-fonts-emoji
+          # Fonts and themes for GUI applications
+          dejavu_fonts
+          noto-fonts
+          noto-fonts-emoji
 
-        # Compositor for smooth rendering
-        picom
-
-        # Optional - notification daemon
-        dunst
-      ];
+          # Window manager and GUI essentials
+          picom
+          dunst
+        ];
+        sessionVariables = {
+          # WSLg automatically sets DISPLAY, so we don't need to set it manually
+          # Only set these if you need to override defaults
+          LIBGL_ALWAYS_INDIRECT = "1";
+          GTK_THEME = "Adwaita-dark";
+          # For i3 socket
+          I3SOCK = "/tmp/i3-ipc.sock";
+        };
+      };
 
       # Font configuration
       fonts = {
         fontDir.enable = true;
         enableGhostscriptFonts = true;
-        packages= with pkgs; [
+        packages = with pkgs; [
           dejavu_fonts
           noto-fonts
           noto-fonts-emoji
         ];
       };
+
+      # Emacs service configuration
       services.emacs = {
         enable = true;
         defaultEditor = true;
-        # startupWithUserSession = true;  # This is important
-        package = pkgs.emacs;  # Ensure this matches your main emacs package
+        package = pkgs.emacs;
       };
       emacs.enable = true;
-    })
-    {
-      # Core X server settings that don't depend on pkgs/runtime args
-      services.xserver = {
-        enable = true;
-        displayManager.startx.enable = false;
-        exportConfiguration = true;
-        # Enable basic X server appearance improvements
-        desktopManager.wallpaper.mode = "scale";
 
-        displayManager = {
-          defaultSession = "none+i3";
-          startx.enable = false;  # Set to false since you're using a display manager
-        };        
-        # Enable a lightweight window manager
-        windowManager.i3 = {
-          enable = true;
-        };
-      };
       # GTK theme configuration
       programs.dconf.enable = true;
       
@@ -93,18 +95,16 @@ inputs.nixpkgs.lib.nixosSystem {
         platformTheme = "gtk2";
         style = "adwaita-dark";
       };
-      # Environment variables are also static configuration
-      environment.sessionVariables = {
-        DISPLAY = ":0";
-        LIBGL_ALWAYS_INDIRECT = "1";
-        GTK_THEME = "Adwaita-dark";
-        # Add this new one for i3
-        I3SOCK = "/tmp/i3-ipc.sock";
-      };
+
+      # Enable VSCode server for WSL integration
       services.vscode-server.enable = true;
+
+      # Basic network config for WSL
       networking.hostName = "hydra";
       nixpkgs.overlays = overlays;
       identityFile = "/home/${globals.user}/.ssh/id_ed25519";
+      
+      # Enable GUI
       gui.enable = true;
       theme = {
         colors = (import ../../colorscheme/gruvbox).dark;
@@ -112,22 +112,29 @@ inputs.nixpkgs.lib.nixosSystem {
       };
       wallpaper = "${inputs.wallpapers}/gruvbox/road.jpg";
       gtk.theme.name = "Adwaita-dark";
+      
+      # Password if needed
       passwordHash = inputs.nixpkgs.lib.fileContents ../../misc/password.sha512;
+      
+      # WSL-specific configuration
       wsl = {
         enable = true;
         wslConf.automount.root = "/mnt";
         defaultUser = globals.user;
         startMenuLaunchers = true;
         nativeSystemd = true;
-        wslConf.network.generateResolvConf = true; # Turn off if it breaks VPN
+        wslConf.network.generateResolvConf = true;
         interop.includePath = false; # Including Windows PATH will slow down Neovim command mode
       };
+
+      # Docker configuration
       virtualisation.docker = {
         enable = true;
         enableOnBoot = true;
       };
       users.users.nixos.extraGroups = [ "docker" ];
-      # vscode.enable = true;
+
+      # Other enabled features
       age-manager.enable = true;
       email-manager = {
         enable = true;
@@ -137,15 +144,13 @@ inputs.nixpkgs.lib.nixosSystem {
           realName = "Ajaneesh Rajashekharaiah";
         };
       };
-      # neovim.enable = true;
-      # mail.enable = true;
-      # mail.aerc.enable = true;
-      # mail.himalaya.enable = true;
+
+      # Dotfiles and development setup
       dotfiles.enable = true;
       lua.enable = true;
       clojure.enable = true;
       docker.enable = true;
       python.enable = true;
-    }
+    })
   ];
 }
