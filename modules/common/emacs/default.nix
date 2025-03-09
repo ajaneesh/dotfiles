@@ -15,58 +15,64 @@
       programs.emacs = {
         enable = true;
 	      extraPackages = epkgs: with epkgs; [
+          aggressive-indent
+          all-the-icons
           all-the-icons
           all-the-icons-completion
-          mixed-pitch
+          cape
+          cider
+          clj-refactor
+          clojure-mode
+          clojure-snippets
+          consult-lsp
+          consult-project-extra
+          corfu
+          coverage
           embark
           embark-consult
-          aggressive-indent
-          treemacs-all-the-icons
-	        which-key
-	        ligature
-	        pyvenv
-	        all-the-icons
-	        evil
-	        modus-themes
-	        undo-tree
-	        evil-collection
-	        evil-surround
-	        evil-commentary
-	        evil-matchit
-	        expand-region
-	        lsp-pyright
-	        vertico
-	        marginalia
-	        consult-lsp
-          consult-project-extra
-	        wgrep
-	        orderless
-	        cape
-	        corfu
-	        clojure-mode
-          clj-refactor
-	        cider
-	        flycheck-clj-kondo
-	        json-mode
-	        yafolding
-	        nix-mode
+          evil
+          evil-collection
+          evil-commentary
+          evil-matchit
+          evil-surround
+          expand-region
+          feature-mode
+          flycheck
+          flycheck-clj-kondo
+          json-mode
+          ligature
+          lsp-pyright
           magit
-          transient
           magit-section
-          treemacs
-          yasnippet
-          yasnippet-snippets
-          yasnippet-capf
-          clojure-snippets
-          paredit
-          smartparens
-          rainbow-delimiters
-          org-superstar
-          olivetti
+          marginalia
+          mixed-pitch
+          modus-themes
           mu4e-alert
-          py-isort
-          python-black
+          nix-mode
+          olivetti
+          orderless
+          org-superstar
+          org-roam
+          org-roam-ui
+          paredit
           pkgs.emacsPackagesCustom.mu4e-dashboard
+          py-isort
+          pytest
+          python-black
+          pyvenv
+          rainbow-delimiters
+          smartparens
+          transient
+          treemacs
+          treemacs-all-the-icons
+          undo-tree
+          vertico
+          wgrep
+          which-key
+          yafolding
+          yasnippet
+          yasnippet-capf
+          yasnippet-snippets
 	      ];
       };
 
@@ -107,7 +113,7 @@ Type *C-c C-c* on the /CALL/ line below to evaluate your query.
 ** Mailing lists
 
 [[mu:list:emacs-devel.gnu.org
-][Emacs development]] /[[mu:list:emacs-devel.gnu.org|(%4d)][(3208)]]/ .......................... [[mu:list:emacs-devel.gnu.org||100][100]] - [[mu:list:emacs-devel.gnu.org||500][500]] - [[mu:list:emacs-devel.gnu.org||9999][all]]
+ ][Emacs development]] /[[mu:list:emacs-devel.gnu.org|(%4d)][(3208)]]/ .......................... [[mu:list:emacs-devel.gnu.org||100][100]] - [[mu:list:emacs-devel.gnu.org||500][500]] - [[mu:list:emacs-devel.gnu.org||9999][all]]
 [[mu:list:mu-discuss.googlegroups.com][Mu4e discussions]] /[[mu:list:mu-discuss.googlegroups.com|(%4d)][( 267)]]/ ........................... [[mu:list:mu-discuss.googlegroups.com||100][100]] - [[mu:list:mu-discuss.googlegroups.com||500][500]] - [[mu:list:mu-discuss.googlegroups.com||9999][all]]
 
 * Information
@@ -148,6 +154,10 @@ mu find -n $count --sortfield=date --reverse --fields "f s" $query
  
         '';
       };
+      
+      home.file."org/roam/.keep".text = "";
+      
     };
+
   };
 }

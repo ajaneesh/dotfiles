@@ -13,21 +13,37 @@
     home-manager.users.${config.user} = {
 
       home.packages = with pkgs; [
-        python3
-        # Build dependencies for tree-sitter
+        libffi
+        openssl
+        stdenv.cc.cc.lib
+        zlib
         gcc
         gnumake
-    
-        # Python LSP and development tools
+        poetry
+        imagemagick
         pyright
-        python3Packages.python-lsp-server
+        python3
+        # python3Packages.behave
         python3Packages.black
+        # python3Packages.coverage
+        # python3Packages.debugpy
+        python3Packages.flake8
         python3Packages.isort
-        python3Packages.debugpy
-        # Additional LSP plugins
+        python3Packages.mypy
+        python3Packages.numpy
+        python3Packages.pandas
+        python3Packages.pylint
         python3Packages.pylsp-mypy
+        # python3Packages.pytest
+        # python3Packages.pytest-bdd
+        # python3Packages.pytest-cov
+        python3Packages.pytest-xdist
+        python3Packages.pytest-xdist
         python3Packages.python-lsp-black
         python3Packages.python-lsp-ruff
+        python3Packages.python-lsp-server
+        # python3Packages.reformat-gherkin
+        python3Packages.tabulate 
       ];
 
       # programs.fish.shellAbbrs = {

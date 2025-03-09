@@ -52,17 +52,17 @@ inputs.nixpkgs.lib.nixosSystem {
       fonts = {
         fontDir.enable = true;
         enableGhostscriptFonts = true;
-         packages= with pkgs; [
+        packages= with pkgs; [
           dejavu_fonts
           noto-fonts
           noto-fonts-emoji
         ];
       };
       services.emacs = {
- 	enable = true;
- 	defaultEditor = true;
- 	# startupWithUserSession = true;  # This is important
- 	package = pkgs.emacs;  # Ensure this matches your main emacs package
+        enable = true;
+        defaultEditor = true;
+        # startupWithUserSession = true;  # This is important
+        package = pkgs.emacs;  # Ensure this matches your main emacs package
       };
       emacs.enable = true;
     })
@@ -74,9 +74,13 @@ inputs.nixpkgs.lib.nixosSystem {
         exportConfiguration = true;
         # Enable basic X server appearance improvements
         desktopManager.wallpaper.mode = "scale";
-        
+
+        displayManager = {
+          defaultSession = "none+i3";
+          startx.enable = false;  # Set to false since you're using a display manager
+        };        
         # Enable a lightweight window manager
-        windowManager.qtile = {
+        windowManager.i3 = {
           enable = true;
         };
       };
@@ -94,6 +98,8 @@ inputs.nixpkgs.lib.nixosSystem {
         DISPLAY = ":0";
         LIBGL_ALWAYS_INDIRECT = "1";
         GTK_THEME = "Adwaita-dark";
+        # Add this new one for i3
+        I3SOCK = "/tmp/i3-ipc.sock";
       };
       services.vscode-server.enable = true;
       networking.hostName = "hydra";
