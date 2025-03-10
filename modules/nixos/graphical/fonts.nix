@@ -13,6 +13,7 @@ in
   config = lib.mkIf (config.gui.enable && pkgs.stdenv.isLinux) {
 
     fonts.packages = with pkgs; [
+      meslo-lgs-nf
       emacs-all-the-icons-fonts
       etBook
       jetbrains-mono
@@ -22,6 +23,9 @@ in
       iosevka
       victor-mono # Used for Vim and Terminal
       nerd-fonts.hack # For Polybar, Rofi
+      dejavu_fonts
+      noto-fonts
+      noto-fonts-emoji
     ];
     fonts.fontconfig.defaultFonts.monospace = [ fontName ];
 

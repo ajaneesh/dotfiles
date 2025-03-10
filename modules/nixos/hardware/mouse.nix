@@ -23,13 +23,13 @@
     };
 
     # Cursor
-    home-manager.users.${config.user}.home.pointerCursor = {
-      name = "Adwaita";
-      package = pkgs.adwaita-icon-theme;
-      size = 24;
-      gtk.enable = true;
-      x11.enable = true;
-    };
+    # home-manager.users.${config.user}.home.pointerCursor = {
+    #   name = "Adwaita";
+    #   package = pkgs.adwaita-icon-theme;
+    #   size = 24;
+    #   gtk.enable = true;
+    #   x11.enable = true;
+    # };
 
   };
 }

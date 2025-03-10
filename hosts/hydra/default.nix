@@ -55,27 +55,12 @@ inputs.nixpkgs.lib.nixosSystem {
           wayland
 
           # Fonts and themes for GUI applications
-          dejavu_fonts
-          noto-fonts
-          noto-fonts-emoji
           freetype
           fontconfig
 
           libGL
           libGLU
 
-          # terminfo
-          ncurses
-
-          # Window manager and GUI essentials
-          dmenu
-          feh
-          picom
-          dunst
-          wezterm
-          tmux
-          xterm
-          alacritty
         ];
 
         sessionVariables = {

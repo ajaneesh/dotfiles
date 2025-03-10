@@ -20,56 +20,28 @@
 
     home-manager.users.${config.user} = {
 
-      xdg.configFile."wezterm/wezterm.lua" = {
-        executable = false;
-        text = ''
-            local wezterm = require("wezterm")
-            local config = wezterm.config_builder()
-
-            -- Disable GPU acceleration when running under X11
-            config.front_end = "Software"
-
-            -- Force X11 as the gui frontend
-            config.enable_wayland = false
-
-            -- Improve font rendering
-            config.freetype_load_target = "Light"
-            config.freetype_render_target = "HorizontalLcd"
-
-            -- config.domain = "unix"
-            -- config.attach_to_existing_window = true
-
-            -- Fallback to a simpler font that might render better
-            config.font = wezterm.font_with_fallback({
-            "JetBrains Mono",
-            "DejaVu Sans Mono",
-            "Monospace",
-                                            })
-
-            -- Set reasonable default colors that might render better
-            config.color_scheme = "Gruvbox Dark"
-
-            -- Use reasonable window dimensions
-            config.initial_cols = 100
-            config.initial_rows = 30
-
-            return config
-        '';
-      };
-      
       # Clipboard sharing with Windows and i3 launcher script
       home.packages = with pkgs; [
 
+        xorg.xrdb
+        
+        # terminfo
+        ncurses
+
+        # Window manager and GUI essentials
+        dmenu
+        feh
+        picom
+        dunst
+        wezterm
+        tmux
+        xterm
+        alacritty
+        rxvt-unicode
+        
         (pkgs.writeShellScriptBin "xterm-with-config" ''
-            exec ${pkgs.xterm}/bin/xterm \
-                -fa "DejaVu Sans Mono" \
-                -fs 11 \
-                -bg black \
-                -fg white \
-                -sb \
-                -rightbar \
-                -sl 5000 \
-                "$@"
+          ${xorg.xrdb}/bin/xrdb -merge ~/.Xresources
+          exec ${pkgs.rxvt-unicode}/bin/urxvt "$@"
         '')
 
         # Create convenience script for launching i3 in WSLg
@@ -107,30 +79,60 @@
         '')
       ];
 
-      home.file.".Xresources.xterm".text = ''
-        XTerm*faceName: DejaVu Sans Mono
-        XTerm*faceSize: 11
-        XTerm*background: black
-        XTerm*foreground: white
-        XTerm*scrollBar: true
-        XTerm*rightScrollBar: true
-        XTerm*saveLines: 5000
-        XTerm*renderFont: true
+      home.file.".Xresources".text = ''
+! special
+URxvt.foreground:   #c5c8c6
+URxvt.background:   #1d1f21
+URxvt.cursorColor:  #c5c8c6
+
+! black
+URxvt.color0:       #282a2e
+URxvt.color8:       #373b41
+
+! red
+URxvt.color1:       #a54242
+URxvt.color9:       #cc6666
+
+! green
+URxvt.color2:       #8c9440
+URxvt.color10:      #b5bd68
+
+! yellow
+URxvt.color3:       #de935f
+URxvt.color11:      #f0c674
+
+! blue
+URxvt.color4:       #5f819d
+URxvt.color12:      #81a2be
+
+! magenta
+URxvt.color5:       #85678f
+URxvt.color13:      #b294bb
+
+! cyan
+URxvt.color6:       #5e8d87
+URxvt.color14:      #8abeb7
+
+! white
+URxvt.color7:       #707880
+URxvt.color15:      #c5c8c6
+
+!! URxvt Appearance
+URxvt.letterSpace: 0
+URxvt.lineSpace: 0
+URxvt.geometry: 92x24
+URxvt.internalBorder: 6
+URxvt.cursorBlink: true
+URxvt.cursorUnderline: false
+URxvt.saveline: 2048
+URxvt.scrollBar: false
+URxvt.scrollBar_right: false
+URxvt.urgentOnBell: true
+URxvt.depth: 24
+URxvt.iso14755: false
+URxvt.font: xft:MesloLGS Nerd Font Regular:size=10
         '';
       
     };
-
-    # Configure autostart for i3
-    #   home-manager.users.${config.user}.xdg.configFile."autostart/i3-wsl.desktop" = {
-    #     text = ''
-    #       [Desktop Entry]
-    #       Type=Application
-    #       Name=i3 Window Manager (WSL)
-    #       Exec=launch-i3
-    #       Terminal=false
-    #       Categories=System;
-    #       Comment=Start i3 Window Manager in WSL
-    #     '';
-    #   };
   };
 }
