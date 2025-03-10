@@ -46,17 +46,38 @@ inputs.nixpkgs.lib.nixosSystem {
           # X11 utilities
           xorg.xhost
           xorg.xorgserver
+          xorg.libX11
+          xorg.libXft
+          xorg.libXext
+          xorg.libXrender
+          xorg.libXinerama
+          xorg.libXcursor
           wayland
 
           # Fonts and themes for GUI applications
           dejavu_fonts
           noto-fonts
           noto-fonts-emoji
+          freetype
+          fontconfig
+
+          libGL
+          libGLU
+
+          # terminfo
+          ncurses
 
           # Window manager and GUI essentials
+          dmenu
+          feh
           picom
           dunst
+          wezterm
+          tmux
+          xterm
+          alacritty
         ];
+
         sessionVariables = {
           # WSLg automatically sets DISPLAY, so we don't need to set it manually
           # Only set these if you need to override defaults

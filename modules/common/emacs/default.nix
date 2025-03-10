@@ -47,6 +47,7 @@
           marginalia
           mixed-pitch
           modus-themes
+          move-text
           mu4e-alert
           nix-mode
           olivetti

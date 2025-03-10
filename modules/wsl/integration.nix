@@ -36,18 +36,26 @@
     # WSL environment variables
     environment.sessionVariables = {
       # For X11 applications - WSLg already sets DISPLAY
-      # DISPLAY = ":0";
+      DISPLAY = ":1";
       
       # Allow GUI applications to work properly
       LIBGL_ALWAYS_INDIRECT = "1";
-      
+      GDK_BACKEND = "x11";
+      QT_QPA_PLATFORM = "x11";
+      XDG_SESSION_TYPE = "x11";
+      WINIT_UNIX_BACKEND = "x11";
+
+      # Force software rendering for problematic apps
+      WEZTERM_CONFIG_FILE = "/home/nixos/.config/wezterm/wezterm.lua";
+      LIBGL_ALWAYS_SOFTWARE = "1";
+
       # WSL-specific paths for better integration
       WSL_INTEROP = "/run/WSL/";
       
       # For i3 usage in WSLg
-      QT_QPA_PLATFORM = "wayland";
-      SDL_VIDEODRIVER = "wayland";
-      _JAVA_AWT_WM_NONREPARENTING = "1";
+      # QT_QPA_PLATFORM = "wayland";
+      # SDL_VIDEODRIVER = "wayland";
+      # _JAVA_AWT_WM_NONREPARENTING = "1";
       
       # Improve font rendering
       GDK_SCALE = "1";
