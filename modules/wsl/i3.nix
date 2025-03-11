@@ -62,6 +62,12 @@
             "${modifier}+Shift+space" = "floating toggle";
             "${modifier}+space" = "focus mode_toggle";
             
+            # Resize window with vim keys...
+            "${modifier}+Shift+h" = "resize shrink width 10 px or 10 ppt";
+            "${modifier}+Shift+j" = "resize grow height 10 px or 10 ppt";
+            "${modifier}+Shift+k" = "resize shrink height 10 px or 10 ppt";
+            "${modifier}+Shift+l" = "resize grow width 10 px or 10 ppt";
+
             # Workspaces
             "${modifier}+1" = "workspace 1";
             "${modifier}+2" = "workspace 2";

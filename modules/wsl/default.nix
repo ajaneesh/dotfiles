@@ -44,39 +44,6 @@
           exec ${pkgs.rxvt-unicode}/bin/urxvt "$@"
         '')
 
-        # Create convenience script for launching i3 in WSLg
-        (writeShellScriptBin "launch-i3" ''
-            #!/usr/bin/env bash
-
-            # Check if WSLg is running (DISPLAY should be set)
-            if [ -z "$DISPLAY" ]; then
-            echo "DISPLAY is not set. Are you running WSLg?"
-            exit 1
-            fi
-
-            # Kill any existing i3 instances
-            if pgrep -x "i3" > /dev/null; then
-            echo "Killing existing i3 instance..."
-            pkill i3
-            sleep 1
-            fi
-
-            # Set up environment for i3
-            export XDG_CURRENT_DESKTOP=i3
-            export DESKTOP_SESSION=i3
-
-            # Launch i3 with a log file for debugging
-            echo "Starting i3..."
-            i3 -V > ~/i3-wsl.log 2>&1 &
-
-            # Wait for i3 to initialize
-            sleep 2
-
-            # Launch a terminal in workspace 1
-            i3-msg 'workspace 1; exec wezterm'
-
-            echo "i3 started successfully!"
-        '')
       ];
 
       home.file.".Xresources".text = ''
@@ -130,7 +97,7 @@ URxvt.scrollBar_right: false
 URxvt.urgentOnBell: true
 URxvt.depth: 24
 URxvt.iso14755: false
-URxvt.font: xft:MesloLGS Nerd Font Regular:size=10
+URxvt.font: xft:JetBrains Mono:size=10
         '';
       
     };

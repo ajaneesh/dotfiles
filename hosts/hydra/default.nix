@@ -40,6 +40,8 @@ inputs.nixpkgs.lib.nixosSystem {
         };
       };
 
+      unfreePackages = [ "google-chrome" ];
+
       # Environment setup for WSLg
       environment = {
         systemPackages = with pkgs; [
@@ -61,6 +63,7 @@ inputs.nixpkgs.lib.nixosSystem {
           libGL
           libGLU
 
+          google-chrome
         ];
 
         sessionVariables = {
