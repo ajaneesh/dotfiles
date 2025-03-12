@@ -554,14 +554,16 @@ Need to externalize secrets and put this in a github repo as a package so that t
 
     (custom-theme-set-faces
      'user
+     `(org-default ((t (,@headline ,@variable-tuple :height 0.8))))
+     `(org-superstar-item ((t (,@headline ,@variable-tuple :height 0.8))))
      `(org-level-8 ((t (,@headline ,@variable-tuple))))
      `(org-level-7 ((t (,@headline ,@variable-tuple))))
      `(org-level-6 ((t (,@headline ,@variable-tuple))))
      `(org-level-5 ((t (,@headline ,@variable-tuple))))
-     `(org-level-4 ((t (,@headline ,@variable-tuple :height 1.0))))
-     `(org-level-3 ((t (,@headline ,@variable-tuple :height 1.1))))
-     `(org-level-2 ((t (,@headline ,@variable-tuple :height 1.15))))
-     `(org-level-1 ((t (,@headline ,@variable-tuple :height 1.25))))
+     `(org-level-4 ((t (,@headline ,@variable-tuple :height 0.9))))
+     `(org-level-3 ((t (,@headline ,@variable-tuple :height 0.9))))
+     `(org-level-2 ((t (,@headline ,@variable-tuple :height 0.9))))
+     `(org-level-1 ((t (,@headline ,@variable-tuple :height 1.0))))
      `(org-document-title ((t (,@headline ,@variable-tuple :height 2.0 :underline nil)))))))
 
 (use-package org-superstar
@@ -1726,55 +1728,55 @@ between the open files which is ok when there aren't too many files open
 
 #+begin_src emacs-lisp
 
-  (custom-set-variables
-   ;; custom-set-variables was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(safe-local-variable-values
-     '((eval add-hook 'cider-connected-hook
-  	   (lambda nil
-  	     (shell-command "npx shadow-cljs server")
-  	     (sleep-for 5)
-  	     (shell-command "npm run watch:css &"))
-  	   nil 'local)
-       (auto-save-default)
-       (make-backup-files)
-       (eval pyvenv-activate
-  	   (expand-file-name ".venv"
-  			     (project-root
-  			      (project-current)))))))
-  (custom-set-faces
-   ;; custom-set-faces was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(org-block ((t (:inherit fixed-pitch))))
-   '(org-code ((t (:inherit (shadow fixed-pitch)))))
-   '(org-document-info ((t (:foreground "dark orange"))))
-   '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-   '(org-document-title ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 2.0 :underline nil))))
-   '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
-   '(org-level-1 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.25))))
-   '(org-level-2 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.15))))
-   '(org-level-3 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.1))))
-   '(org-level-4 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.0))))
-   '(org-level-5 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
-   '(org-level-6 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
-   '(org-level-7 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
-   '(org-level-8 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
-   '(org-link ((t (:foreground "royal blue" :underline t))))
-   '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-   '(org-property-value ((t (:inherit fixed-pitch))))
-   '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-   '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
-   '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
-   '(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
-   '(treemacs-directory-face ((t (:inherit variable-pitch :height 0.9))))
-   '(treemacs-file-face ((t (:inherit variable-pitch :height 0.9))))
-   '(treemacs-git-modified-face ((t (:inherit variable-pitch :height 0.9))))
-   '(treemacs-git-untracked-face ((t (:inherit variable-pitch :height 0.9))))
-   '(treemacs-root-face ((t (:inherit variable-pitch :height 0.9)))))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(safe-local-variable-values
+   '((eval add-hook 'cider-connected-hook
+	   (lambda nil
+	     (shell-command "npx shadow-cljs server")
+	     (sleep-for 5)
+	     (shell-command "npm run watch:css &"))
+	   nil 'local)
+     (auto-save-default)
+     (make-backup-files)
+     (eval pyvenv-activate
+	   (expand-file-name ".venv"
+			     (project-root
+			      (project-current)))))))
+;; (custom-set-faces
+;;  ;; custom-set-faces was added by Custom.
+;;  ;; If you edit it by hand, you could mess it up, so be careful.
+;;  ;; Your init file should contain only one such instance.
+;;  ;; If there is more than one, they won't work right.
+;;  '(org-block ((t (:inherit fixed-pitch))))
+;;  '(org-code ((t (:inherit (shadow fixed-pitch)))))
+;;  '(org-document-info ((t (:foreground "dark orange"))))
+;;  '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+;;  '(org-document-title ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 2.0 :underline nil))))
+;;  '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
+;;  '(org-level-1 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.25))))
+;;  '(org-level-2 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.15))))
+;;  '(org-level-3 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.1))))
+;;  '(org-level-4 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.0))))
+;;  '(org-level-5 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
+;;  '(org-level-6 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
+;;  '(org-level-7 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
+;;  '(org-level-8 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
+;;  '(org-link ((t (:foreground "royal blue" :underline t))))
+;;  '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+;;  '(org-property-value ((t (:inherit fixed-pitch))))
+;;  '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+;;  '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
+;;  '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+;;  '(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
+;;  '(treemacs-directory-face ((t (:inherit variable-pitch :height 0.9))))
+;;  '(treemacs-file-face ((t (:inherit variable-pitch :height 0.9))))
+;;  '(treemacs-git-modified-face ((t (:inherit variable-pitch :height 0.9))))
+;;  '(treemacs-git-untracked-face ((t (:inherit variable-pitch :height 0.9))))
+;;  '(treemacs-root-face ((t (:inherit variable-pitch :height 0.9)))))
 
 
 #+end_src

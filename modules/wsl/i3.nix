@@ -14,7 +14,6 @@
         enable = true;
         config = {
           modifier = "Mod1"; # Windows key
-          terminal = "xterm-with-config"; 
           
           # Basic startup applications
           startup = [
@@ -33,10 +32,11 @@
           
           # Basic key bindings for a more minimal setup
           keybindings = let modifier = "Mod1"; in {
-            "${modifier}+Return" = "exec --no-startup-id ${pkgs.xterm}/bin/xterm";
+            "${modifier}+Return" = "exec --no-startup-id xterm-with-config";
+            "${modifier}+d" = "exec --no-startup-id ${pkgs.rofi}/bin/rofi -modes run -show run";
 
             "${modifier}+Shift+q" = "kill";
-            "${modifier}+d" = "exec ${pkgs.dmenu}/bin/dmenu_run";
+            #"${modifier}+d" = "exec ${pkgs.dmenu}/bin/dmenu_run";
             
             # Window navigation
             "${modifier}+Left" = "focus left";
@@ -60,13 +60,12 @@
             
             # Floating
             "${modifier}+Shift+space" = "floating toggle";
-            "${modifier}+space" = "focus mode_toggle";
-            
+            # "${modifier}+space" = "focus mode_toggle";
             # Resize window with vim keys...
-            "${modifier}+Shift+h" = "resize shrink width 10 px or 10 ppt";
-            "${modifier}+Shift+j" = "resize grow height 10 px or 10 ppt";
-            "${modifier}+Shift+k" = "resize shrink height 10 px or 10 ppt";
-            "${modifier}+Shift+l" = "resize grow width 10 px or 10 ppt";
+            "${modifier}+Shift+h" = "resize shrink width 5 px or 5 ppt";
+            "${modifier}+Shift+j" = "resize grow height 5 px or 5 ppt";
+            "${modifier}+Shift+k" = "resize shrink height 5 px or 5 ppt";
+            "${modifier}+Shift+l" = "resize grow width 5 px or 5 ppt";
 
             # Workspaces
             "${modifier}+1" = "workspace 1";
@@ -106,7 +105,7 @@
             position = "bottom";
             statusCommand = "${pkgs.i3status}/bin/i3status";
             fonts = {
-              names = [ "DejaVu Sans Mono" ];
+              names = [ "JetBrains Mono" ];
               size = 10.0;
             };
           }];

@@ -81,23 +81,6 @@
       fi
     '';
     
-    programs.fish.shellInit = ''
-      # WSL-specific fish integration
-      if command -v wslpath >/dev/null 2>&1
-        # Convert Windows paths to WSL paths
-        function wslpath_to_unix
-          if string match -q "/*" $argv[1]
-            echo $argv[1]
-          else
-            wslpath -u $argv[1]
-          end
-        end
-        
-        # Alias for Windows home
-        alias winhome="cd (wslpath -u (powershell.exe -Command 'Write-Host -NoNewline \$HOME' 2>/dev/null))"
-      end
-    '';
-
     # GUI support for WSL
     environment.systemPackages = with pkgs; [
       # WSL-specific utilities

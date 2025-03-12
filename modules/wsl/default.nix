@@ -33,11 +33,8 @@
         feh
         picom
         dunst
-        wezterm
-        tmux
-        xterm
-        alacritty
         rxvt-unicode
+        rofi
         
         (pkgs.writeShellScriptBin "xterm-with-config" ''
           ${xorg.xrdb}/bin/xrdb -merge ~/.Xresources
@@ -97,7 +94,7 @@ URxvt.scrollBar_right: false
 URxvt.urgentOnBell: true
 URxvt.depth: 24
 URxvt.iso14755: false
-URxvt.font: xft:JetBrains Mono:size=10
+URxvt.font: xft:JetBrains Mono:size=9
         '';
       
     };
