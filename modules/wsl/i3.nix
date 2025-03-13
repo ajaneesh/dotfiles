@@ -32,10 +32,10 @@
           
           # Basic key bindings for a more minimal setup
           keybindings = let modifier = "Mod1"; in {
-            "${modifier}+Return" = "exec --no-startup-id xterm-with-config";
+            "${modifier}+Return" = "exec --no-startup-id xterm";
             "${modifier}+d" = "exec --no-startup-id ${pkgs.rofi}/bin/rofi -modes run -show run";
 
-            "${modifier}+Shift+q" = "kill";
+            # "${modifier}+Shift+q" = "kill";
             #"${modifier}+d" = "exec ${pkgs.dmenu}/bin/dmenu_run";
             
             # Window navigation
@@ -81,8 +81,10 @@
             "${modifier}+Shift+5" = "move container to workspace 5";
             
             # Restart and reload
-            "${modifier}+Shift+c" = "reload";
+            "${modifier}+Shift+q" = "reload";
             "${modifier}+Shift+r" = "restart";
+            "${modifier}+Shift+s" = "exec --no-startup-id i3-resurrect save";
+            "${modifier}+Shift+t" = "exec --no-startup-id i3-resurrect restore";
             
             # Exit - simplified for WSL
             "${modifier}+Shift+e" = "exec i3-nagbar -t warning -m 'Exit i3?' -B 'Yes' 'i3-msg exit'";
