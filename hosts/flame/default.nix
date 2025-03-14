@@ -69,7 +69,6 @@ inputs.nixpkgs.lib.nixosSystem rec {
       atuin.enable = true;
       cloudflare.enable = true; # Proxy traffic with Cloudflare
       dotfiles.enable = true; # Clone dotfiles
-      neovim.enable = true;
       giteaRunner.enable = true;
       services.actualbudget.enable = true;
       services.caddy.enable = true;

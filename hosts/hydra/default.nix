@@ -48,6 +48,7 @@ inputs.nixpkgs.lib.nixosSystem {
           # X11 utilities
           xorg.xhost
           xorg.xorgserver
+          xorg.xprop
           xorg.libX11
           xorg.libXft
           xorg.libXext

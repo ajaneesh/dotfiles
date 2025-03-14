@@ -254,13 +254,6 @@ in
         extraConfig = "";
       };
 
-      #   programs.fish.functions = {
-      #     update-lock-screen = lib.mkIf config.services.xserver.enable {
-      #       description = "Update lockscreen with wallpaper";
-      #       body = lockUpdate;
-      #     };
-      #   };
-
       # Update lock screen cache only if cache is empty
       home.activation.updateLockScreenCache =
         let

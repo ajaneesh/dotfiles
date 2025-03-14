@@ -23,38 +23,6 @@
         "type": "github"
       }
     },
-    "baleia-nvim-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1721805312,
-        "narHash": "sha256-qA1x5kplP2I8bURO0I4R0gt/zeznu9hQQ+XHptLGuwc=",
-        "owner": "m00qek",
-        "repo": "baleia.nvim",
-        "rev": "1b25eac3ac03659c3d3af75c7455e179e5f197f7",
-        "type": "github"
-      },
-      "original": {
-        "owner": "m00qek",
-        "repo": "baleia.nvim",
-        "type": "github"
-      }
-    },
-    "base16-nvim-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1716483968,
-        "narHash": "sha256-GRF/6AobXHamw8TZ3FjL7SI6ulcpwpcohsIuZeCSh2A=",
-        "owner": "RRethy",
-        "repo": "base16-nvim",
-        "rev": "6ac181b5733518040a33017dde654059cd771b7c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "RRethy",
-        "repo": "base16-nvim",
-        "type": "github"
-      }
-    },
     "bufferline-nvim-src": {
       "flake": false,
       "locked": {
@@ -84,22 +52,6 @@
       "original": {
         "owner": "hraban",
         "repo": "cl-nix-lite",
-        "type": "github"
-      }
-    },
-    "cmp-nvim-lsp-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1733823748,
-        "narHash": "sha256-iaihXNCF5bB5MdeoosD/kc3QtpA/QaIDZVLiLIurBSM=",
-        "owner": "hrsh7th",
-        "repo": "cmp-nvim-lsp",
-        "rev": "99290b3ec1322070bcfb9e846450a46f6efa50f0",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hrsh7th",
-        "repo": "cmp-nvim-lsp",
         "type": "github"
       }
     },
@@ -678,23 +630,6 @@
         "type": "github"
       }
     },
-    "nvim-lspconfig-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1716281382,
-        "narHash": "sha256-foJ7a59N0a3QaBW24PtwbyYDQVlIsFxiatADLO/hQvc=",
-        "owner": "neovim",
-        "repo": "nvim-lspconfig",
-        "rev": "0b8165cf95806bc4bb8f745bb0c92021b2ed4b98",
-        "type": "github"
-      },
-      "original": {
-        "owner": "neovim",
-        "ref": "v0.1.8",
-        "repo": "nvim-lspconfig",
-        "type": "github"
-      }
-    },
     "nvim-tree-lua-src": {
       "flake": false,
       "locked": {
@@ -780,10 +715,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
-        "baleia-nvim-src": "baleia-nvim-src",
-        "base16-nvim-src": "base16-nvim-src",
         "bufferline-nvim-src": "bufferline-nvim-src",
-        "cmp-nvim-lsp-src": "cmp-nvim-lsp-src",
         "darwin": "darwin_2",
         "disko": "disko",
         "fidget-nvim-src": "fidget-nvim-src",
@@ -804,7 +736,6 @@
         "nixpkgs-stable": "nixpkgs-stable",
         "nur": "nur",
         "nvim-lint-src": "nvim-lint-src",
-        "nvim-lspconfig-src": "nvim-lspconfig-src",
         "nvim-tree-lua-src": "nvim-tree-lua-src",
         "nvim-treesitter-src": "nvim-treesitter-src",
         "osc": "osc",
@@ -821,7 +752,6 @@
         "tree-sitter-puppet": "tree-sitter-puppet",
         "tree-sitter-python": "tree-sitter-python",
         "tree-sitter-rasi": "tree-sitter-rasi",
-        "tree-sitter-vimdoc": "tree-sitter-vimdoc",
         "vscode-server": "vscode-server",
         "wallpapers": "wallpapers",
         "wsl": "wsl",
@@ -1117,22 +1047,6 @@
       "original": {
         "owner": "Fymyte",
         "repo": "tree-sitter-rasi",
-        "type": "github"
-      }
-    },
-    "tree-sitter-vimdoc": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1729686839,
-        "narHash": "sha256-Vrl4/cZL+TWlUMEeWZoHCAWhvlefcl3ajGcwyTNKOhI=",
-        "owner": "neovim",
-        "repo": "tree-sitter-vimdoc",
-        "rev": "d2e4b5c172a109966c2ce0378f73df6cede39400",
-        "type": "github"
-      },
-      "original": {
-        "owner": "neovim",
-        "repo": "tree-sitter-vimdoc",
         "type": "github"
       }
     },

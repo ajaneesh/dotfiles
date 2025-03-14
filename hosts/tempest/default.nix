@@ -106,7 +106,6 @@ inputs.nixpkgs.lib.nixosSystem rec {
       # Programs and services
       atuin.enable = false;
       charm.enable = true;
-      neovim.enable = false;
       emacs.enable = true;
       # media.enable = true;
       dotfiles.enable = true;

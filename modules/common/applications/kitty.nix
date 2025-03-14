@@ -34,7 +34,7 @@
       programs.rofi.terminal = lib.mkIf pkgs.stdenv.isLinux (lib.mkDefault "${pkgs.kitty}/bin/kitty");
 
       # Display images in the terminal
-      programs.fish.interactiveShellInit = # fish
+      programs.zsh.interactiveShellInit = # zsh
         ''
           if test "$TERM" = "xterm-kitty"
               alias icat="kitty +kitten icat"
@@ -48,7 +48,7 @@
         extraConfig = "";
         font.size = 14;
         keybindings = {
-          # Use shift+enter to complete text suggestions in fish
+          # Use shift+enter to complete text suggestions in zsh
           "shift+enter" = "send_text all \\x1F";
 
           # Easy fullscreen toggle (for macOS)

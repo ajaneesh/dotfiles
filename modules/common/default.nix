@@ -9,7 +9,6 @@
   imports = [
     ./applications
     ./mail
-    ./neovim
     ./emacs
     ./programming
     ./repositories

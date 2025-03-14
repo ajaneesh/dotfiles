@@ -12,10 +12,6 @@
 
     home-manager.users.${config.user} = {
 
-      programs.fish.shellAbbrs = {
-        ca = "cargo";
-      };
-
       home.packages = with pkgs; [
         cargo
         rustc

@@ -101,7 +101,6 @@ inputs.nixpkgs.lib.nixosSystem rec {
 
       # Programs and services
       atuin.enable = true;
-      neovim.enable = true;
       cloudflare.enable = true;
       dotfiles.enable = true;
       arrs.enable = true;

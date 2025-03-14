@@ -10,7 +10,7 @@
   home-manager.users.${config.user} = lib.mkIf pkgs.stdenv.isDarwin {
     programs.alacritty.settings = {
       font.size = lib.mkForce 20.0;
-      shell.program = "${pkgs.fish}/bin/fish";
+      shell.program = "${pkgs.zsh}/bin/zsh";
       window.startup_mode = "SimpleFullScreen";
       key_bindings = [
         {

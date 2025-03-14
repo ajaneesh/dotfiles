@@ -36,11 +36,6 @@
 
     home-manager.users.${config.user}.programs = {
 
-      # Alias sudo to doas for convenience
-      fish.shellAliases = {
-        sudo = "doas";
-      };
-
       zsh.shellAliases = {
 	# sudo = "doas";
       };

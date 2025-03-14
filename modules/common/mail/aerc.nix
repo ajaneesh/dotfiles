@@ -212,9 +212,6 @@
           }";
       };
 
-      programs.fish.shellAbbrs = {
-        ae = "aerc";
-      };
     };
   };
 }

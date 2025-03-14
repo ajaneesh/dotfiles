@@ -74,25 +74,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Neovim plugins
-    base16-nvim-src = {
-      url = "github:RRethy/base16-nvim";
-      flake = false;
-    };
-    nvim-lspconfig-src = {
-      # https://github.com/neovim/nvim-lspconfig/tags
-      url = "github:neovim/nvim-lspconfig/v0.1.8";
-      flake = false;
-    };
-    cmp-nvim-lsp-src = {
-      url = "github:hrsh7th/cmp-nvim-lsp";
-      flake = false;
-    };
-    baleia-nvim-src = {
-      # https://github.com/m00qek/baleia.nvim/tags
-      url = "github:m00qek/baleia.nvim";
-      flake = false;
-    };
     nvim-treesitter-src = {
       # https://github.com/nvim-treesitter/nvim-treesitter/tags
       url = "github:nvim-treesitter/nvim-treesitter/v0.9.2";
@@ -166,10 +147,6 @@
     };
     tree-sitter-rasi = {
       url = "github:Fymyte/tree-sitter-rasi";
-      flake = false;
-    };
-    tree-sitter-vimdoc = {
-      url = "github:neovim/tree-sitter-vimdoc";
       flake = false;
     };
 
@@ -284,7 +261,6 @@
         inputs.nur.overlays.default
         inputs.nix2vim.overlay
         inputs.jujutsu.overlays.default # Fix: https://github.com/martinvonz/jj/issues/4784
-        (import ./overlays/neovim-plugins.nix inputs)
         (import ./overlays/tree-sitter.nix inputs)
         (import ./overlays/mpv-scripts.nix inputs)
         (import ./overlays/nextcloud-apps.nix inputs)
@@ -349,15 +325,6 @@
                 system
                 ;
             };
-          neovim =
-            system:
-            let
-              pkgs = import nixpkgs { inherit system overlays; };
-            in
-            import ./modules/common/neovim/package {
-              inherit pkgs;
-              colors = (import ./colorscheme/gruvbox-dark).dark;
-            };
         in
         {
           x86_64-linux.staff = staff "x86_64-linux";
@@ -392,12 +359,6 @@
               )
             ];
           };
-
-          # Package Neovim config into standalone package
-          x86_64-linux.neovim = neovim "x86_64-linux";
-          x86_64-darwin.neovim = neovim "x86_64-darwin";
-          aarch64-linux.neovim = neovim "aarch64-linux";
-          aarch64-darwin.neovim = neovim "aarch64-darwin";
         };
 
       # Programs that can be run by calling this flake
@@ -436,19 +397,6 @@
           pkgs = import nixpkgs { inherit system overlays; };
         in
         {
-          neovim =
-            pkgs.runCommand "neovim-check-health" { buildInputs = [ inputs.self.packages.${system}.neovim ]; }
-              ''
-                mkdir -p $out
-                export HOME=$TMPDIR
-                nvim -c "checkhealth" -c "write $out/health.log" -c "quitall"
-
-                # Check for errors inside the health log
-                if $(grep "ERROR" $out/health.log); then
-                  cat $out/health.log
-                  exit 1
-                fi
-              '';
         }
       );
 

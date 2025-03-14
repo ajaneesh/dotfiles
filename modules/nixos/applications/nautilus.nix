@@ -31,13 +31,6 @@
         }+n" = "exec --no-startup-id ${pkgs.nautilus}/bin/nautilus";
       };
 
-      # Generates a QR code and previews it with sushi
-      programs.fish.functions = {
-        qr = {
-          body = "${pkgs.qrencode}/bin/qrencode $argv[1] -o /tmp/qr.png | ${pkgs.sushi}/bin/sushi /tmp/qr.png";
-        };
-      };
-
       # Set Nautilus as default for opening directories
       xdg.mimeApps = {
         associations.added."inode/directory" = [ "org.gnome.Nautilus.desktop" ];

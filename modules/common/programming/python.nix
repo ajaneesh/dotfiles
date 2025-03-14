@@ -46,10 +46,6 @@
         python3Packages.tabulate 
       ];
 
-      # programs.fish.shellAbbrs = {
-      #   py = "python3";
-      # };
-
       # Optional: If you want to configure pyright globally
       home.file.".config/pyright/pyrightconfig.json".text = ''
             {

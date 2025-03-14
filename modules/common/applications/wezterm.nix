@@ -178,7 +178,7 @@
                 mods = 'LEADER',
                 action = wezterm.action.DetachDomain { DomainName = 'unix' },
               },
-              -- sends completion string for fish autosuggestions
+              -- sends completion string for zsh autosuggestions
               {
                 key = 'Enter',
                 mods = 'SHIFT',

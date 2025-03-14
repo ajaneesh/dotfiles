@@ -38,18 +38,6 @@
             size = 14.0;
           };
           key_bindings = [
-            # Used for word completion in fish_user_key_bindings
-            {
-              key = "Return";
-              mods = "Shift";
-              chars = "\\x1F";
-            }
-            # Used for searching nixpkgs in fish_user_key_bindings
-            {
-              key = "N";
-              mods = "Control|Shift";
-              chars = "\\x11F";
-            }
             {
               key = "H";
               mods = "Control|Shift";

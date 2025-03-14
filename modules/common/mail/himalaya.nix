@@ -18,9 +18,6 @@
         };
       };
 
-      programs.fish.shellAbbrs = {
-        hi = "himalaya";
-      };
     };
   };
 }

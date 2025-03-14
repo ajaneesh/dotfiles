@@ -39,10 +39,6 @@ inputs.nixos-generators.nixosGenerate {
           vim
           wget
           curl
-          (import ../../modules/common/neovim/package {
-            inherit pkgs;
-            colors = (import ../../colorscheme/gruvbox).dark;
-          })
         ];
       nix.extraOptions = ''
         experimental-features = nix-command flakes

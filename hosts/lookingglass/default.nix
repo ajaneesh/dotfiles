@@ -37,7 +37,6 @@ inputs.darwin.lib.darwinSystem {
       mail.user = globals.user;
       atuin.enable = true;
       charm.enable = true;
-      neovim.enable = true;
       mail.enable = true;
       mail.aerc.enable = true;
       mail.himalaya.enable = false;

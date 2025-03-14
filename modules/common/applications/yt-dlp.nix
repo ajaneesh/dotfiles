@@ -31,8 +31,6 @@
           concurrent-fragments = 4; # Parallel download chunks
         };
       };
-
-      programs.fish.shellAbbrs.yt = "yt-dlp";
     };
   };
 }

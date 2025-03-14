@@ -19,7 +19,7 @@
       newSession = true; # Automatically spawn new session
       plugins = [ ];
       resizeAmount = 10;
-      shell = "${pkgs.fish}/bin/fish";
+      shell = "${pkgs.zsh}/bin/zsh";
       terminal = "screen-256color";
       extraConfig = ''
         # Horizontal and vertical splits
@@ -128,10 +128,5 @@
       ];
     };
 
-    programs.fish.shellAbbrs = {
-      ta = "tmux attach-session";
-      tan = "tmux attach-session -t noah";
-      tnn = "tmux new-session -s noah";
-    };
   };
 }
