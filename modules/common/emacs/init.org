@@ -1,7 +1,8 @@
 #+PROPERTY: header-args :tangle ~/.emacs.d/init.el :tangle-dir "~/.emacs.d/"
 
-* start server process
-I  am commenting this out for now as i have emacs service running in systemd.  Assuming these do the same thing. 
+* Start server process
+
+this is now running as a systemd service
 
 #+begin_src emacs-lisp
 ;; -*- lexical-binding: t; -*-
@@ -12,7 +13,7 @@ I  am commenting this out for now as i have emacs service running in systemd.  A
 
 #+end_src
 
-* startup performance
+* Startup performance
 
 #+begin_src emacs-lisp
 
@@ -62,6 +63,9 @@ I  am commenting this out for now as i have emacs service running in systemd.  A
 
 #+begin_src emacs-lisp
 
+(use-package treemacs-all-the-icons
+  :ensure nil)
+
 (use-package which-key
   :ensure nil
   :config
@@ -84,7 +88,7 @@ I  am commenting this out for now as i have emacs service running in systemd.  A
 
 #+end_src
 
-* using straight.el for package management
+* Using straight.el for package management
 
 #+begin_src emacs-lisp
   (unless (featurep 'straight)
@@ -107,7 +111,8 @@ I  am commenting this out for now as i have emacs service running in systemd.  A
 
 #+end_src
 
-* load path for our custom elisp package
+* SSH Tunnel Configuration (need external library that uses pem key and secrets)
+** TODO This is only for the ssh tunneling.  I need to turn this into a module that can be loaded from git.  Having it in this folder will mean that it cannot be made available to others in a reproducible fashion
 
 #+begin_src emacs-lisp
 
@@ -116,8 +121,7 @@ I  am commenting this out for now as i have emacs service running in systemd.  A
 
 #+end_src
 
-* SSH Tunnel Configuration (need external library that uses pem key and secrets)
-Need to externalize secrets and put this in a github repo as a package so that this can be loaded from other machines without having to copy it around
+** Need to externalize secrets and put this in a github repo as a package so that this can be loaded from other machines without having to copy it around
 
 #+begin_src emacs-lisp
 
@@ -182,104 +186,6 @@ Need to externalize secrets and put this in a github repo as a package so that t
     (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)) ; Use letters instead of numbers
     :config
     (ace-window-display-mode 1)) ; Optionally show persistent window labels
-
-#+end_src
-
-* Font configuration
-
-#+begin_src emacs-lisp
-
-  ;; Set default fonts
-  (set-face-attribute 'default nil
-                      :family "JetBrains Mono"
-                      :height 90)
-
-  ;; Ensure programming modes and code use fixed-pitch
-  (set-face-attribute 'fixed-pitch nil 
-                      :family "JetBrains Mono"
-                      :height 90)
-
-  (set-face-attribute 'variable-pitch nil
-                      :family "Source Sans Pro"
-                      :height 120)
-
-  (use-package all-the-icons
-    :ensure nil)
-
-  ;; ;; Font rendering options
-  ;; (setq-default inhibit-compacting-font-caches t)  ; Improve performance
-
-  ;; ;; If you're on Linux, you might want to enable these
-  ;; (setq-default x-use-underline-position-properties t)
-  ;; (setq x-underline-at-descent-line t)
-
-  ;; ;; Anti-aliasing settings
-  ;; (setq-default frame-title-format nil)
-  ;; (push '(font-backend xft x) default-frame-alist)
-
-  ;; ;; HiDPI settings if needed
-  ;; (setq x-gtk-use-system-tooltips nil) 
-
-  ;; ;; Enable ligatures if using a font that supports them
-  (use-package ligature
-    :config
-    (ligature-set-ligatures 't '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\"
-                                 "{-" "::" ":::" ":=" "!!" "!=" "!==" "-}" "--" "---" "-->"
-                                 "->>" "->" "-<" "-<<" "-~" "#{" "#[" "##" "###" "####"
-                                 "#(" "#?" "#_" "#_(" ".-" ".=" ".." "..<" "..." "?="))
-    (global-ligature-mode t))
-
-  ;; Configure mixed-pitch mode for Org
-  (use-package mixed-pitch
-    :hook
-    (org-mode . mixed-pitch-mode)
-    :config
-    (setq mixed-pitch-set-height t)
-    ;; Keep code blocks, tables, etc in fixed-pitch
-    (setq mixed-pitch-fixed-pitch-faces
-          '(org-block
-            org-block-begin-line
-            org-block-end-line
-            org-code
-            org-document-info-keyword
-            org-meta-line
-            org-property-value
-            org-special-keyword
-            org-table
-            org-verbatim
-            line-number
-            line-number-current-line)))
-
-#+end_src
-
-* Modus Theme Configuration
-
-#+begin_src emacs-lisp
-
-  ;; Configure the Modus Themes' appearance
-  (use-package modus-themes
-    :ensure nil
-    :config
-    (setq modus-themes-mode-line '(accented borderless)
-          modus-themes-bold-constructs t
-          modus-themes-italic-constructs t
-          modus-themes-fringes 'subtle
-          modus-themes-tabs-accented t
-          modus-themes-paren-match '(bold intense)
-          modus-themes-prompts '(bold intense)
-          modus-themes-completions '((matches . (extrabold underline))
-  				   (selection . (semibold)))
-          modus-themes-org-blocks 'tinted-background
-          modus-themes-scale-headings t
-          modus-themes-region '(bg-only)
-          modus-themes-headings
-          '((1 . (rainbow overline background 1.2))
-            (2 . (rainbow background 1.1))
-            (3 . (rainbow bold 1.1))
-            (t . (semilight 1.1))))
-
-    ;; Load the dark theme by default
-    (load-theme 'modus-vivendi t ))
 
 #+end_src
 
@@ -447,42 +353,7 @@ Need to externalize secrets and put this in a github repo as a package so that t
   (when (treesit-available-p)
     (evil-collection-init '(python))))
 
-;; Define the smart reference finder
-(defun my/smart-find-references ()
-  "Enhanced reference finder that auto-jumps when there are exactly two references."
-  (interactive)
-  (let* ((orig-buf (current-buffer))
-	 (orig-pos (point))
-	 (refs (lsp-request "textDocument/references"
-                            (lsp--make-reference-params nil nil)))
-	 (num-refs (length refs)))
-    (cond
-     ;; No references found
-     ((= num-refs 0)
-      (message "No references found"))
-     
-     ;; Exactly two references - try to jump to the other one
-     ((= num-refs 2)
-      (let* ((current-uri (lsp--buffer-uri))
-             (other-ref (car (seq-filter
-                              (lambda (ref)
-				(let ((ref-uri (lsp:location-uri ref)))
-				  (or (not (string= ref-uri current-uri))
-                                      (let* ((range (lsp:location-range ref))
-                                             (start (lsp:range-start range))
-                                             (line (lsp:position-line start))
-                                             (character (lsp:position-character start))
-                                             (cur-line (line-number-at-pos))
-                                             (cur-char (current-column)))
-					(or (/= (1+ line) cur-line)
-                                            (/= character cur-char))))))
-                              refs))))
-	(if other-ref
-            (lsp-goto-location other-ref)
-          (message "Cannot determine other reference location"))))
-     
-     ;; More than two references - show all references
-     (t (lsp-find-references)))))
+
 
 ;; Python development keybindings
 (add-hook 'python-ts-mode-hook
@@ -507,7 +378,7 @@ Need to externalize secrets and put this in a github repo as a package so that t
 
 #+end_src
 
-* Org Mode configuration
+* =org-mode= base configuration
 
 #+begin_src emacs-lisp
 
@@ -528,46 +399,7 @@ Need to externalize secrets and put this in a github repo as a package so that t
   (org-hide-leading-stars t)
   (org-pretty-entities t)
   (org-ellipsis "…")
-
-  :config
-  (custom-theme-set-faces
-   'user
-   '(org-block ((t (:inherit fixed-pitch))))
-   '(org-code ((t (:inherit (shadow fixed-pitch)))))
-   '(org-document-info ((t (:foreground "dark orange"))))
-   '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-   '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
-   '(org-link ((t (:foreground "royal blue" :underline t))))
-   '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-   '(org-property-value ((t (:inherit fixed-pitch))) t)
-   '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-   '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
-   '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
-   '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
-
-  (let* ((variable-tuple
-          (cond ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
-  		((x-list-fonts "ETBembo")         '(:font "ETBembo"))
-                ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
-                ((x-list-fonts "Verdana")         '(:font "Verdana"))
-                ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
-                (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
-         (base-font-color     (face-foreground 'default nil 'default))
-         (headline           `(:inherit default :foreground ,base-font-color)))
-
-    (custom-theme-set-faces
-     'user
-     `(org-default ((t (,@headline ,@variable-tuple :height 0.8))))
-     `(org-superstar-item ((t (,@headline ,@variable-tuple :height 0.8))))
-     `(org-level-8 ((t (,@headline ,@variable-tuple))))
-     `(org-level-7 ((t (,@headline ,@variable-tuple))))
-     `(org-level-6 ((t (,@headline ,@variable-tuple))))
-     `(org-level-5 ((t (,@headline ,@variable-tuple))))
-     `(org-level-4 ((t (,@headline ,@variable-tuple :height 0.9))))
-     `(org-level-3 ((t (,@headline ,@variable-tuple :height 0.9))))
-     `(org-level-2 ((t (,@headline ,@variable-tuple :height 0.9))))
-     `(org-level-1 ((t (,@headline ,@variable-tuple :height 1.0))))
-     `(org-document-title ((t (,@headline ,@variable-tuple :height 2.0 :underline nil)))))))
+  )
 
 (use-package org-superstar
   :ensure nil
@@ -598,9 +430,9 @@ Need to externalize secrets and put this in a github repo as a package so that t
 
 #+end_src
 
-* Org Roam
+* =org-roam= and =org-ui= configuration
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
 
 (use-package org-roam
   :ensure nil
@@ -630,7 +462,8 @@ Need to externalize secrets and put this in a github repo as a package so that t
   (org-roam-ui-open-on-start t))
 
 #+end_src
-* Org mode wrapping
+
+* =org-mode= wrapping
 ** Automatic wrapping: Enable auto-fill-mode for automatic wrapping as you type:
 
 #+begin_src emacs-lisp
@@ -706,6 +539,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
         '("~/automation_scripts" "pyprojects"))
 
 #+end_src
+
 * Vertico configuration
 
 #+begin_src emacs-lisp
@@ -873,7 +707,24 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
 
 #+end_src
     
-* dgrep for search and replace across files (not buffers)
+* Consult - Custom extensions
+
+#+begin_src emacs-lisp
+
+  (defun my/consult-find-across-projects ()
+    "Find files across all known projects."
+    (interactive)
+    (let* ((projects (project-known-project-roots))
+           (dirs (cl-remove-if-not #'file-exists-p projects)))
+      (consult-find dirs)))
+
+  ;; Bind it to a key
+  (global-set-key (kbd "C-c p F") #'my/consult-find-across-projects)
+  (global-set-key (kbd "M-s F") #'my/consult-find-across-projects)
+
+#+end_src
+
+* =dgrep= for search and replace across files (not buffers)
 this will allow us to make changes across multiple unopened files in file system within a project using a combination of consult-ripgrep, embark-act and wgrep-change-to-wgrep-mode
 
 #+begin_src emacs-lisp
@@ -993,7 +844,7 @@ this will allow us to make changes across multiple unopened files in file system
 
 * Python test configuration
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
 
 (use-package pytest
   :ensure nil
@@ -1046,16 +897,18 @@ this will allow us to make changes across multiple unopened files in file system
 
 
 #+end_src
+
 * Python BDD Specific configuration
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
 
 (use-package feature-mode
-  ensure nil)
+  :ensure nil)
 (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
 
 
 #+end_src
+
 * Corfu Configuration
 
 #+begin_src emacs-lisp
@@ -1086,7 +939,7 @@ this will allow us to make changes across multiple unopened files in file system
   (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
 #+end_src
 
-* magit to start working with Git.
+* =magit= to start working with Git.
 
 * Clojure support
 
@@ -1176,92 +1029,62 @@ this will allow us to make changes across multiple unopened files in file system
 * treemacs configuration
 #+begin_src emacs-lisp
 
-  (defun my/treemacs-peek ()
-    "Peek at file content in a temporary window without creating a permanent buffer."
-    (interactive)
-    (when-let* ((window (selected-window))
-                (btn (treemacs-current-button))
-                (file (treemacs-button-get btn :path)))
-      (when (file-exists-p file)
-        (if-let ((peek-window (next-window)))
-            (with-selected-window peek-window
-              (find-file file)
-              (read-only-mode -1))  ; Make buffer writable
-          (split-window-right)
-          (other-window 1)
-          (find-file file)
-          (read-only-mode -1))  ; Make buffer writable
-        (message "Peek mode: press q to close"))))
+(defun my/treemacs-peek ()
+  "Peek at file content in a temporary window without creating a permanent buffer."
+  (interactive)
+  (when-let* ((window (selected-window))
+              (btn (treemacs-current-button))
+              (file (treemacs-button-get btn :path)))
+    (when (file-exists-p file)
+      (if-let ((peek-window (next-window)))
+          (with-selected-window peek-window
+            (find-file file)
+            (read-only-mode -1))  ; Make buffer writable
+        (split-window-right)
+        (other-window 1)
+        (find-file file)
+        (read-only-mode -1))  ; Make buffer writable
+      (message "Peek mode: press q to close"))))
 
-  (defun my/treemacs-close-peek ()
-    "Close the peek window if it exists."
-    (interactive)
-    (when (and (eq major-mode 'treemacs-mode)
-               (> (count-windows) 1))
-      (delete-window (next-window))))
+(defun my/treemacs-close-peek ()
+  "Close the peek window if it exists."
+  (interactive)
+  (when (and (eq major-mode 'treemacs-mode)
+             (> (count-windows) 1))
+    (delete-window (next-window))))
 
-  (use-package treemacs
-    :ensure nil
-    :config
+(use-package treemacs
+  :ensure nil
+  :config
+  (setq treemacs-indentation 1
+  	treemacs-indentation-string "  "
+  	treemacs-width 35
+  	treemacs-show-hidden-files t
+  	treemacs-show-git-status t
+  	treemacs-no-png-images t
+  	treemacs-collapse-dirs 3
+  	treemacs-follow-mode t
+  	treemacs-project-follow-mode t)
 
-    ;; Basic settings
-    (setq treemacs-indentation 1
-    	treemacs-indentation-string "  "
-    	treemacs-width 35
-    	treemacs-show-hidden-files t
-    	treemacs-show-git-status t
-    	treemacs-no-png-images t
-    	treemacs-collapse-dirs 3
-    	treemacs-follow-mode t
-    	treemacs-project-follow-mode t)
+  (treemacs-load-theme "all-the-icons")
 
-    ;; (setq treemacs-is-never-other-window t)
+  :bind
+  (:map global-map
+	("C-c t t" . treemacs)
+	("C-c t f" . treemacs-select-window)))
 
-    (with-eval-after-load 'treemacs
-      (define-key treemacs-mode-map (kbd "P") #'my/treemacs-peek)
-      (define-key treemacs-mode-map (kbd "q") #'my/treemacs-close-peek))
+(add-hook 'treemacs-mode-hook
+      	    (lambda() (display-line-numbers-mode -1)))
 
-    ;; Faces configuration - make sure these are AFTER the basic settings
-    (custom-set-faces
-     '(treemacs-root-face ((t (:inherit variable-pitch :height 0.9))))
-     '(treemacs-file-face ((t (:inherit variable-pitch :height 0.9))))
-     '(treemacs-directory-face ((t (:inherit variable-pitch :height 0.9))))
-     '(treemacs-git-modified-face ((t (:inherit variable-pitch :height 0.9))))
-     '(treemacs-git-untracked-face ((t (:inherit variable-pitch :height 0.9)))))
+(with-eval-after-load 'treemacs
+  (define-key treemacs-mode-map (kbd "P") #'my/treemacs-peek)
+  (define-key treemacs-mode-map (kbd "q") #'my/treemacs-close-peek))
 
-
-    (add-hook 'treemacs-mode-hook
-        	    (lambda() (display-line-numbers-mode -1)))
-
-    (use-package treemacs-all-the-icons
-      :ensure nil)
-
-    (treemacs-load-theme "all-the-icons")
-
-    (with-eval-after-load 'all-the-icons
-      (set-face-attribute 'treemacs-directory-face nil
-  			:family "Source Sans Pro"
-  			:height 0.9)
-      (set-face-attribute 'treemacs-file-face nil
-  			:inherit 'treemacs-directory-face))
-
-    (with-eval-after-load 'treemacs
-      (treemacs-modify-theme "all-the-icons"
-        :config
-        (progn
-  	(set-face-attribute 'treemacs-directory-face nil
-      			    :family "Source Sans Pro"
-      			    :height 0.9)
-  	(set-face-attribute 'treemacs-file-face nil
-      			    :inherit 'treemacs-directory-face))))
-
-    :bind
-    (:map global-map
-  	("C-c t t" . treemacs)
-  	("C-c t f" . treemacs-select-window)))
 #+end_src
 
 * debugging with dap-mode?
+
+Starting to believe i will never use DAP
 
 #+begin_src emacs-lisp
 
@@ -1273,86 +1096,94 @@ this will allow us to make changes across multiple unopened files in file system
 
 #+begin_src emacs-lisp
 
-  ;; JSON navigation with TAB behavior similar to org-mode
-  (defun my/json-next-element ()
-    "Move to next element in a JSON array, handling nested structures."
-    (interactive)
-    (let ((depth 0)
-  	(in-string nil))
-      ;; Keep moving forward until we find a comma at our nesting level
-      (while (and (< (point) (point-max))  ; don't go past end of buffer
-  		(or (/= depth 0)          ; keep going if we're in nested structure
-                      (not (looking-at-p ","))))  ; or haven't found a comma
-        ;; Track if we're in a string
-        (when (and (looking-at-p "\"")
-                   (not (save-excursion (backward-char) (looking-at-p "\\\\"))))
-  	(setq in-string (not in-string)))
-        
-        ;; Only count brackets when not in string
-        (when (not in-string)
-  	(cond ((looking-at-p "[[{]")
-                 (setq depth (1+ depth)))
-                ((looking-at-p "[]}]")
-                 (setq depth (1- depth)))))
-        
-        (forward-char))
+;; JSON navigation with TAB behavior similar to org-mode
+(defun my/json-next-element ()
+  "Move to next element in a JSON array, handling nested structures."
+  (interactive)
+  (let ((depth 0)
+	(in-string nil))
+    ;; Keep moving forward until we find a comma at our nesting level
+    (while (and (< (point) (point-max))  ; don't go past end of buffer
+		(or (/= depth 0)          ; keep going if we're in nested structure
+                    (not (looking-at-p ","))))  ; or haven't found a comma
+      ;; Track if we're in a string
+      (when (and (looking-at-p "\"")
+                 (not (save-excursion (backward-char) (looking-at-p "\\\\"))))
+	(setq in-string (not in-string)))
       
-      ;; If we found a comma, move past it and any whitespace
-      (when (looking-at-p ",")
-        (forward-char)
-        (skip-chars-forward "[:space:]\n")))) 
-
-  (defun my/json-previous-element ()
-    "Move to previous element in a JSON array, handling nested structures."
-    (interactive)
-    (let ((depth 0)
-  	(in-string nil))
-      ;; Keep moving backward until we find a comma at our nesting level
-      (while (and (> (point) (point-min))  ; don't go past start of buffer
-  		(or (/= depth 0)          ; keep going if we're in nested structure
-                      (not (looking-back "," 1))))  ; or haven't found a comma
-        (backward-char)
-        
-        ;; Track if we're in a string
-        (when (and (looking-at-p "\"")
-  		 (not (save-excursion (backward-char) (looking-at-p "\\\\"))))
-  	(setq in-string (not in-string)))
-        
-        ;; Only count brackets when not in string
-        (when (not in-string)
-  	(cond ((looking-at-p "[]}]")
-                 (setq depth (1+ depth)))
-                ((looking-at-p "[[{]")
-                 (setq depth (1- depth))))))
+      ;; Only count brackets when not in string
+      (when (not in-string)
+	(cond ((looking-at-p "[[{]")
+               (setq depth (1+ depth)))
+              ((looking-at-p "[]}]")
+               (setq depth (1- depth)))))
       
-      ;; If we found a comma, skip backward over whitespace
-      (when (looking-back "," 1)
-        (backward-char)
-        (skip-chars-backward "[:space:]\n"))))
+      (forward-char))
+    
+    ;; If we found a comma, move past it and any whitespace
+    (when (looking-at-p ",")
+      (forward-char)
+      (skip-chars-forward "[:space:]\n")))) 
 
-  (use-package json-mode
-    :ensure nil
-    :config
-    ;; First, unbind Evil's default C-n and C-p in normal state
-    (define-key evil-normal-state-map (kbd "C-n") nil)
-    (define-key evil-normal-state-map (kbd "C-p") nil)
+(defun my/json-previous-element ()
+  "Move to previous element in a JSON array, handling nested structures."
+  (interactive)
+  (let ((depth 0)
+	(in-string nil))
+    ;; Keep moving backward until we find a comma at our nesting level
+    (while (and (> (point) (point-min))  ; don't go past start of buffer
+		(or (/= depth 0)          ; keep going if we're in nested structure
+                    (not (looking-back "," 1))))  ; or haven't found a comma
+      (backward-char)
+      
+      ;; Track if we're in a string
+      (when (and (looking-at-p "\"")
+		 (not (save-excursion (backward-char) (looking-at-p "\\\\"))))
+	(setq in-string (not in-string)))
+      
+      ;; Only count brackets when not in string
+      (when (not in-string)
+	(cond ((looking-at-p "[]}]")
+               (setq depth (1+ depth)))
+              ((looking-at-p "[[{]")
+               (setq depth (1- depth))))))
+    
+    ;; If we found a comma, skip backward over whitespace
+    (when (looking-back "," 1)
+      (backward-char)
+      (skip-chars-backward "[:space:]\n"))))
 
-    ;; Then bind our JSON navigation functions
-    (evil-define-key 'normal json-mode-map
-      (kbd "C-n") 'my/json-next-element
-      (kbd "C-p") 'my/json-previous-element))
+(use-package json-mode
+  :ensure nil
+  :config)
 
-  (use-package yafolding
-    :ensure nil)
+(with-eval-after-load 'json-mode
+  (with-eval-after-load 'evil
+    ;; Use a local hook to set up JSON-specific key handling
+    (defun my/setup-json-mode-keys ()
+      ;; Locally unbind the keys
+      (when (boundp 'evil-normal-state-local-map)
+        (define-key evil-normal-state-local-map (kbd "C-n") nil)
+        (define-key evil-normal-state-local-map (kbd "C-p") nil))
+      
+      ;; Add our JSON-specific bindings
+      (evil-local-set-key 'normal (kbd "C-n") 'my/json-next-element)
+      (evil-local-set-key 'normal (kbd "C-p") 'my/json-previous-element))
+    
+    ;; Add the hook
+    (add-hook 'json-mode-hook 'my/setup-json-mode-keys)))
 
-  (use-package yasnippet-capf
-    :ensure nil
-    :after cape
-    :init
-    (defun my/yasnippet-capf-h ()
-      (add-to-list 'completion-at-point-functions #'yasnippet-capf))
-    :hook
-    (emacs-lisp-mode . my/yasnippet-capf-h))
+(use-package yafolding
+  :ensure nil)
+
+(use-package yasnippet-capf
+  :ensure nil
+  :after cape
+  :init
+  (defun my/yasnippet-capf-h ()
+    (add-to-list 'completion-at-point-functions #'yasnippet-capf))
+  :hook
+  (emacs-lisp-mode . my/yasnippet-capf-h))
 
 #+end_src
 
@@ -1426,6 +1257,7 @@ this will allow us to make changes across multiple unopened files in file system
         (kbd "TAB") 'yafolding-toggle-element)))  
 
 #+end_src
+
 * REST support
 
 #+begin_src emacs-lisp
@@ -1436,43 +1268,9 @@ this will allow us to make changes across multiple unopened files in file system
   
 #+end_src
 
-* Basic emacs configuration
+* TODO Uvicron compilation mappings for FastAPI projects
 
-#+begin_src emacs-lisp
-  ;; ESC cancels all
-  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-  (global-set-key [C-tab] 'other-window)
-
-  ;; Prevent auto-centering
-  (setq scroll-conservatively 101)
-  ;; (setq scroll-margin 0)
-  ;; (setq scroll-preserve-screen-position t)
-
-  ;; If you're using Evil mode, you might also want:
-  ;; (setq evil-scroll-line-to-center nil)
-
-  (global-set-key [f5] 'revert-buffer)
-  (global-set-key (kbd "C-!") 'eval-expression)
-#+end_src
-
-* Search across all projects
-
-#+begin_src emacs-lisp
-
-  (defun my/consult-find-across-projects ()
-    "Find files across all known projects."
-    (interactive)
-    (let* ((projects (project-known-project-roots))
-           (dirs (cl-remove-if-not #'file-exists-p projects)))
-      (consult-find dirs)))
-
-  ;; Bind it to a key
-  (global-set-key (kbd "C-c p F") #'my/consult-find-across-projects)
-  (global-set-key (kbd "M-s F") #'my/consult-find-across-projects)
-
-#+end_src
-
-* Uvicron compilation mappings for FastAPI projects
+This is just an easy for me to start up my various python projects.  I realize that this is not generic and is better off outside of dotfiles.  It makes no sense for people who are not involved in these projects
 
 #+begin_src emacs-lisp
   ;; Create a keymap for uvicorn commands
@@ -1515,90 +1313,23 @@ this will allow us to make changes across multiple unopened files in file system
       "C-c u 3" "start Billi"))  
 #+end_src
 
-* Toggle between two most recent buffers using F12
-Note: this doesnt seem to be necessary anymore,  discovered that evil-buffer (c-^) pretty much does the same thing
+* Evil - Elisp keymap customization
+This doesnt seem to be working as expected.  messing up the code.  Can move this to the paredit area.  I think paredit already has C-M-u/d/n/p which kind of get this done and these bindings are somewhat difficult to remember unless you have already used it a lot in vim and have developed muscle memory
+Needs to be placed along with all the other with-eval-after-load 'evil customizations so that they are all in one place
 
 #+begin_src emacs-lisp
 
-  ;; Quick buffer toggle with Function button
-  ;; (defun my/toggle-previous-buffer ()
-    ;; "Toggle between current and previous buffer."
-    ;; (interactive)
-    ;; (switch-to-buffer (other-buffer (current-buffer) t)))
-;; 
-  ;; (global-set-key [f12] 'my/toggle-previous-buffer)
-#+end_src
-
-* Use standard windows shortcut to close tabs for quickly killing buffers
-
-#+begin_src emacs-lisp
-
-  (defun my/kill-current-buffer ()
-    "Kill current buffer without confirmation."
-    (interactive)
-    (kill-buffer (current-buffer)))
-
-  (global-set-key [C-f4] 'my/kill-current-buffer)
+(with-eval-after-load 'evil
+  (evil-define-key '(normal visual) emacs-lisp-mode-map
+    (kbd "]e") 'evil-cp-end-of-defun    ; Jump to end of top-level form
+    (kbd "[e") 'evil-cp-beginning-of-defun  ; Jump to start of top-level form
+    (kbd "M-j") 'evil-cp-next-sexp      ; Jump to next sexp
+    (kbd "M-k") 'evil-cp-previous-sexp)) ; Jump to previous sexp
 
 #+end_src
 
-* this doesnt seem to be working as expected.  messing up the code
-
-#+begin_src emacs-lisp
-
-  (with-eval-after-load 'evil
-    (evil-define-key '(normal visual) emacs-lisp-mode-map
-      (kbd "]e") 'evil-cp-end-of-defun    ; Jump to end of top-level form
-      (kbd "[e") 'evil-cp-beginning-of-defun  ; Jump to start of top-level form
-      (kbd "M-j") 'evil-cp-next-sexp      ; Jump to next sexp
-      (kbd "M-k") 'evil-cp-previous-sexp)) ; Jump to previous sexp
-#+end_src
-
-* Cycle through programming mode output buffers quickly using F6
-This takes a list of regexp that identify buffers to cycle through.  useful for quickly getting to python compilation and clojure REPL buffers
-
-#+begin_src emacs-lisp
-  (defun my/cycle-output-buffers ()
-    "Cycle through compilation, cider and repl buffers."
-    (interactive)
-    (let* ((buffer-patterns '("\\*compilation\\*"
-                              "\\*cider\\-repl.*\\*"
-                              "\\*repl.*\\*"))
-           ;; Get list of matching buffers
-           (matching-buffers
-            (seq-filter
-             (lambda (buf)
-               (let ((buf-name (buffer-name buf)))
-                 (seq-some (lambda (pattern)
-                             (string-match-p pattern buf-name))
-                           buffer-patterns)))
-             (buffer-list)))
-           ;; Sort them by name for consistent cycling
-           (sorted-buffers (sort matching-buffers
-                                 (lambda (a b)
-                                   (string< (buffer-name a)
-                                            (buffer-name b)))))
-           ;; Find current buffer's position
-           (current-pos (seq-position sorted-buffers (current-buffer)))
-           (num-buffers (length sorted-buffers)))
-      
-      (cond
-       ((null sorted-buffers)
-        (message "No matching buffers found"))
-       ((null current-pos)
-        ;; If current buffer isn't in the list, switch to first matching buffer
-        (switch-to-buffer (car sorted-buffers)))
-       (t
-        ;; Switch to next buffer in cycle
-        (switch-to-buffer
-         (nth (mod (1+ current-pos) num-buffers)
-              sorted-buffers))))))
-
-  ;; Bind to F6
-  (global-set-key [f6] 'my/cycle-output-buffers)
-#+end_src
-
-* this overrides evil behaviour of using Esc to close special buffers.
+* Evil - Buffer customization
+This overrides evil behaviour of using Esc to close special buffers.  This sometimes causes more harm than good.  this becomes necessary because in buffers like python compilation and repl and eshell, if Vi is active, then you are forced to hit esc to use other commands that allow you do search in the buffer etc.  The solution is to learn to some some emacs native navigation commands to move around in such buffers otherwise, hitting Esc closes the buffers and for someone using Vi, hitting Esc is second nature 
 
 #+begin_src emacs-lisp
 
@@ -1619,115 +1350,8 @@ This takes a list of regexp that identify buffers to cycle through.  useful for 
 
 #+end_src
 
-* copy Buffer message.
-Useful stuff.  this is to avoid having to go to the Messages buffer to copy.  I use this mostly to query copilots for fixes as the last error that is flashed in mini buffer is usually the thing we use to research or debug
-
-#+begin_src emacs-lisp
-
-  (defvar my/last-minibuffer-message nil)
-
-  (advice-add 'message :after 
-              (lambda (&rest args)
-                (when (car args)
-                  (setq my/last-minibuffer-message (apply #'format-message args)))))
-
-  (global-set-key (kbd "C-c w") (lambda () 
-    				(interactive)
-    				(when my/last-minibuffer-message
-    				  (kill-new my/last-minibuffer-message)
-    				  (let ((message-log-max nil)) ; prevent recursive message capture
-    				    (message "Copied: %s" my/last-minibuffer-message)))))
-#+end_src
-
-* Custom editor file cycling for prog-mode
-use F8 to cycle through open buffers matching the file extension of the current buffer. This is useful when you have some 4-5 py or clj files open and you want to find one of them by using a single key. probably not very useful in cases when too many such buffers are open unless we can get a completion popup.  that is the next step in the evolution of this customization
-The grand plan is to get a popup completion so that a file can be picked,  that is still work in progress, even now it only toggles
-between the open files which is ok when there aren't too many files open
-
-#+begin_src emacs-lisp
-
-(defun my/get-buffer-extension (&optional buffer)
-  "Get the file extension of BUFFER or current buffer."
-  (when-let* ((buffer (or buffer (current-buffer)))
-              (file-name (buffer-file-name buffer)))
-    (file-name-extension file-name)))
-
-(defun my/cycle-same-extension-buffers (&optional reverse)
-  "Cycle through buffers with same extension as current buffer."
-  (interactive)
-  (when (derived-mode-p 'prog-mode)
-    (let* ((curr-ext (my/get-buffer-extension))
-           (current-buf (current-buffer))
-           ;; Get all matching buffers and sort them by name
-           (same-ext-buffers
-            (sort 
-             (seq-filter
-              (lambda (buf)
-                (with-current-buffer buf
-                  (and (buffer-file-name buf)
-                       (derived-mode-p 'prog-mode)
-                       (when-let ((ext (my/get-buffer-extension buf)))
-                         (string= ext curr-ext)))))
-              (buffer-list))
-             (lambda (a b) 
-               (string< (buffer-name a) (buffer-name b)))))
-           ;; Find current position
-           (current-index (cl-position current-buf same-ext-buffers))
-           (total (length same-ext-buffers)))
-      
-      (when (and current-index (> total 1))
-        ;; Calculate next position with wrapping
-        (let* ((next-index (if reverse
-                               (if (= current-index 0) 
-                                   (1- total) 
-                                 (1- current-index))
-                             (if (= current-index (1- total)) 
-                                 0 
-                               (1+ current-index))))
-               (next-buf (nth next-index same-ext-buffers)))
-          
-          ;; Switch buffer with messages suppressed
-          (let ((inhibit-message t))
-            (switch-to-buffer next-buf)
-            ;; Show simple status message
-            (message "[%d/%d] %s" 
-                     (1+ next-index) 
-                     total
-                     (buffer-name next-buf))))))))
-
-(defun my/cycle-same-extension-buffers-backward ()
-  "Cycle through buffers with same extension as current buffer backwards."
-  (interactive)
-  (my/cycle-same-extension-buffers t))
-
-;; Bind to F8 and Shift-F8
-(define-key prog-mode-map [f8] 'my/cycle-same-extension-buffers)
-
-#+end_src
-
-* Buffer management customizations
-#+begin_src emacs-lisp
-
-  (defvar my/saved-window-config nil 
-    "Store window configuration for maximize/restore.")
-
-  (defun my/maximize-window ()
-    "Maximize current window, keeping config for restore."
-    (interactive)
-    (if my/saved-window-config
-        (progn
-          (set-window-configuration my/saved-window-config)
-          (setq my/saved-window-config nil)
-          (message "Layout restored"))
-      (setq my/saved-window-config (current-window-configuration))
-      (delete-other-windows)
-      (message "Window maximized - run command again to restore")))
-
-  ;; Bind to a key of your choice later
-  (global-set-key (kbd "<f12>") 'my/maximize-window)
-  
-#+end_src
 * MANAGED BY EMACS
+** TODO Have no clue if this is actually being used at all
 
 #+begin_src emacs-lisp
 
@@ -1749,57 +1373,6 @@ between the open files which is ok when there aren't too many files open
 	   (expand-file-name ".venv"
 			     (project-root
 			      (project-current)))))))
-;; (custom-set-faces
-;;  ;; custom-set-faces was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  '(org-block ((t (:inherit fixed-pitch))))
-;;  '(org-code ((t (:inherit (shadow fixed-pitch)))))
-;;  '(org-document-info ((t (:foreground "dark orange"))))
-;;  '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-;;  '(org-document-title ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 2.0 :underline nil))))
-;;  '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
-;;  '(org-level-1 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.25))))
-;;  '(org-level-2 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.15))))
-;;  '(org-level-3 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.1))))
-;;  '(org-level-4 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro" :height 1.0))))
-;;  '(org-level-5 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
-;;  '(org-level-6 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
-;;  '(org-level-7 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
-;;  '(org-level-8 ((t (:inherit default :foreground "#ffffff" :font "Source Sans Pro"))))
-;;  '(org-link ((t (:foreground "royal blue" :underline t))))
-;;  '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-;;  '(org-property-value ((t (:inherit fixed-pitch))))
-;;  '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-;;  '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
-;;  '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
-;;  '(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
-;;  '(treemacs-directory-face ((t (:inherit variable-pitch :height 0.9))))
-;;  '(treemacs-file-face ((t (:inherit variable-pitch :height 0.9))))
-;;  '(treemacs-git-modified-face ((t (:inherit variable-pitch :height 0.9))))
-;;  '(treemacs-git-untracked-face ((t (:inherit variable-pitch :height 0.9))))
-;;  '(treemacs-root-face ((t (:inherit variable-pitch :height 0.9)))))
-
-
-#+end_src
-
-* For one off updates in existing buffers
-
-#+begin_src emacs-lisp
-
-  (when (boundp 'python-ts-mode-map)
-    (dolist (buffer (buffer-list))
-      (with-current-buffer buffer
-        (when (derived-mode-p 'python-ts-mode)
-  	(define-key python-ts-mode-map [f4] 'my/smart-find-references)))))
-
-#+end_src
-
-* Some embark specific global settings
-
-#+begin_src emacs-lisp
-
 
 #+end_src
 
@@ -1827,164 +1400,11 @@ between the open files which is ok when there aren't too many files open
 (setq cape-file-directory-must-exist nil)
 #+end_src
 
-* mu4e configuration
-assuming in here that the relevant dependencies have been managed in nixos build
-
-#+begin_src emacs-lisp
-
-;; (use-package mu4e
-;;   :ensure nil
-;;   :load-path "/nix/store/97ymyq978919zfqva4p15r4ddzzkkz0l-emacs-mu4e-1.12.7/share/emacs/site-lisp/elpa/mu4e-1.12.7"
-;;   :config
-;;   (setq
-;;    fill-column 80                               
-;;    line-spacing 0.1
-;;    message-send-mail-function 'message-send-mail-with-sendmail
-;;    message-sendmail-extra-arguments '("--read-envelope-from")
-;;    message-sendmail-f-is-evil t
-;;    mu4e-attachment-dir "~/Downloads"
-;;    mu4e-change-filenames-when-moving t
-;;    mu4e-compose-format-flowed t
-;;    mu4e-compose-signature "-Ajaneesh"
-;;    mu4e-compose-signature-auto-include t
-;;    mu4e-drafts-folder "/[Gmail].Drafts"
-;;    mu4e-get-mail-command "mbsync -a"
-;;    mu4e-headers-date-format "%Y-%m-%d %H:%M"              
-;;    mu4e-headers-fields '((:date . 12) (:flags . 6) (:from . 25) (:subject))
-;;    mu4e-headers-include-related nil
-;;    mu4e-headers-long-date-format  "%Y-%m-%d %H:%M"        
-;;    mu4e-headers-search-skip-duplicates t
-;;    mu4e-headers-skip-duplicates t
-;;    mu4e-headers-sort-direction 'descending
-;;    mu4e-headers-time-format "%H:%M"
-;;    mu4e-headers-visible-lines 15  
-;;    mu4e-maildir "~/Mail"
-;;    mu4e-maildir-shortcuts '(("/INBOX" . ?i) ("/[Gmail].Sent Mail" . ?s))
-;;    mu4e-refile-folder "/[Gmail].All Mail"
-;;    mu4e-sent-folder "/[Gmail].Sent Mail"
-;;    mu4e-split-view 'vertical
-;;    mu4e-split-view-width 10       
-;;    mu4e-trash-folder "/[Gmail].Bin"
-;;    mu4e-update-interval 300
-;;    mu4e-use-color t
-;;    mu4e-use-fancy-chars t                      
-;;    mu4e-view-auto-mark-as-read t
-;;    mu4e-view-fields '(:from :to :cc :subject :flags :date :maildir :mailing-list :tags :attachments :signature)
-;;    mu4e-view-header-field-format "%s: %s\n"
-;;    mu4e-view-header-separator (propertize "\n" 'face '(:background "gray90" :height 0.5))
-;;    mu4e-view-image-max-width 800               
-;;    mu4e-view-prefer-html t
-;;    mu4e-view-show-addresses t
-;;    mu4e-view-show-images t
-;;    send-mail-function 'message-send-mail-with-sendmail
-;;    sendmail-program "/etc/profiles/per-user/nixos/bin/msmtp"
-;;    user-full-name "Ajaneesh Rajashekharaiah"
-;;    user-mail-address "ajaneesh.rajashekharaiah@ihx.in"
-;;    variable-pitch-mode 1
-;;    )
-
-;;   ;; ;; Font customization with correct face names
-;;   ;; (set-face-attribute 'mu4e-header-face nil :height 100)
-;;   ;; (set-face-attribute 'mu4e-header-title-face nil :height 100)
-;;   ;; (set-face-attribute 'mu4e-header-key-face nil :height 100)
-;;   ;; (set-face-attribute 'mu4e-header-value-face nil :height 100)
-;;   ;; (set-face-attribute 'mu4e-contact-face nil :height 100)
-;;   ;; (set-face-attribute 'mu4e-context-face nil :height 100)
-;;   ;; (set-face-attribute 'mu4e-link-face nil :height 100)
-;;   )
-
-;; ;; Use xwidgets (Webkit) if available for better HTML rendering
-;; (when (fboundp 'xwidget-webkit-browse-url)
-;;   (setq mu4e-view-html-plaintext-ratio-heuristic most-positive-fixnum
-;;         mu4e-view-use-xwidget t))
-
-;; ;; ;; Alternatively (instead of xwidget), improve standard HTML rendering
-;; ;; (setq shr-color-visible-luminance-min 80)           ;; Improve color contrast
-;; ;; (setq shr-use-colors t)                             ;; Enable colors
-;; ;; (setq shr-use-fonts t)                              ;; Use fonts
-;; ;; (setq shr-max-width 80)                             ;; Wrap at 80 chars
-;; ;; (setq shr-discard-aria-hidden t)                    ;; Clean up HTML
-
-
-;; (use-package olivetti
-;;   :ensure nil
-;;   :config
-;;   (setq olivetti-body-width 120)
-;;   (add-hook 'mu4e-view-mode-hook 'olivetti-mode))
-
-;; (use-package visual-fill-column
-;;   :ensure t
-;;   :config
-;;   (setq visual-fill-column-width 90
-;;         visual-fill-column-center-text t)
-;;   (add-hook 'mu4e-view-mode-hook 'visual-fill-column-mode))
-
-;; (use-package emojify
-;;   :ensure t
-;;   :hook (mu4e-view-mode . emojify-mode))
-
-
-;; ;; Ensure that mu4e headers are well-differentiated in modus themes
-;; (setq mu4e-use-fancy-chars t)
-;; (setq mu4e-headers-draft-mark     '("D" . "🖊️"))  ;; Draft
-;; (setq mu4e-headers-flagged-mark   '("F" . "⚑"))   ;; Flagged
-;; (setq mu4e-headers-new-mark       '("N" . "✱"))   ;; New
-;; (setq mu4e-headers-passed-mark    '("P" . "➥"))   ;; Passed/Forwarded
-;; (setq mu4e-headers-replied-mark   '("R" . "↵"))   ;; Replied
-;; (setq mu4e-headers-seen-mark      '("S" . "✓"))   ;; Seen
-;; (setq mu4e-headers-trashed-mark   '("T" . "♻"))   ;; Trashed
-;; (setq mu4e-headers-attach-mark    '("a" . "📎"))  ;; Attachment
-;; (setq mu4e-headers-encrypted-mark '("x" . "🔒"))  ;; Encrypted
-;; (setq mu4e-headers-signed-mark    '("s" . "🔑"))  ;; Signed
-;; (setq mu4e-headers-unread-mark    '("u" . "●"))   ;; Unread
-
-;; ;; Modus themes compatibility for headers
-;; (with-eval-after-load 'modus-themes
-;;   (setq modus-themes-mail-citations 'intense)  ;; Make citations more distinct
-;;   (setq modus-themes-completions '((matches . (extrabold))
-;;                                    (selection . (semibold accented))
-;;                                    (popup . (accented intense))))
-  
-;;   ;; If using modus-vivendi (dark theme)
-;;   (when (eq (modus-themes--current-theme) 'modus-vivendi)
-;;     (set-face-attribute 'mu4e-header-highlight-face nil
-;;                         :background (modus-themes-get-color-value 'bg-hl-alt)
-;;                         :underline nil)))
-
-;; (when (fboundp 'xwidget-webkit-browse-url)
-;;   (setq mu4e-view-prefer-html t
-;;         mu4e-view-html-plaintext-ratio-heuristic most-positive-fixnum
-;;         mu4e-view-use-xwidget t))
-
-
-;; ;; (setq shr-color-visible-luminance-min 80) 
-;; ;; (setq shr-use-colors t)
-;; ;; (setq shr-use-fonts t)
-;; ;; (setq shr-max-width 80)
-;; ;; (setq shr-discard-aria-hidden t)
-
-
-;; (use-package all-the-icons
-;;   :ensure nil)
-
-;; (use-package all-the-icons-completion
-;;   :ensure nil
-;;   :after (marginalia all-the-icons)
-;;   :hook (marginalia-mode . all-the-icons-completion-marginalia-setup))
-
-;; (use-package mu4e-alert
-;;   :ensure nil
-;;   :config
-;;   (mu4e-alert-set-default-style 'libnotify)
-;;   (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
-;;   (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
-
-
-#+end_src
-
 * EWW configuration
 
-#+begin_src emacs-lisp :tangle yes
+** TODO Probably something that i will get rid of later on.  I dont see myself using this at all
+
+#+begin_src emacs-lisp 
 
 ;; EWW configuration
 (require 'eww)
@@ -2002,53 +1422,23 @@ assuming in here that the relevant dependencies have been managed in nixos build
 (global-set-key (kbd "C-c o") 'browse-url-external) ;; Open in external browser when needed
 
 #+end_src
+
 * Nix mode
+** TODO There is also a =nix-ts-mode=.  wonder if that is complementary to this.  Need to figure it out
 
 #+begin_src emacs-lisp
+
 (use-package transient
   :ensure nil)
 
 (use-package nix-mode
-  :ensure nil
-  )
-#+end_src
-
-* Editor customization for python
-
-#+begin_src emacs-lisp :tangle yes
-(use-package smartparens
-  :ensure nil 
-  :config
-  ;; Load the default configuration
-  (require 'smartparens-config)
-  
-  ;; Enable smartparens in Python mode
-  (add-hook 'python-mode-hook #'smartparens-mode)
-  
-  ;; Optional: Use strict mode for even better structural editing
-  ;; (add-hook 'python-mode-hook #'smartparens-strict-mode)
-  
-  ;; Python-specific pairs
-  (sp-local-pair 'python-mode "'" "'" :unless '(sp-in-comment-p sp-in-string-p))
-  (sp-local-pair 'python-mode "\"" "\"" :unless '(sp-in-comment-p sp-in-string-p))
-  (sp-local-pair 'python-mode "'''" "'''")
-  (sp-local-pair 'python-mode "\"\"\"" "\"\"\"")
-  
-  ;; Useful keybindings for Python
-  :bind (:map smartparens-mode-map
-              ("C-M-f" . sp-forward-sexp)
-              ("C-M-b" . sp-backward-sexp)
-              ("C-<left>" . sp-backward-slurp-sexp)
-              ("C-<right>" . sp-forward-slurp-sexp)
-              ("C-M-<left>" . sp-backward-barf-sexp)
-	      ("C-M-<right>" . sp-forward-barf-sexp)
-              ))
+  :ensure nil)
 
 #+end_src
 
 * mu4e-dashboard
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
 
 ;; Load mu4e-dashboard
 (use-package mu4e-dashboard
@@ -2066,7 +1456,8 @@ assuming in here that the relevant dependencies have been managed in nixos build
 
 #+end_src
 
-* Editor customization for clojure
+* Editor customization for programming modes
+** move-text
 
 #+begin_src emacs-lisp
 
@@ -2075,6 +1466,12 @@ assuming in here that the relevant dependencies have been managed in nixos build
   :bind
   (("C-M-<up>" . move-text-up)
    ("C-M-<down>" . move-text-down)))
+#+end_src
+
+** Paredit
+
+#+begin_src emacs-lisp
+
 
 (use-package paredit
   :hook ((emacs-lisp-mode
@@ -2109,6 +1506,39 @@ assuming in here that the relevant dependencies have been managed in nixos build
     (kbd "C-<right>") 'paredit-forward-slurp-sexp
     (kbd "C-M-<left>") 'paredit-backward-barf-sexp
     (kbd "C-M-<right>") 'paredit-forward-barf-sexp))
+#+end_src
+
+** TODO Smartparens
+Need to figure out what this does that is different from paredit.  infact i see the same bindings here that i see in paredit-mode
+
+#+begin_src emacs-lisp 
+(use-package smartparens
+  :ensure nil 
+  :config
+  ;; Load the default configuration
+  (require 'smartparens-config)
+  
+  ;; Enable smartparens in Python mode
+  (add-hook 'python-mode-hook #'smartparens-mode)
+  
+  ;; Optional: Use strict mode for even better structural editing
+  ;; (add-hook 'python-mode-hook #'smartparens-strict-mode)
+  
+  ;; Python-specific pairs
+  (sp-local-pair 'python-mode "'" "'" :unless '(sp-in-comment-p sp-in-string-p))
+  (sp-local-pair 'python-mode "\"" "\"" :unless '(sp-in-comment-p sp-in-string-p))
+  (sp-local-pair 'python-mode "'''" "'''")
+  (sp-local-pair 'python-mode "\"\"\"" "\"\"\"")
+  
+  ;; Useful keybindings for Python
+  :bind (:map smartparens-mode-map
+              ("C-M-f" . sp-forward-sexp)
+              ("C-M-b" . sp-backward-sexp)
+              ("C-<left>" . sp-backward-slurp-sexp)
+              ("C-<right>" . sp-forward-slurp-sexp)
+              ("C-M-<left>" . sp-backward-barf-sexp)
+	      ("C-M-<right>" . sp-forward-barf-sexp)
+              ))
 
 #+end_src
 
@@ -2356,7 +1786,7 @@ assuming in here that the relevant dependencies have been managed in nixos build
 
 * mu4e - org-msg integration
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
 
 (use-package org-msg
   :ensure nil
@@ -2439,7 +1869,7 @@ Ajaneesh")
 
 ** mu4e - toggle between mime and msg packages for org/html support
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
 
 ;; (defun my/toggle-org-msg-mode ()
 ;;   "Toggle between org-msg and standard composition."
@@ -2506,40 +1936,497 @@ Ajaneesh")
   (define-key mu4e-view-mode-map (kbd "C-c t") 'my/toggle-html-plain-text))
 #+end_src
 
-* mu4e - Modus Light Theme
+* mixed-pitch-mode configuration for org-mode
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 
-(defun my/apply-buffer-local-theme ()
-  "Apply the light theme to mu4e buffers only."
+;; Configure mixed-pitch mode for Org
+(use-package mixed-pitch
+  :hook
+  (org-mode . mixed-pitch-mode)
+  :config
+  (setq mixed-pitch-set-height t)
+  ;; Keep code blocks, tables, etc in fixed-pitch
+  (setq mixed-pitch-fixed-pitch-faces
+        '(org-block
+          org-block-begin-line
+          org-block-end-line
+          org-code
+          org-document-info-keyword
+          org-meta-line
+          org-property-value
+          org-special-keyword
+          org-table
+          org-verbatim
+          line-number
+          line-number-current-line)))
+
+;; (with-eval-after-load 'all-the-icons
+;;   (set-face-attribute 'treemacs-directory-face nil
+;; 			:family "Source Sans Pro"
+;; 			:height 0.9)
+;;   (set-face-attribute 'treemacs-file-face nil
+;; 			:inherit 'treemacs-directory-face))
+
+;; (with-eval-after-load 'treemacs
+;;   (treemacs-modify-theme "all-the-icons"
+;;     :config
+;;     (progn
+;; 	(set-face-attribute 'treemacs-directory-face nil
+;;   			    :family "Source Sans Pro"
+;;   			    :height 0.9)
+;; 	(set-face-attribute 'treemacs-file-face nil
+;;   			    :inherit 'treemacs-directory-face))))
+
+#+end_src
+
+* Font and Color Configuration
+
+#+begin_src emacs-lisp
+
+;; Basic font definitions - KEEP THESE
+(set-face-attribute 'default nil
+                    :family "JetBrains Mono"
+                    :height 90)
+
+(set-face-attribute 'fixed-pitch nil 
+                    :family "JetBrains Mono"
+                    :height 90)
+
+(set-face-attribute 'variable-pitch nil
+                    :family "Source Sans Pro"
+                    :height 120)
+
+;; Ligature config - KEEP THIS
+(use-package ligature
+  :ensure nil
+  :config
+  (ligature-set-ligatures 't '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\"
+                               "{-" "::" ":::" ":=" "!!" "!=" "!==" "-}" "--" "---" "-->"
+                               "->>" "->" "-<" "-<<" "-~" "#{" "#[" "##" "###" "####"
+                               "#(" "#?" "#_" "#_(" ".-" ".=" ".." "..<" "..." "?="))
+  (global-ligature-mode t))
+
+;; ==== NEW CENTRALIZED CONFIGURATION ====
+
+(defun my/apply-fonts-and-faces ()
+  "Apply centralized font and face settings, using Modus theme colors."
+  (interactive)
+  
+  ;; Define our font families
+  (let* ((fixed-font "JetBrains Mono")
+         (variable-font "Source Sans Pro")
+         (code-font-size 90)
+         (ui-font-size 120)
+         
+         ;; Variable tuple for org headings
+         (variable-tuple
+          (cond ((x-list-fonts variable-font) `(:font ,variable-font))
+                ((x-list-fonts "Lucida Grande") '(:font "Lucida Grande"))
+                ((x-list-fonts "Verdana") '(:font "Verdana"))
+                ((x-family-fonts "Sans Serif") '(:family "Sans Serif"))
+                (nil (warn "Cannot find a Sans Serif Font."))))
+         
+         ;; Get base color from current theme
+         (base-font-color (face-foreground 'default nil 'default))
+         (headline `(:inherit default :foreground (modus-themes-get-color-value 'fg-main))))
+    
+    ;; ===== ORG MODE FACES =====
+    (with-eval-after-load 'org
+      (custom-theme-set-faces
+       'user
+       ;; Fixed-pitch elements
+       `(org-block ((t (:inherit fixed-pitch))))
+       `(org-code ((t (:inherit (shadow fixed-pitch)))))
+       `(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+       `(org-indent ((t (:inherit (org-hide fixed-pitch)))))
+       `(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+       `(org-property-value ((t (:inherit fixed-pitch))))
+       `(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+       `(org-table ((t (:inherit fixed-pitch :foreground ,(modus-themes-get-color-value 'blue-alt)))))
+       `(org-tag ((t (:inherit (shadow fixed-pitch) :weight normal :height 0.8))))
+       `(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
+       
+       ;; Document structure with variable pitch
+       `(org-document-title ((t (:inherit default ,@variable-tuple :height 2.0 :underline nil))))
+       `(org-level-1 ((t (,@headline ,@variable-tuple))))
+       `(org-level-2 ((t (,@headline ,@variable-tuple))))
+       `(org-level-3 ((t (,@headline ,@variable-tuple))))
+       `(org-level-4 ((t (,@headline ,@variable-tuple))))
+       `(org-level-5 ((t (,@headline ,@variable-tuple))))
+       `(org-level-6 ((t (,@headline ,@variable-tuple))))
+       `(org-level-7 ((t (,@headline ,@variable-tuple))))
+       `(org-level-8 ((t (,@headline ,@variable-tuple))))
+       
+       ;; Links and other elements
+       `(org-link ((t (:foreground ,(modus-themes-get-color-value 'blue) :underline t)))))))
+
+  ;; ===== TREEMACS FACES =====
+  (with-eval-after-load 'treemacs
+    (custom-theme-set-faces
+     'user
+     `(treemacs-root-face ((t (:inherit variable-pitch :height 0.9))))
+     `(treemacs-file-face ((t (:inherit variable-pitch :height 0.9))))
+     `(treemacs-directory-face ((t (:inherit variable-pitch :height 0.9))))
+     `(treemacs-git-modified-face ((t (:inherit variable-pitch :height 0.9))))
+     `(treemacs-git-untracked-face ((t (:inherit variable-pitch :height 0.9))))))
+  
+  ;; ===== MU4E FACES =====
+  (with-eval-after-load 'mu4e
+    (custom-theme-set-faces
+     'user
+     `(mu4e-header-face ((t (:family ,variable-font :height 90))))
+     `(mu4e-header-title-face ((t (:family ,variable-font :height 90))))
+     `(mu4e-header-key-face ((t (:family ,variable-font :height 90))))
+     `(mu4e-header-value-face ((t (:family ,variable-font :height 90))))
+     `(mu4e-contact-face ((t (:family ,variable-font :height 90))))
+     `(mu4e-highlight-face ((t (:background ,(modus-themes-get-color-value 'bg-active)
+                                            :foreground ,(modus-themes-get-color-value 'fg-main)))))
+     `(mu4e-header-highlight-face ((t (:background ,(modus-themes-get-color-value 'bg-hl-alt)
+                                                   :underline nil))))))
+  
+  (message "Applied centralized font and face settings"))
+
+;; Update your mu4e buffer-local theme to use Modus colors
+(defun my/apply-mu4e-buffer-local-theme ()
+  "Apply buffer-local light theme for mu4e using Modus Operandi colors."
   (when (derived-mode-p 'mu4e-view-mode 'mu4e-compose-mode)
     ;; Ensure we're working with buffer-local faces
     (buffer-face-mode 1)
     
-    ;; Set buffer-local face remapping for key faces
-    (face-remap-add-relative 'default :background "#ffffff" :foreground "#000000")
-    (face-remap-add-relative 'mu4e-header-face :foreground "#333333")
-    (face-remap-add-relative 'mu4e-unread-face :foreground "#2020cc" :weight 'bold)
-    (face-remap-add-relative 'mu4e-highlight-face :background "#f0f0f0" :foreground "#000000")
-    (face-remap-add-relative 'mu4e-header-highlight-face :background "#e0e0e0" :foreground "#000000")
-    (face-remap-add-relative 'fringe :background "#f0f0f0")
-    
-    ;; Adjust more faces as needed
-    (face-remap-add-relative 'mu4e-cited-1-face :foreground "#336699")
-    (face-remap-add-relative 'mu4e-cited-2-face :foreground "#558866")
-    (face-remap-add-relative 'mu4e-cited-3-face :foreground "#884466")
-    
-    ;; Text rendering adjustments
-    (face-remap-add-relative 'variable-pitch :family "Source Sans Pro" :height 110)
-    
-    ;; Set light background for the mode line in this buffer
-    (face-remap-add-relative 'mode-line :background "#e8e8e8" :foreground "#303030")
-    (face-remap-add-relative 'mode-line-inactive :background "#d8d8d8" :foreground "#505050")))
+    ;; Store the current theme
+    (let ((current-theme (car custom-enabled-themes))
+          (temp-theme nil))
+      
+      ;; Temporarily load modus-operandi if not already active
+      (unless (eq current-theme 'modus-operandi)
+        (load-theme 'modus-operandi t)
+        (setq temp-theme 'modus-operandi))
+      
+      ;; Apply face remappings using Modus Operandi colors
+      (face-remap-add-relative 'default 
+                               :background (modus-themes-get-color-value 'bg-main)
+                               :foreground (modus-themes-get-color-value 'fg-main))
+      
+      (face-remap-add-relative 'fringe 
+                               :background (modus-themes-get-color-value 'bg-dim))
+      
+      (face-remap-add-relative 'mu4e-header-face 
+                               :foreground (modus-themes-get-color-value 'fg-dim))
+      
+      (face-remap-add-relative 'mu4e-unread-face 
+                               :foreground (modus-themes-get-color-value 'blue-warmer)
+                               :weight 'bold)
+      
+      (face-remap-add-relative 'mu4e-highlight-face 
+                               :background (modus-themes-get-color-value 'bg-active)
+                               :foreground (modus-themes-get-color-value 'fg-main))
+      
+      (face-remap-add-relative 'mu4e-header-highlight-face 
+                               :background (modus-themes-get-color-value 'bg-hl-alt))
+      
+      (face-remap-add-relative 'mode-line 
+                               :background (modus-themes-get-color-value 'bg-mode-line-active)
+                               :foreground (modus-themes-get-color-value 'fg-mode-line-active))
+      
+      (face-remap-add-relative 'mode-line-inactive 
+                               :background (modus-themes-get-color-value 'bg-mode-line-inactive)
+                               :foreground (modus-themes-get-color-value 'fg-mode-line-inactive))
+      
+      ;; Text rendering adjustments (only font family/size, no colors)
+      (face-remap-add-relative 'variable-pitch :family "Source Sans Pro" :height 110)
+      
+      ;; Restore original theme if we temporarily changed it
+      (when temp-theme
+        (disable-theme temp-theme)
+        (when current-theme
+          (enable-theme current-theme))))))
 
-;; Hook into all mu4e modes to apply buffer-local theming
-(add-hook 'mu4e-main-mode-hook 'my/apply-buffer-local-theme)
-(add-hook 'mu4e-headers-mode-hook 'my/apply-buffer-local-theme)
-(add-hook 'mu4e-view-mode-hook 'my/apply-buffer-local-theme)
-(add-hook 'mu4e-compose-mode-hook 'my/apply-buffer-local-theme)
+;; Add hooks for mu4e buffer-local themes
+;; (with-eval-after-load 'mu4e
+;;   (add-hook 'mu4e-view-mode-hook 'my/apply-mu4e-buffer-local-theme)
+;;   (add-hook 'mu4e-compose-mode-hook 'my/apply-mu4e-buffer-local-theme))
+
+;; Modify your modus-themes configuration
+(use-package modus-themes
+  :ensure nil
+  :config
+  ;; Your existing settings...
+  (setq modus-themes-mode-line '(accented borderless)
+        modus-themes-bold-constructs t
+        modus-themes-italic-constructs t
+        modus-themes-fringes 'subtle
+        modus-themes-tabs-accented t
+        modus-themes-paren-match '(bold intense)
+        modus-themes-prompts '(bold intense)
+        modus-themes-completions '((matches . (extrabold underline))
+  				   (selection . (semibold)))
+        modus-themes-org-blocks 'tinted-background
+        modus-themes-scale-headings t
+        modus-themes-region '(bg-only)
+        modus-themes-headings
+        '((1 . (rainbow regular overline background 1.0))
+          (2 . (rainbow regular background 1.0))
+          (3 . (rainbow regular 1.0))
+          (t . (semilight 1.0))))
+
+  ;; Add our function to the theme loading hook
+  (add-hook 'modus-themes-after-load-theme-hook #'my/apply-fonts-and-faces)
+  
+  ;; Load theme - this will trigger our hook
+  (load-theme 'modus-vivendi t ))
+
+;; Add a theme toggle function
+(defun my/toggle-modus-theme ()
+  "Toggle between light and dark Modus themes."
+  (interactive)
+  (if (eq (car custom-enabled-themes) 'modus-operandi)
+      (load-theme 'modus-vivendi t) 
+    (load-theme 'modus-operandi t)))
+
+;; Key binding for toggling themes - currently conflicting with treemacs
+;; (global-set-key (kbd "C-c t t") 'my/toggle-modus-theme)
+
+
+
 
 #+end_src
+
+* Global Configuration
+
+#+begin_src emacs-lisp
+
+;; ESC cancels all
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+(global-set-key [C-tab] 'other-window)
+
+;; Prevent auto-centering
+(setq scroll-conservatively 101)
+
+
+(global-set-key [f5] 'revert-buffer)
+(global-set-key (kbd "C-!") 'eval-expression)
+
+#+end_src
+
+** Focus on one window by toggling its full-screen view using F12
+
+Hitting F12 hides other windows (except treemacs).  Any number of other windows may be open.  It will restore other buffers back when toggled.  But restoration only works till any actions are executed.  To be used only in context where you are peeking at something like a log file which is wrapping which would momentarily benefit from full screen view. 
+
+#+begin_src emacs-lisp
+
+  (defvar my/saved-window-config nil 
+    "Store window configuration for maximize/restore.")
+
+  (defun my/maximize-window ()
+    "Maximize current window, keeping config for restore."
+    (interactive)
+    (if my/saved-window-config
+        (progn
+          (set-window-configuration my/saved-window-config)
+          (setq my/saved-window-config nil)
+          (message "Layout restored"))
+      (setq my/saved-window-config (current-window-configuration))
+      (delete-other-windows)
+      (message "Window maximized - run command again to restore")))
+
+  ;; Bind to a key of your choice later
+  (global-set-key (kbd "<f12>") 'my/maximize-window)
+  
+#+end_src
+
+** Use standard windows shortcut to close tabs for quickly killing buffers
+
+Ctrl-K and RETURN would also do the same thing.  but i find this convenient and i use this as it matches with tab closing keymap in windows text editors. 
+
+#+begin_src emacs-lisp
+
+  (defun my/kill-current-buffer ()
+    "Kill current buffer without confirmation."
+    (interactive)
+    (kill-buffer (current-buffer)))
+
+  (global-set-key [C-f4] 'my/kill-current-buffer)
+
+#+end_src
+
+** Cycle through programming mode output buffers quickly using F6
+This takes a list of regexp that identify buffers to cycle through.  useful for quickly getting to python compilation and clojure REPL buffers.  *I hardly ever use this as i end up opening way to many buffers of source files and it makes no sense to cycle through all of them* 
+
+#+begin_src emacs-lisp
+  (defun my/cycle-output-buffers ()
+    "Cycle through compilation, cider and repl buffers."
+    (interactive)
+    (let* ((buffer-patterns '("\\*compilation\\*"
+                              "\\*cider\\-repl.*\\*"
+                              "\\*repl.*\\*"))
+           ;; Get list of matching buffers
+           (matching-buffers
+            (seq-filter
+             (lambda (buf)
+               (let ((buf-name (buffer-name buf)))
+                 (seq-some (lambda (pattern)
+                             (string-match-p pattern buf-name))
+                           buffer-patterns)))
+             (buffer-list)))
+           ;; Sort them by name for consistent cycling
+           (sorted-buffers (sort matching-buffers
+                                 (lambda (a b)
+                                   (string< (buffer-name a)
+                                            (buffer-name b)))))
+           ;; Find current buffer's position
+           (current-pos (seq-position sorted-buffers (current-buffer)))
+           (num-buffers (length sorted-buffers)))
+      
+      (cond
+       ((null sorted-buffers)
+        (message "No matching buffers found"))
+       ((null current-pos)
+        ;; If current buffer isn't in the list, switch to first matching buffer
+        (switch-to-buffer (car sorted-buffers)))
+       (t
+        ;; Switch to next buffer in cycle
+        (switch-to-buffer
+         (nth (mod (1+ current-pos) num-buffers)
+              sorted-buffers))))))
+
+  ;; Bind to F6
+  (global-set-key [f6] 'my/cycle-output-buffers)
+#+end_src
+
+** Copy buffer message.
+Useful stuff.  this is to avoid having to go to the Messages buffer to copy.  I use this mostly to query copilots for fixes as the last error that is flashed in mini buffer is usually the thing we use to research or debug
+*This is not working anymore. It usually changes the buffer message as soon as C-c is hit.  It still copies text.  But some other useless nonsense*  The idea was to use this to copy file paths when navigating treemacs.  Treemacs usually shows the entire file path in the minibuffer
+#+begin_src emacs-lisp
+
+  (defvar my/last-minibuffer-message nil)
+
+  (advice-add 'message :after 
+              (lambda (&rest args)
+                (when (car args)
+                  (setq my/last-minibuffer-message (apply #'format-message args)))))
+
+  (global-set-key (kbd "C-c w") (lambda () 
+    				(interactive)
+    				(when my/last-minibuffer-message
+    				  (kill-new my/last-minibuffer-message)
+    				  (let ((message-log-max nil)) ; prevent recursive message capture
+    				    (message "Copied: %s" my/last-minibuffer-message)))))
+#+end_src
+
+** Custom editor file cycling for prog-mode
+use F8 to cycle through open buffers matching the file extension of the current buffer. This is useful when you have some 4-5 py or clj files open and you want to find one of them by using a single key. probably not very useful in cases when too many such buffers are open unless we can get a completion popup.  that is the next step in the evolution of this customization
+The grand plan is to get a popup completion so that a file can be picked,  that is still work in progress, even now it only toggles
+between the open files which is ok when there aren't too many files open
+
+#+begin_src emacs-lisp
+
+(defun my/get-buffer-extension (&optional buffer)
+  "Get the file extension of BUFFER or current buffer."
+  (when-let* ((buffer (or buffer (current-buffer)))
+              (file-name (buffer-file-name buffer)))
+    (file-name-extension file-name)))
+
+(defun my/cycle-same-extension-buffers (&optional reverse)
+  "Cycle through buffers with same extension as current buffer."
+  (interactive)
+  (when (derived-mode-p 'prog-mode)
+    (let* ((curr-ext (my/get-buffer-extension))
+           (current-buf (current-buffer))
+           ;; Get all matching buffers and sort them by name
+           (same-ext-buffers
+            (sort 
+             (seq-filter
+              (lambda (buf)
+                (with-current-buffer buf
+                  (and (buffer-file-name buf)
+                       (derived-mode-p 'prog-mode)
+                       (when-let ((ext (my/get-buffer-extension buf)))
+                         (string= ext curr-ext)))))
+              (buffer-list))
+             (lambda (a b) 
+               (string< (buffer-name a) (buffer-name b)))))
+           ;; Find current position
+           (current-index (cl-position current-buf same-ext-buffers))
+           (total (length same-ext-buffers)))
+      
+      (when (and current-index (> total 1))
+        ;; Calculate next position with wrapping
+        (let* ((next-index (if reverse
+                               (if (= current-index 0) 
+                                   (1- total) 
+                                 (1- current-index))
+                             (if (= current-index (1- total)) 
+                                 0 
+                               (1+ current-index))))
+               (next-buf (nth next-index same-ext-buffers)))
+          
+          ;; Switch buffer with messages suppressed
+          (let ((inhibit-message t))
+            (switch-to-buffer next-buf)
+            ;; Show simple status message
+            (message "[%d/%d] %s" 
+                     (1+ next-index) 
+                     total
+                     (buffer-name next-buf))))))))
+
+(defun my/cycle-same-extension-buffers-backward ()
+  "Cycle through buffers with same extension as current buffer backwards."
+  (interactive)
+  (my/cycle-same-extension-buffers t))
+
+;; Bind to F8 and Shift-F8
+(define-key prog-mode-map [f8] 'my/cycle-same-extension-buffers)
+
+#+end_src
+
+** For one off updates in existing buffers
+This is something that i use often.  it kind of makes it easier to deal with =lsp-find-references= and =lsp-find-definiton= when looking at code.  I can use a single key in most cases to navigate back and forth betwen caller and callee. Works especially well when there is a single caller, it simply toggles between the references.  When there is more than once reference, then it works a little like ripgrep.   
+
+#+begin_src emacs-lisp
+
+;; Define the smart reference finder
+(defun my/smart-find-references ()
+  "Enhanced reference finder that auto-jumps when there are exactly two references."
+  (interactive)
+  (let* ((orig-buf (current-buffer))
+	 (orig-pos (point))
+	 (refs (lsp-request "textDocument/references"
+                            (lsp--make-reference-params nil nil)))
+	 (num-refs (length refs)))
+    (cond
+     ;; No references found
+     ((= num-refs 0)
+      (message "No references found"))
+     
+     ;; Exactly two references - try to jump to the other one
+     ((= num-refs 2)
+      (let* ((current-uri (lsp--buffer-uri))
+             (other-ref (car (seq-filter
+                              (lambda (ref)
+				(let ((ref-uri (lsp:location-uri ref)))
+				  (or (not (string= ref-uri current-uri))
+                                      (let* ((range (lsp:location-range ref))
+                                             (start (lsp:range-start range))
+                                             (line (lsp:position-line start))
+                                             (character (lsp:position-character start))
+                                             (cur-line (line-number-at-pos))
+                                             (cur-char (current-column)))
+					(or (/= (1+ line) cur-line)
+                                            (/= character cur-char))))))
+                              refs))))
+	(if other-ref
+            (lsp-goto-location other-ref)
+          (message "Cannot determine other reference location"))))
+     
+     ;; More than two references - show all references
+     (t (lsp-find-references)))))
+
+(when (boundp 'python-ts-mode-map)
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (when (derived-mode-p 'python-ts-mode)
+  	(define-key python-ts-mode-map [f4] 'my/smart-find-references)))))
+
+#+end_src
+
