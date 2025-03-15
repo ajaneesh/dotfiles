@@ -12,8 +12,22 @@
 
     home-manager.users.${config.user} = {
 
+      home.packages = with pkgs; [
+        (texlive.combine {
+          inherit (texlive) 
+            scheme-minimal  # Bare minimum
+            latex-bin       # LaTeX binaries
+            latex           # Basic LaTeX packages
+            dvipng          # DVI to PNG converter
+            dvisvgm         # Alternative DVI converter
+          # Any other TeX packages you might need
+          ;
+        })
+      ];
+
       programs.emacs = {
         enable = true;
+        package = (pkgs.emacs.override { withXwidgets = true; withGTK3 = true; });
 	      extraPackages = epkgs: with epkgs; [
           aggressive-indent
           all-the-icons
@@ -39,6 +53,7 @@
           feature-mode
           flycheck
           flycheck-clj-kondo
+          htmlize
           json-mode
           ligature
           lsp-pyright
@@ -53,6 +68,8 @@
           olivetti
           orderless
           org-superstar
+          org-msg
+          org-mime
           org-roam
           org-roam-ui
           paredit

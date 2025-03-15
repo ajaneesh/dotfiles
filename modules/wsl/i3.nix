@@ -35,9 +35,10 @@
             "${modifier}+Return" = "exec --no-startup-id xterm";
             "${modifier}+d" = "exec --no-startup-id ${pkgs.rofi}/bin/rofi -modes run -show run";
 
-            # "${modifier}+Shift+q" = "kill";
+            "${modifier}+Shift+x" = "kill";
             #"${modifier}+d" = "exec ${pkgs.dmenu}/bin/dmenu_run";
-            
+            "${modifier}+Shift+f" = "fullscreen toggle global";
+
             # Window navigation
             "${modifier}+Left" = "focus left";
             "${modifier}+Down" = "focus down";
@@ -83,7 +84,7 @@
             "${modifier}+Shift+s" = "exec --no-startup-id i3-resurrect save";
             "${modifier}+Shift+t" = "exec --no-startup-id i3-resurrect restore";
 
-            "${modifier}+Escape" = "mode default";
+            "${modifier}+Esc" = "mode default";
             "${modifier}+0" = "mode emacs";
             
             # Exit - simplified for WSL
@@ -132,7 +133,7 @@
                 "${modifier}+5" = "workspace 5; mode default";
             
                 # Add a keybinding to exit emacs mode
-      	        "${modifier}+Escape" = "mode default";
+      	        "${modifier}+Esc" = "mode default";
 	              "${modifier}+0" = "mode emacs";
              
             };

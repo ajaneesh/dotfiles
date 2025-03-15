@@ -27,6 +27,7 @@
         i3-resurrect
 
         xorg.xrdb
+        xorg.xkill
         
         # terminfo
         ncurses
