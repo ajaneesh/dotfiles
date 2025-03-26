@@ -23,6 +23,7 @@ inputs.nixpkgs.lib.nixosSystem {
     inputs.vscode-server.nixosModules.default
     inputs.agenix.nixosModules.age 
     ({ config, pkgs, lib, ... }: {
+      time.timeZone = "Asia/Kolkata";
       systemd.services.display-manager.enable = lib.mkForce false;
       
       # X Server configuration for WSLg
@@ -89,10 +90,20 @@ inputs.nixpkgs.lib.nixosSystem {
       };
 
       # Emacs service configuration
-      services.emacs = {
-        enable = true;
-        defaultEditor = true;
-        package = pkgs.emacs;
+      systemd.user.services.emacs = {
+        description = "Emacs Daemon";
+        wantedBy = [ "default.target" ];
+        serviceConfig = {
+          Type = "forking";
+          # Use the same Emacs you're using interactively
+          ExecStart = "${config.home-manager.users.nixos.home.path}/bin/emacs --daemon";
+          ExecStop = "${config.home-manager.users.nixos.home.path}/bin/emacsclient --eval '(kill-emacs)'";
+          Restart = "on-failure";
+        };
+        # Add the PATH to match what you have in your shell
+      #   environment = {
+      #     PATH = "${config.home-manager.users.nixos.home.path}/bin:$PATH";
+      #   };
       };
       emacs.enable = true;
 

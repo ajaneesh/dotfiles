@@ -21,6 +21,7 @@
         gnumake
         poetry
         imagemagick
+        postgresql_15
         pyright
         python3
         # python3Packages.behave

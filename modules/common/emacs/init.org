@@ -189,7 +189,7 @@ this is now running as a systemd service
 
 #+end_src
 
-* Get evil-mode up and running ASAP so that we dont have to struggle with emacs editing controls
+* Get =evil-mode= up and running ASAP so that we dont have to struggle with emacs editing controls
 
 #+begin_src emacs-lisp
 
@@ -428,6 +428,9 @@ this is now running as a systemd service
 
 (setq org-agenda-files '("~/org" "~/org/roam"))
 
+(with-eval-after-load 'evil
+    (evil-define-key '(normal insert) org-mode-map
+      (kbd "S-<right>") 'org-shiftright))
 #+end_src
 
 * =org-roam= and =org-ui= configuration
@@ -437,7 +440,7 @@ this is now running as a systemd service
 (use-package org-roam
   :ensure nil
   :custom
-  (setq org-roam-directory (file-truename "~/org/roam")) ;; Set your preferred directory
+  (org-roam-directory (file-truename "~/org/roam/")) ;; Set your preferred directory
   (org-roam-completion-everywhere t)
   (org-roam-capture-templates
    '(("d" "default" plain
@@ -963,11 +966,6 @@ this will allow us to make changes across multiple unopened files in file system
     (setq cider-repl-use-pretty-printing t)
     (setq cider-clojure-cli-aliases ":dev:cider"))
 
-  (use-package paredit
-    :ensure nil
-    :hook ((clojure-mode . paredit-mode)
-           (cider-repl-mode . paredit-mode)))
-
   (use-package rainbow-delimiters
     :ensure nil
     :hook ((clojure-mode . rainbow-delimiters-mode)
@@ -1061,7 +1059,7 @@ this will allow us to make changes across multiple unopened files in file system
   	treemacs-width 35
   	treemacs-show-hidden-files t
   	treemacs-show-git-status t
-  	treemacs-no-png-images t
+  	treemacs-no-png-images nil
   	treemacs-collapse-dirs 3
   	treemacs-follow-mode t
   	treemacs-project-follow-mode t)
@@ -1472,8 +1470,8 @@ This overrides evil behaviour of using Esc to close special buffers.  This somet
 
 #+begin_src emacs-lisp
 
-
 (use-package paredit
+  :ensure nil
   :hook ((emacs-lisp-mode
           clojure-mode
           clojurescript-mode
@@ -1508,37 +1506,37 @@ This overrides evil behaviour of using Esc to close special buffers.  This somet
     (kbd "C-M-<right>") 'paredit-forward-barf-sexp))
 #+end_src
 
-** TODO Smartparens
+** TODO COMMENT Smartparens
 Need to figure out what this does that is different from paredit.  infact i see the same bindings here that i see in paredit-mode
 
 #+begin_src emacs-lisp 
-(use-package smartparens
-  :ensure nil 
-  :config
-  ;; Load the default configuration
-  (require 'smartparens-config)
+;; (use-package smartparens
+;;   :ensure nil 
+;;   :config
+;;   ;; Load the default configuration
+;;   (require 'smartparens-config)
   
-  ;; Enable smartparens in Python mode
-  (add-hook 'python-mode-hook #'smartparens-mode)
+;;   ;; Enable smartparens in Python mode
+;;   (add-hook 'python-mode-hook #'smartparens-mode)
   
-  ;; Optional: Use strict mode for even better structural editing
-  ;; (add-hook 'python-mode-hook #'smartparens-strict-mode)
+;;   ;; Optional: Use strict mode for even better structural editing
+;;   ;; (add-hook 'python-mode-hook #'smartparens-strict-mode)
   
-  ;; Python-specific pairs
-  (sp-local-pair 'python-mode "'" "'" :unless '(sp-in-comment-p sp-in-string-p))
-  (sp-local-pair 'python-mode "\"" "\"" :unless '(sp-in-comment-p sp-in-string-p))
-  (sp-local-pair 'python-mode "'''" "'''")
-  (sp-local-pair 'python-mode "\"\"\"" "\"\"\"")
+;;   ;; Python-specific pairs
+;;   (sp-local-pair 'python-mode "'" "'" :unless '(sp-in-comment-p sp-in-string-p))
+;;   (sp-local-pair 'python-mode "\"" "\"" :unless '(sp-in-comment-p sp-in-string-p))
+;;   (sp-local-pair 'python-mode "'''" "'''")
+;;   (sp-local-pair 'python-mode "\"\"\"" "\"\"\"")
   
-  ;; Useful keybindings for Python
-  :bind (:map smartparens-mode-map
-              ("C-M-f" . sp-forward-sexp)
-              ("C-M-b" . sp-backward-sexp)
-              ("C-<left>" . sp-backward-slurp-sexp)
-              ("C-<right>" . sp-forward-slurp-sexp)
-              ("C-M-<left>" . sp-backward-barf-sexp)
-	      ("C-M-<right>" . sp-forward-barf-sexp)
-              ))
+;;   ;; Useful keybindings for Python
+;;   :bind (:map smartparens-mode-map
+;;               ("C-M-f" . sp-forward-sexp)
+;;               ("C-M-b" . sp-backward-sexp)
+;;               ("C-<left>" . sp-backward-slurp-sexp)
+;;               ("C-<right>" . sp-forward-slurp-sexp)
+;;               ("C-M-<left>" . sp-backward-barf-sexp)
+;; 	      ("C-M-<right>" . sp-forward-barf-sexp)
+;;               ))
 
 #+end_src
 
@@ -2063,6 +2061,10 @@ Ajaneesh")
 
   ;; ===== TREEMACS FACES =====
   (with-eval-after-load 'treemacs
+    ;; Make sure all files have at least a fallback icon
+    (treemacs-define-custom-icon 
+     (all-the-icons-faicon "file-o" :v-adjust 0.0 :height 0.8)
+     "fallback")
     (custom-theme-set-faces
      'user
      `(treemacs-root-face ((t (:inherit variable-pitch :height 0.9))))
@@ -2430,3 +2432,55 @@ This is something that i use often.  it kind of makes it easier to deal with =ls
 
 #+end_src
 
+* SQL Client configuration
+#+begin_src emacs-lisp
+
+;; Function to read from secrets.json
+(defun my/read-postgres-secrets ()
+  "Read PostgreSQL connection details from secrets.json"
+  (let* ((json-object-type 'hash-table)
+         (json-array-type 'list)
+         (json-key-type 'string)
+         (secrets-file (expand-file-name "~/.config/ihx/secrets.json"))
+         (json-data (with-temp-buffer
+                      (insert-file-contents secrets-file)
+                      (json-read-from-string (buffer-string)))))
+    (list :user (gethash "db_user" json-data)
+          :database (gethash "db_name" json-data)
+          :server (gethash "db_host_local" json-data)
+          :port (let ((port-value (gethash "db_port_local" json-data)))
+                  (if (stringp port-value) 
+                      (string-to-number port-value) 
+                    port-value))
+          :password (gethash "db_password" json-data))))
+
+;; Direct PostgreSQL connection function
+(defun my/postgres-connect ()
+  "Connect to PostgreSQL using settings from secrets file."
+  (interactive)
+  ;; Get connection details
+  (let* ((pg-conn (my/read-postgres-secrets))
+         (sql-postgres-program "psql")
+         (sql-postgres-options '("-P" "pager=off"))
+         (sql-product 'postgres)
+         (sql-user (plist-get pg-conn :user))
+         (sql-password (plist-get pg-conn :password))
+         (sql-server (plist-get pg-conn :server))
+         (sql-database (plist-get pg-conn :database))
+         (sql-port (plist-get pg-conn :port)))
+    
+    ;; Create a buffer name based on connection details
+    (let ((sql-buffer (sql-postgres)))
+      ;; After connection, set up buffer for SQL sending
+      (with-current-buffer sql-buffer
+        (setq-local sql-buffer sql-buffer))
+      
+      ;; Return to the previous buffer and set sql-buffer there too
+      (with-current-buffer (other-buffer sql-buffer 1)
+        (when (eq major-mode 'sql-mode)
+          (setq-local sql-buffer sql-buffer))))))
+
+;; Setup SQL file keybindings
+(with-eval-after-load 'sql
+  (define-key sql-mode-map (kbd "C-c C-c") 'sql-send-paragraph))
+#+end_src

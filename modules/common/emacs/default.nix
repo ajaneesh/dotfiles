@@ -79,6 +79,7 @@
           python-black
           pyvenv
           rainbow-delimiters
+          restclient
           smartparens
           transient
           treemacs
