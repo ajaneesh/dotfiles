@@ -2483,4 +2483,25 @@ This is something that i use often.  it kind of makes it easier to deal with =ls
 ;; Setup SQL file keybindings
 (with-eval-after-load 'sql
   (define-key sql-mode-map (kbd "C-c C-c") 'sql-send-paragraph))
+
+(defun my/copy-pg-password-to-kill-ring ()
+  "Copy PostgreSQL password from secrets to the kill ring."
+  (interactive)
+  (let* ((pg-conn (my/read-postgres-secrets))
+         (password (plist-get pg-conn :password)))
+    (kill-new password)
+    (message "PostgreSQL password copied to clipboard. Use yank (C-y) to paste it.")))
+
+;; Bind to a convenient key combination
+(global-set-key (kbd "C-c s c") 'my/postgres-connect)
+(global-set-key (kbd "C-c s p") 'my/copy-pg-password-to-kill-ring)
+
+;; Configure which-key to show a descriptive prefix for your SQL keys
+(which-key-add-key-based-replacements
+  "C-c s" "sql")
+
+;; You can also add descriptions for the individual commands
+(which-key-add-key-based-replacements
+  "C-c s c" "connect"
+  "C-c s p" "copy password")
 #+end_src
