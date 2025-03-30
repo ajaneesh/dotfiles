@@ -2454,7 +2454,6 @@ This is something that i use often.  it kind of makes it easier to deal with =ls
                     port-value))
           :password (gethash "db_password" json-data))))
 
-;; Direct PostgreSQL connection function
 (defun my/postgres-connect ()
   "Connect to PostgreSQL using settings from secrets file."
   (interactive)
@@ -2469,6 +2468,19 @@ This is something that i use often.  it kind of makes it easier to deal with =ls
          (sql-database (plist-get pg-conn :database))
          (sql-port (plist-get pg-conn :port)))
     
+    ;; Override password handling to prevent prompting
+    (advice-add 'sql-get-login :around
+                (lambda (orig-fun &rest args)
+                  (let ((func (nth 0 args))
+                        (prompt (nth 1 args))
+                        (default (nth 2 args)))
+                    (if (and (eq func 'sql-password)
+                             (or (string= prompt "Password: ")
+                                 (string= prompt "PostgreSQL Password: ")))
+                        sql-password
+                      (apply orig-fun args))))
+                '((name . password-override)))
+    
     ;; Create a buffer name based on connection details
     (let ((sql-buffer (sql-postgres)))
       ;; After connection, set up buffer for SQL sending
@@ -2478,23 +2490,31 @@ This is something that i use often.  it kind of makes it easier to deal with =ls
       ;; Return to the previous buffer and set sql-buffer there too
       (with-current-buffer (other-buffer sql-buffer 1)
         (when (eq major-mode 'sql-mode)
-          (setq-local sql-buffer sql-buffer))))))
+          (setq-local sql-buffer sql-buffer)))
+      
+      ;; Remove advice
+      (advice-remove 'sql-get-login 'password-override))))
 
-;; Setup SQL file keybindings
-(with-eval-after-load 'sql
-  (define-key sql-mode-map (kbd "C-c C-c") 'sql-send-paragraph))
-
-(defun my/copy-pg-password-to-kill-ring ()
-  "Copy PostgreSQL password from secrets to the kill ring."
+(defun my/insert-pg-password ()
+  "Insert PostgreSQL password from secrets at current position.
+If in minibuffer during password prompt, inserts and submits."
   (interactive)
   (let* ((pg-conn (my/read-postgres-secrets))
-         (password (plist-get pg-conn :password)))
+         (password (plist-get pg-conn :password))
+         (in-minibuffer (minibufferp)))
+    ;; Store in kill ring
     (kill-new password)
-    (message "PostgreSQL password copied to clipboard. Use yank (C-y) to paste it.")))
+    
+    ;; Insert password
+    (insert password)
+    
+    ;; If in minibuffer, automatically submit
+    (when in-minibuffer
+      (exit-minibuffer))
+    
+    (message "PostgreSQL password %s." 
+             (if in-minibuffer "submitted" "inserted"))))
 
-;; Bind to a convenient key combination
-(global-set-key (kbd "C-c s c") 'my/postgres-connect)
-(global-set-key (kbd "C-c s p") 'my/copy-pg-password-to-kill-ring)
 
 ;; Configure which-key to show a descriptive prefix for your SQL keys
 (which-key-add-key-based-replacements
@@ -2503,5 +2523,13 @@ This is something that i use often.  it kind of makes it easier to deal with =ls
 ;; You can also add descriptions for the individual commands
 (which-key-add-key-based-replacements
   "C-c s c" "connect"
-  "C-c s p" "copy password")
+  "C-c s p" "password from secrets")
+
+(global-set-key (kbd "C-c s c") 'my/postgres-connect)
+(global-set-key (kbd "C-c s p") 'my/insert-pg-password)
+
+;; Setup SQL file keybindings
+(with-eval-after-load 'sql
+  (define-key sql-mode-map (kbd "C-c C-c") 'sql-send-paragraph))
+
 #+end_src
