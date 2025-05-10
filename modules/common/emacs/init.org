@@ -204,7 +204,7 @@ this is now running as a systemd service
       :init
       (setq evil-want-integration t)
       (setq evil-want-keybinding nil)
-      (setq evil-want-C-u-scroll t)
+      (setq evil-want-C-u-scroll nil)
       (setq evil-want-C-i-jump nil)
       (setq evil-respect-visual-line-mode t)
       (setq evil-undo-system 'undo-tree)
@@ -515,7 +515,7 @@ this is now running as a systemd service
   
 #+end_src
 
-* Org mode workflow customization
+* =org-mode= workflow customization
 ** Org Agenda Custom View
 #+begin_src emacs-lisp
 
@@ -557,8 +557,8 @@ this is now running as a systemd service
 #+begin_src emacs-lisp
 
 (setq org-todo-keywords
-      '((sequence "TODO(t)" "NEXT(n)" "IN-PROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")
-        (sequence "IDEA(i)" "DRAFT(d)" "IN-REVIEW(r)" "|" "PUBLISHED(p)")))
+      '((sequence "TODO(t/!)" "NEXT(n/!)" "IN-PROGRESS(p@/!)" "WAITING(w/!)" "|" "DONE(d@/!)" "CANCELLED(c@/!)")
+        (sequence "IDEA(i)" "DRAFT(d)" "IN-REVIEW(r)" "|" "PUBLISHED(b)")))
 
 ;; Set TODO state colors
 (setq org-todo-keyword-faces
@@ -653,10 +653,293 @@ this is now running as a systemd service
 ;; Fast tag selection
 (setq org-fast-tag-selection-single-key t)
 #+end_src
+** Advanced Workflow for standups
+#+begin_src emacs-lisp :tangle yes
+;; Define team members
+(defvar my/team-members '("Dev1" "Dev2" "Dev3" "Dev4" "DevOps" "QA"))
+
+;; Function to assign team members with completion
+(defun my/assign-team-members ()
+  "Prompt for team members and add them to the ASSIGNED property."
+  (interactive)
+  (let* ((selected (completing-read-multiple 
+                    "Assign to (comma-separated): " 
+                    my/team-members))
+         (assigned (mapconcat 'identity selected ", ")))
+    (org-set-property "ASSIGNED" assigned)))
+
+;; Bind to a convenient key
+(define-key org-mode-map (kbd "C-c a") 'my/assign-team-members)
+
+;; Create a standup-specific agenda view
+(add-to-list 'org-agenda-custom-commands
+             '("S" "Standup Overview"
+               ((agenda "" ((org-agenda-span 'day)
+                            (org-agenda-start-day ".")
+                            (org-deadline-warning-days 14)))
+                (tags-todo "DEADLINE<\"<now>\"|SCHEDULED<\"<now>\""
+                           ((org-agenda-overriding-header "Overdue Tasks")))
+                (todo "WAITING" 
+                      ((org-agenda-overriding-header "Blocked Tasks")))
+                (todo "IN-PROGRESS" 
+                      ((org-agenda-overriding-header "In Progress")))
+                (todo "NEXT" 
+                      ((org-agenda-overriding-header "Starting Soon")
+                       (org-agenda-skip-function '(org-agenda-skip-entry-if 'notscheduled))))
+                (todo "TODO"
+                      ((org-agenda-overriding-header "Upcoming \(Next 14 Days\)")
+                       (org-agenda-skip-function 
+			'(org-agenda-skip-entry-if 
+                          'notscheduled 
+                          '(not (org-agenda-skip-subtree-if 
+				 'scheduled 
+				 '(lambda () (org-get-scheduled-time (point))
+                                    (> 14 (org-time-stamp-to-now
+                                           (org-get-scheduled-time (point))))))))))))))
+;; Make notes appear similar to state changes (timestamp at end)
+(setq org-log-note-headings '((done . "CLOSING NOTE %t")
+                              (state . "State %-12s from %-12S %t")
+                              (note . "Note %t")
+                              (reschedule . "Rescheduled from %S on %t")
+                              (delschedule . "Not scheduled, was %S on %t")
+                              (redeadline . "New deadline from %S on %t")
+                              (deldeadline . "Removed deadline, was %S on %t")
+                              (refile . "Refiled on %t")
+                              (clock-out . "")))
+
+;; Remove the backslash continuation marker
+(setq org-log-into-drawer t)
+(setq org-log-states-order-reversed nil)
+
+;; Use visual line mode for better multi-line notes
+(add-hook 'org-mode-hook 'visual-line-mode)
+
+(defun my/get-org-entry-logbook-notes ()
+  "Extract LOGBOOK notes from the current entry, handling various org-mode log formats."
+  (let ((notes nil))
+    (org-with-wide-buffer
+     (org-back-to-heading t)
+     (let ((end (save-excursion (outline-next-heading) (point)))
+           (case-fold-search t))
+       ;; Find the LOGBOOK drawer
+       (when (re-search-forward "^[ \t]*:LOGBOOK:[ \t]*$" end t)
+         (let ((drawer-start (point))
+               (drawer-end (save-excursion
+                             (re-search-forward "^[ \t]*:END:[ \t]*$" end t)
+                             (point))))
+           
+           ;; Return to start of drawer
+           (goto-char drawer-start)
+           
+           ;; Process each line in the drawer
+           (while (< (point) drawer-end)
+             (cond
+              ;; Match standard note entries (with timestamp at end)
+              ((looking-at "[ \t]*- Note \\(.*\\)\\[\\([^]]+\\)\\]$")
+               (let ((content (string-trim (match-string-no-properties 1)))
+                     (timestamp (match-string-no-properties 2)))
+                 (push (cons timestamp content) notes)
+                 (forward-line 1)))
+              
+              ;; Match old-style note entries (with timestamp at beginning)
+              ((looking-at "[ \t]*- Note taken on \\[\\([^]]+\\)\\]\\(.*\\)$")
+               (let ((timestamp (match-string-no-properties 1))
+                     (content "")
+                     (has-continuation (string-match-p "\\\\[ \t]*$" (match-string 2))))
+                 
+                 ;; Get content from first line (after the timestamp)
+                 (setq content (string-trim (replace-regexp-in-string "\\\\[ \t]*$" "" (match-string-no-properties 2))))
+                 
+                 ;; If there's a continuation marker, get content from following lines
+                 (when has-continuation
+                   (forward-line 1)
+                   (while (and (< (point) drawer-end)
+                               (looking-at "[ \t]+\\(.+\\)$"))
+                     (setq content 
+                           (concat content 
+                                   (if (string= content "") "" " ") 
+                                   (match-string-no-properties 1)))
+                     (forward-line 1)))
+                 
+                 ;; Store the note if we have content
+                 (when (not (string= content ""))
+                   (push (cons timestamp content) notes))))
+              
+              ;; Match state changes
+              ((looking-at "[ \t]*- State \"\\([^\"]+\\)\"[ \t]+from \"\\([^\"]+\\)\"[ \t]+\\[\\([^]]+\\)\\]")
+               (let ((new-state (match-string-no-properties 1))
+                     (old-state (match-string-no-properties 2))
+                     (timestamp (match-string-no-properties 3)))
+                 (push (cons timestamp (format "Changed from %s to %s" old-state new-state)) notes)
+                 (forward-line 1)))
+              
+              ;; Skip any other lines
+              (t (forward-line 1))))))))
+    (nreverse notes)))
+(defun org-dblock-write:standup-report (params)
+  "Write out a standup report dynamic block using built-in org functions."
+  (let* ((date (or (plist-get params :date) (format-time-string "%Y-%m-%d")))
+         (files (or (plist-get params :files) '("~/org/tasks.org")))
+         (entries nil))
+    
+    ;; For each file
+    (dolist (file files)
+      (with-current-buffer (find-file-noselect file)
+        (org-map-entries
+         (lambda ()
+           (let* ((heading (org-get-heading t t t t))
+                  (assigned (org-entry-get nil "ASSIGNED"))
+                  (todo-state (org-get-todo-state))
+                  ;; Create a file link with line number instead of ID link
+                  (file-path (buffer-file-name))
+                  (link (format "[[file:%s::%s][%s]]" 
+                                file-path
+                                heading
+                                heading))
+                  (logbook (my/get-org-entry-logbook-notes))
+                  (date-logs (seq-filter
+                              (lambda (log)
+                                (string-match-p date (car log)))
+                              logbook)))
+             (when date-logs
+               (push (list link assigned todo-state date-logs) entries))))
+         nil nil)))
+    
+    ;; Insert the collected data
+    (if entries
+        (progn
+          (insert "** Updates for " date "\n")
+          (dolist (entry (nreverse entries))
+            (let ((link (nth 0 entry))
+                  (assigned (nth 1 entry))
+                  (todo-state (nth 2 entry))
+                  (logs (nth 3 entry)))
+              (insert "*** " link)
+              (when todo-state
+                (insert " [" todo-state "]"))
+              (when assigned
+                (insert " (" assigned ")"))
+              (insert "\n")
+              (dolist (log logs)
+                (insert "    - " (car log) ": " (cdr log) "\n")))))
+      (insert "** No updates found for " date "\n"))))
+
+(with-eval-after-load 'org
+  (org-dynamic-block-define "standup-report" 'standup-report))
+
+(defun my/create-todays-standup ()
+  "Create today's standup entry with an automatic report of all LOGBOOK entries."
+  (interactive)
+  (let* ((today (format-time-string "%Y-%m-%d"))
+         (today-heading (format-time-string "* Standup %Y-%m-%d %A"))
+         (standup-file "~/org/standups.org"))
+    
+    ;; Open standups.org file
+    (find-file standup-file)
+    
+    ;; Check if today's entry already exists
+    (goto-char (point-min))
+    (unless (re-search-forward (format "^%s" (regexp-quote today-heading)) nil t)
+      ;; Create new heading for today
+      (goto-char (point-max))
+      (unless (bolp) (insert "\n"))
+      (insert today-heading "\n\n")
+      
+      ;; Insert dynamic block
+      (insert "#+BEGIN: standup-report :date \"" today "\"\n")
+      (insert "#+END:\n\n")
+      (insert "** Action Items\n\n")
+      
+      ;; Position cursor at the dynamic block
+      (search-backward "#+BEGIN:")
+      
+      ;; Execute the dynamic block
+      (org-ctrl-c-ctrl-c)
+      
+      ;; Move to Action Items for additional notes
+      (search-forward "** Action Items")
+      (forward-line 1)
+      
+      (message "Created standup entry for %s" today))
+    
+    ;; If entry already exists, just go to it
+    (goto-char (point-min))
+    (when (re-search-forward (format "^%s" (regexp-quote today-heading)) nil t)
+      (org-show-entry)
+      (message "Opened existing standup for %s" today))))
+(defun my/get-org-entry-logbook-notes ()
+  "Extract LOGBOOK notes from the current entry, handling various org-mode log formats."
+  (let ((notes nil))
+    (org-with-wide-buffer
+     (org-back-to-heading t)
+     (let ((end (save-excursion (outline-next-heading) (point)))
+           (case-fold-search t))
+       ;; Find the LOGBOOK drawer
+       (when (re-search-forward "^[ \t]*:LOGBOOK:[ \t]*$" end t)
+         (let ((drawer-start (point))
+               (drawer-end (save-excursion
+                             (re-search-forward "^[ \t]*:END:[ \t]*$" end t)
+                             (point))))
+           
+           ;; Return to start of drawer
+           (goto-char drawer-start)
+           
+           ;; Process each line in the drawer
+           (while (< (point) drawer-end)
+             (cond
+              ;; Match standard note entries (with timestamp at end)
+              ((looking-at "[ \t]*- Note \\(.*\\)\\[\\([^]]+\\)\\]$")
+               (let ((content (string-trim (match-string-no-properties 1)))
+                     (timestamp (match-string-no-properties 2)))
+                 (push (cons timestamp content) notes)
+                 (forward-line 1)))
+              
+              ;; Match old-style note entries (with timestamp at beginning)
+              ((looking-at "[ \t]*- Note taken on \\[\\([^]]+\\)\\]\\(.*\\)?$")
+               (let ((timestamp (match-string-no-properties 1))
+                     (content (or (match-string-no-properties 2) ""))
+                     (has-continuation (and (match-string 2) 
+                                            (string-match-p "\\\\[ \t]*$" (match-string 2)))))
+                 
+                 ;; Get content from first line (after the timestamp)
+                 (setq content (string-trim (replace-regexp-in-string "\\\\[ \t]*$" "" content)))
+                 
+                 ;; If there's a continuation marker, get content from following lines
+                 (when has-continuation
+                   (forward-line 1)
+                   (while (and (< (point) drawer-end)
+                               (looking-at "[ \t]+\\(.+\\)$"))
+                     (setq content 
+                           (concat content 
+                                   (if (string= content "") "" " ") 
+                                   (match-string-no-properties 1)))
+                     (forward-line 1)))
+                 
+                 ;; Store the note even if content is empty
+                 (push (cons timestamp content) notes)
+                 (unless has-continuation
+                   (forward-line 1))))
+              
+              ;; Match state changes
+              ((looking-at "[ \t]*- State \"\\([^\"]+\\)\"[ \t]+from \"\\([^\"]+\\)\"[ \t]+\\[\\([^]]+\\)\\]")
+               (let ((new-state (match-string-no-properties 1))
+                     (old-state (match-string-no-properties 2))
+                     (timestamp (match-string-no-properties 3)))
+                 (push (cons timestamp (format "Changed from %s to %s" old-state new-state)) notes)
+                 (forward-line 1)))
+              
+              ;; Skip any other lines
+              (t (forward-line 1))))))))
+    (nreverse notes)))
+
+;; Bind to convenient keys
+(global-set-key (kbd "C-c s s") 'my/create-todays-standup)
+(global-set-key (kbd "C-c s r") 'my/refresh-standup-report)
+#+end_src
 * Buffer customizations (prot tips to ensure they open in specific windows)
 Need to borrow some useful configuration to control mini buffer from Prot's youtube video.  I have deferred this for a while.  Once i live with my configuration for a while i will be in a better position to understand what exactly i am missing.  Better not start with what someone feels is a good way to configure buffers. 
 
-* Project.el configuration
+* =project.el= configuration
 
 #+begin_src emacs-lisp
 
@@ -703,7 +986,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
 
 #+end_src
 
-* Vertico configuration
+* =vertico= configuration
 
 #+begin_src emacs-lisp
   ;; Enable vertico
@@ -724,7 +1007,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
     (savehist-mode))  
 #+end_src
 
-* Marginalia configuration
+* =marginalia= configuration
 
 #+begin_src emacs-lisp
 
@@ -746,7 +1029,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
     (marginalia-mode))
 #+end_src
 
-* Consult configuration
+* =consult= configuration
 
 #+begin_src emacs-lisp
 
@@ -919,7 +1202,7 @@ this will allow us to make changes across multiple unopened files in file system
 
 #+end_src
 
-* Embark configuration
+* =embark= configuration
 
 #+begin_src emacs-lisp
 
@@ -960,7 +1243,7 @@ this will allow us to make changes across multiple unopened files in file system
 
 #+end_src
 
-* Orderless configuration
+* =orderless= configuration
 
 #+begin_src emacs-lisp
 
@@ -972,7 +1255,7 @@ this will allow us to make changes across multiple unopened files in file system
     (completion-category-overrides '((file (styles basic partial-completion)))))  
 #+end_src
 
-* Cape Configuration
+* =cape= Configuration
 
 #+begin_src emacs-lisp
 
@@ -1072,7 +1355,7 @@ this will allow us to make changes across multiple unopened files in file system
 
 #+end_src
 
-* Corfu Configuration
+* =corfu= Configuration
 
 #+begin_src emacs-lisp
 
@@ -1184,7 +1467,7 @@ this will allow us to make changes across multiple unopened files in file system
   (setq cider-repl-history-size 3000)
 #+end_src
 
-* treemacs configuration
+* =treemacs= configuration
 #+begin_src emacs-lisp
 
 (defun my/treemacs-peek ()
@@ -1426,49 +1709,58 @@ Starting to believe i will never use DAP
   
 #+end_src
 
-* TODO Uvicron compilation mappings for FastAPI projects
+* Uvicron compilation mappings for FastAPI projects
 
 This is just an easy for me to start up my various python projects.  I realize that this is not generic and is better off outside of dotfiles.  It makes no sense for people who are not involved in these projects
 
 #+begin_src emacs-lisp
-  ;; Create a keymap for uvicorn commands
-  (defvar uvicorn-command-map
-    (let ((map (make-sparse-keymap)))
-      (define-key map (kbd "1") 
-                  (lambda () 
-                    (interactive)
-                    (let ((default-directory (project-root (project-current t)))
-                          (compilation-buffer-name-function
-                           (lambda (_mode) "*uvicorn-iOCR*")))
-                      (compile "PYTHONPATH=$PYTHONPATH:. uvicorn app.iOCR_app:app --reload --port 8123 --host 0.0.0.0"))))
-      
-      (define-key map (kbd "2")
-                  (lambda ()
-                    (interactive)
-                    (let ((default-directory (project-root (project-current t)))
-                          (compilation-buffer-name-function
-                           (lambda (_mode) "*uvicorn-CVC*")))
-                      (compile "PYTHONPATH=$PYTHONPATH:. uvicorn app.CVC_app:app --reload --port 8124 --host 0.0.0.0"))))
+;; Create a keymap for uvicorn commands
+(defvar uvicorn-command-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "1") 
+                (lambda () 
+                  (interactive)
+                  (let ((default-directory (project-root (project-current t)))
+                        (compilation-buffer-name-function
+                         (lambda (_mode) "*uvicorn-iOCR*")))
+                    (compile "PYTHONPATH=$PYTHONPATH:. uvicorn app.iOCR_app:app --reload --port 8123 --host 0.0.0.0"))))
+    
+    (define-key map (kbd "2")
+                (lambda ()
+                  (interactive)
+                  (let ((default-directory (project-root (project-current t)))
+                        (compilation-buffer-name-function
+                         (lambda (_mode) "*uvicorn-CVC*")))
+                    (compile "PYTHONPATH=$PYTHONPATH:. uvicorn app.CVC_app:app --reload --port 8124 --host 0.0.0.0"))))
 
-      (define-key map (kbd "3")
-                  (lambda ()
-                    (interactive)
-                    (let ((default-directory (project-root (project-current t)))
-                          (compilation-buffer-name-function
-                           (lambda (_mode) "*uvicorn-Blens*")))
-                      (compile "PYTHONPATH=$PYTHONPATH:. uvicorn app.billuminati-app:app --reload --port 8125 --host 0.0.0.0"))))
-      map))
+    (define-key map (kbd "3")
+                (lambda ()
+                  (interactive)
+                  (let ((default-directory (project-root (project-current t)))
+                        (compilation-buffer-name-function
+                         (lambda (_mode) "*uvicorn-Blens*")))
+                    (compile "PYTHONPATH=$PYTHONPATH:. uvicorn app.billuminati-app:app --reload --port 8125 --host 0.0.0.0"))))
 
-  ;; Create the prefix key binding
-  (global-set-key (kbd "C-c u") uvicorn-command-map)
+    (define-key map (kbd "4")
+                (lambda ()
+                  (interactive)
+                  (let ((default-directory (project-root (project-current t)))
+                        (compilation-buffer-name-function
+                         (lambda (_mode) "*uvicorn-capture*")))
+                    (compile "PYTHONPATH=$PYTHONPATH:. uvicorn tests.api_server:app --reload --port 8125 --host 0.0.0.0"))))
+    map))
 
-  ;; Add which-key descriptions
-  (with-eval-after-load 'which-key
-    (which-key-add-key-based-replacements
-      "C-c u" "uvicorn"
-      "C-c u 1" "start iOCR"
-      "C-c u 2" "start CVC"
-      "C-c u 3" "start Billi"))  
+;; Create the prefix key binding
+(global-set-key (kbd "C-c u") uvicorn-command-map)
+
+;; Add which-key descriptions
+(with-eval-after-load 'which-key
+  (which-key-add-key-based-replacements
+    "C-c u" "uvicorn"
+    "C-c u 1" "start iOCR"
+    "C-c u 2" "start CVC"
+    "C-c u 3" "start Billi"
+    "C-c u 4" "start Billi capture"))  
 #+end_src
 
 * Evil - Elisp keymap customization
@@ -2112,23 +2404,6 @@ Ajaneesh")
           line-number
           line-number-current-line)))
 
-;; (with-eval-after-load 'all-the-icons
-;;   (set-face-attribute 'treemacs-directory-face nil
-;; 			:family "Source Sans Pro"
-;; 			:height 0.9)
-;;   (set-face-attribute 'treemacs-file-face nil
-;; 			:inherit 'treemacs-directory-face))
-
-;; (with-eval-after-load 'treemacs
-;;   (treemacs-modify-theme "all-the-icons"
-;;     :config
-;;     (progn
-;; 	(set-face-attribute 'treemacs-directory-face nil
-;;   			    :family "Source Sans Pro"
-;;   			    :height 0.9)
-;; 	(set-face-attribute 'treemacs-file-face nil
-;;   			    :inherit 'treemacs-directory-face))))
-
 #+end_src
 
 * Font and Color Configuration
@@ -2146,7 +2421,7 @@ Ajaneesh")
 
 (set-face-attribute 'variable-pitch nil
                     :family "Source Sans Pro"
-                    :height 120)
+                    :height 110)
 
 ;; Ligature config - KEEP THIS
 (use-package ligature
@@ -2586,6 +2861,7 @@ This is something that i use often.  it kind of makes it easier to deal with =ls
 #+end_src
 
 * SQL Client configuration
+makes it easier to open a connection to Postgres.   In this setup, i save my connection properties in a .config/.. file and when i start a connection with =C-c s c=, i am prompted for a password and hitting =C-c s p= automatically enters the password from my secrets file. Having to do this as the connection routinue is not accepting password even if supplied along with other connection parameters. 
 #+begin_src emacs-lisp
 
 ;; Function to read from secrets.json
