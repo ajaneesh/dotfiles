@@ -10,5 +10,6 @@
     ./terraform.nix
     ./clojure.nix
     ./docker.nix
+    ./claudecode.nix
   ];
 }

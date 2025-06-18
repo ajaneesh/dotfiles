@@ -709,7 +709,7 @@ this is now running as a systemd service
 
 ;; Remove the backslash continuation marker
 (setq org-log-into-drawer t)
-(setq org-log-states-order-reversed nil)
+(setq org-log-states-order-reversed t)
 
 ;; Use visual line mode for better multi-line notes
 (add-hook 'org-mode-hook 'visual-line-mode)
@@ -2960,5 +2960,157 @@ If in minibuffer during password prompt, inserts and submits."
 ;; Setup SQL file keybindings
 (with-eval-after-load 'sql
   (define-key sql-mode-map (kbd "C-c C-c") 'sql-send-paragraph))
+
+#+end_src
+
+* Claude Code Integration
+
+Claude Code integration is configured through the Nix module system and provides AI-powered coding assistance directly in Emacs.
+
+#+begin_src emacs-lisp
+
+;; Claude Code integration is automatically configured via Nix module
+;; The configuration is injected when claudecode.enable = true in your host config
+
+;; Additional Claude Code enhancements for Python development
+(with-eval-after-load 'claude-code
+  ;; Python-specific Claude Code functions
+  (defun claude-code-python-debug ()
+    "Use Claude Code to help debug Python code with error context."
+    (interactive)
+    (if-let ((file (buffer-file-name)))
+        (let* ((error-context (if (get-buffer "*Python*")
+                                  (with-current-buffer "*Python*"
+                                    (buffer-substring-no-properties 
+                                     (max (point-min) (- (point-max) 2000)) 
+                                     (point-max)))
+                                ""))
+               (prompt (if (string-empty-p error-context)
+                           "Review this Python code for potential bugs and improvements"
+                         (format "Help debug this Python code. Recent output/errors:\n\n%s" error-context))))
+          (claude-code-run prompt (list file)))
+      (user-error "Current buffer is not visiting a file")))
+
+  (defun claude-code-python-optimize ()
+    "Use Claude Code to optimize Python code for performance."
+    (interactive)
+    (if-let ((file (buffer-file-name)))
+        (claude-code-run 
+         "Analyze this Python code for performance optimizations. Suggest improvements for speed, memory usage, and pythonic patterns."
+         (list file))
+      (user-error "Current buffer is not visiting a file")))
+
+  (defun claude-code-python-type-hints ()
+    "Add type hints to Python code using Claude Code."
+    (interactive)
+    (if-let ((file (buffer-file-name)))
+        (claude-code-run 
+         "Add comprehensive type hints to this Python code. Include return types, parameter types, and use appropriate generics."
+         (list file))
+      (user-error "Current buffer is not visiting a file")))
+
+  (defun claude-code-python-docstrings ()
+    "Generate docstrings for Python code using Claude Code."
+    (interactive)
+    (if-let ((file (buffer-file-name)))
+        (claude-code-run 
+         "Add comprehensive docstrings to all functions and classes in this Python code. Use Google or NumPy style and include examples where appropriate."
+         (list file))
+      (user-error "Current buffer is not visiting a file")))
+
+  ;; Python-specific keymap additions
+  (defvar claude-code-python-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "d") 'claude-code-python-debug)
+      (define-key map (kbd "o") 'claude-code-python-optimize)
+      (define-key map (kbd "t") 'claude-code-python-type-hints)
+      (define-key map (kbd "s") 'claude-code-python-docstrings)
+      map))
+
+  ;; Add Python-specific commands to the main Claude Code keymap
+  (define-key claude-code-command-map (kbd "y") claude-code-python-map)
+
+  ;; Integration with python-ts-mode
+  (add-hook 'python-ts-mode-hook
+            (lambda ()
+              (local-set-key (kbd "C-c c y") claude-code-python-map)))
+
+  ;; Which-key descriptions for Python commands
+  (with-eval-after-load 'which-key
+    (which-key-add-key-based-replacements
+      "C-c c y" "python specific"
+      "C-c c y d" "debug code"
+      "C-c c y o" "optimize code"
+      "C-c c y t" "add type hints"
+      "C-c c y s" "add docstrings")))
+
+;; Integration with existing pytest workflow
+(with-eval-after-load 'claude-code
+  (defun claude-code-pytest-analyze ()
+    "Analyze pytest failures and suggest fixes."
+    (interactive)
+    (if-let ((pytest-buf (get-buffer "*pytest*")))
+        (let* ((pytest-output (with-current-buffer pytest-buf
+                                 (buffer-substring-no-properties (point-min) (point-max))))
+               (current-file (buffer-file-name))
+               (prompt (format "Analyze these pytest failures and suggest specific fixes:\n\n%s" pytest-output)))
+          (if current-file
+              (claude-code-run prompt (list current-file))
+            (claude-code-run prompt)))
+      (user-error "No pytest output buffer found")))
+
+  ;; Add to existing uvicorn-like command structure
+  (defun claude-code-create-test-file ()
+    "Create a test file for the current Python module."
+    (interactive)
+    (if-let ((file (buffer-file-name)))
+        (let* ((module-name (file-name-sans-extension (file-name-nondirectory file)))
+               (test-file (format "test_%s.py" module-name))
+               (prompt (format "Create comprehensive pytest test cases for the Python module in %s. Create a new file called %s with proper test structure, fixtures, and edge cases." 
+                               (file-name-nondirectory file) test-file)))
+          (claude-code-run prompt (list file)))
+      (user-error "Current buffer is not visiting a file")))
+
+  ;; Add test creation to Python map
+  (define-key claude-code-python-map (kbd "c") 'claude-code-create-test-file)
+  (with-eval-after-load 'which-key
+    (which-key-add-key-based-replacements
+      "C-c c y c" "create tests")))
+
+;; Integration with LSP for enhanced context
+(with-eval-after-load 'claude-code
+  (defun claude-code-lsp-analyze-symbol ()
+    "Analyze symbol at point with LSP context using Claude Code."
+    (interactive)
+    (when (and (bound-and-true-p lsp-mode) (buffer-file-name))
+      (let* ((symbol (thing-at-point 'symbol t))
+             (file (buffer-file-name)))
+        (if symbol
+            (let* ((definition (condition-case nil
+                                 (lsp-request "textDocument/definition"
+                                              (lsp--text-document-position-params))
+                               (error nil)))
+                   (references (condition-case nil
+                                 (lsp-request "textDocument/references"
+                                              (lsp--make-reference-params nil nil))
+                               (error nil)))
+                   (hover-info (condition-case nil
+                                 (lsp-request "textDocument/hover"
+                                              (lsp--text-document-position-params))
+                               (error nil)))
+                   (context (format "Symbol: %s\nDefinitions: %d\nReferences: %d"
+                                    symbol
+                                    (if definition (length definition) 0)
+                                    (if references (length references) 0)))
+                   (prompt (format "Analyze this symbol with context:\n%s\n\nExplain its purpose, usage patterns, and any potential improvements."
+                                   context)))
+              (claude-code-run prompt (list file)))
+          (claude-code-explain-at-point)))))
+
+  ;; Add LSP integration to main keymap
+  (define-key claude-code-command-map (kbd "l") 'claude-code-lsp-analyze-symbol)
+  (with-eval-after-load 'which-key
+    (which-key-add-key-based-replacements
+      "C-c c l" "LSP analyze symbol")))
 
 #+end_src

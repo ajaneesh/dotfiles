@@ -27,7 +27,8 @@
 
       programs.emacs = {
         enable = true;
-        package = (pkgs.emacs.override { withXwidgets = true; withGTK3 = true; });
+        package = pkgs.emacs-gtk;
+        # package = (pkgs.emacs.override { withXwidgets = true; withGTK3 = true; });
 	      extraPackages = epkgs: with epkgs; [
           aggressive-indent
           all-the-icons

@@ -41,7 +41,10 @@ inputs.nixpkgs.lib.nixosSystem {
         };
       };
 
-      unfreePackages = [ "google-chrome" ];
+      unfreePackages = [
+        "google-chrome"
+        "claude-code"
+      ];
 
       # Environment setup for WSLg
       environment = {
@@ -109,7 +112,7 @@ inputs.nixpkgs.lib.nixosSystem {
 
       # GTK theme configuration
       programs.dconf.enable = true;
-      
+      claudecode.enable = true;      
       # Qt theme to match GTK
       qt = {
         enable = true;
@@ -143,7 +146,7 @@ inputs.nixpkgs.lib.nixosSystem {
         wslConf.automount.root = "/mnt";
         defaultUser = globals.user;
         startMenuLaunchers = true;
-        nativeSystemd = true;
+        # nativeSystemd = true;
         wslConf.network.generateResolvConf = true;
         interop.includePath = false; # Including Windows PATH will slow down Neovim command mode
       };

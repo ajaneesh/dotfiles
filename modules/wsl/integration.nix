@@ -15,7 +15,7 @@
     # WSL-specific configurations
     
     # Ensure systemd compatibility
-    wsl.nativeSystemd = true;
+    # wsl.nativeSystemd = true;
     
     # Network configuration for WSL
     networking = {
