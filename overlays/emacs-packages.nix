@@ -14,5 +14,19 @@ final: prev: {
         mu4e
       ];
     };
+    claude-code = final.emacsPackages.trivialBuild {
+      pname = "claude-code";
+      version = "0.1.0";
+      src = final.fetchFromGitHub {
+        owner = "stevemolitor"; 
+        repo = "claude-code"; 
+        rev = "main"; 
+        sha256 = "sha256-bCelxaT+qaR2W80Cr591A4cRycIFJmXjeY8/aqIpl5g=";
+      };
+      packageRequires = with final.emacsPackages; [
+        async
+        mu4e
+      ];
+    };
   };
 }

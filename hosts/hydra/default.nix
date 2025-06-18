@@ -104,9 +104,9 @@ inputs.nixpkgs.lib.nixosSystem {
           Restart = "on-failure";
         };
         # Add the PATH to match what you have in your shell
-      #   environment = {
-      #     PATH = "${config.home-manager.users.nixos.home.path}/bin:$PATH";
-      #   };
+        #   environment = {
+        #     PATH = "${config.home-manager.users.nixos.home.path}/bin:$PATH";
+        #   };
       };
       emacs.enable = true;
 

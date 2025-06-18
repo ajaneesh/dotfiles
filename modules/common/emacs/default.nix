@@ -43,6 +43,7 @@
           consult-project-extra
           corfu
           coverage
+          eat
           embark
           embark-consult
           evil
