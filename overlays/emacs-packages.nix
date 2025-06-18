@@ -19,13 +19,13 @@ final: prev: {
       version = "0.1.0";
       src = final.fetchFromGitHub {
         owner = "stevemolitor"; 
-        repo = "claude-code"; 
+        repo = "claude-code.el"; 
         rev = "main"; 
-        sha256 = "sha256-bCelxaT+qaR2W80Cr591A4cRycIFJmXjeY8/aqIpl5g=";
+        sha256 = "sha256-UtJH1am/00XSYYVsCKtmMgl/DE2XsFs+vg8DPBKUX0Q=";
       };
       packageRequires = with final.emacsPackages; [
-        async
-        mu4e
+        transient
+        eat
       ];
     };
   };
