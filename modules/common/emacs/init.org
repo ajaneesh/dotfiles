@@ -373,10 +373,13 @@ this is now running as a systemd service
 ;; Override Evil keybindings for Python
 (with-eval-after-load 'evil
   (evil-define-key '(normal insert visual) python-ts-mode-map 
+    (kbd "C-.") 'embark-act
     (kbd "M-.") 'lsp-find-definition
     (kbd "M-,") 'xref-go-back))
 
 #+end_src
+
+#+RESULTS:
 
 * =org-mode= base configuration
 
@@ -984,7 +987,12 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
   (setq project-additional-project-dirs 
         '("~/automation_scripts" "pyprojects"))
 
+  (with-eval-after-load 'evil
+    (evil-define-key '(normal visual) prog-mode-map
+      (kbd "C-.") 'embark-act))
 #+end_src
+
+#+RESULTS:
 
 * =vertico= configuration
 
@@ -1205,7 +1213,6 @@ this will allow us to make changes across multiple unopened files in file system
 * =embark= configuration
 
 #+begin_src emacs-lisp
-
 (use-package embark
   :ensure nil
   :bind
@@ -1424,6 +1431,7 @@ this will allow us to make changes across multiple unopened files in file system
   ;; Also add Evil bindings if needed
   (with-eval-after-load 'evil
     (evil-define-key '(normal visual) clojure-mode-map
+    (kbd "C-.") 'embark-act
       (kbd "M-.") 'cider-find-var
       (kbd "M-,") 'cider-pop-back))
 
@@ -1771,10 +1779,11 @@ Needs to be placed along with all the other with-eval-after-load 'evil customiza
 
 (with-eval-after-load 'evil
   (evil-define-key '(normal visual) emacs-lisp-mode-map
-    (kbd "]e") 'evil-cp-end-of-defun    ; Jump to end of top-level form
-    (kbd "[e") 'evil-cp-beginning-of-defun  ; Jump to start of top-level form
-    (kbd "M-j") 'evil-cp-next-sexp      ; Jump to next sexp
-    (kbd "M-k") 'evil-cp-previous-sexp)) ; Jump to previous sexp
+    (kbd "C-.") 'embark-act
+    (kbd "]e") 'evil-cp-end-of-defun    
+    (kbd "[e") 'evil-cp-beginning-of-defun  
+    (kbd "M-j") 'evil-cp-next-sexp      
+    (kbd "M-k") 'evil-cp-previous-sexp)) 
 
 #+end_src
 
@@ -1991,6 +2000,40 @@ Need to figure out what this does that is different from paredit.  infact i see 
 ;;               ))
 
 #+end_src
+
+** Intelligent ripgrep
+Place cursor at token and call C-. r for quick ripgrep using that token
+
+#+begin_src emacs-lisp
+
+;; Enhanced word/symbol extraction
+(defun my/thing-at-point-or-region ()
+  "Get either the selected region or symbol at point."
+  (if (use-region-p)
+      (buffer-substring-no-properties (region-beginning) (region-end))
+    (thing-at-point 'symbol t)))
+
+;; Main search functions
+(defun my/consult-ripgrep-dwim ()
+  "Search with consult-ripgrep using region or symbol at point."
+  (interactive)
+  (let ((query (my/thing-at-point-or-region)))
+    (consult-ripgrep nil query)))
+
+(defun my/embark-consult-ripgrep (str)
+  "Search for STR using consult-ripgrep."
+  (consult-ripgrep nil str))
+
+(with-eval-after-load 'embark
+  ;; Use the correct keymaps
+  (define-key embark-symbol-map "r" 'my/embark-consult-ripgrep)
+  (define-key embark-identifier-map "r" 'my/embark-consult-ripgrep)  ; This is the correct one
+  (define-key embark-region-map "r" 'my/embark-consult-ripgrep))
+
+(global-set-key (kbd "M-s R") 'my/consult-ripgrep-dwim)
+
+#+end_src
+
 
 * mu4e  - Basic Configuration
 #+begin_src emacs-lisp
@@ -2968,7 +3011,7 @@ If in minibuffer during password prompt, inserts and submits."
 Claude Code integration using the dedicated claude-code.el package for better Emacs integration.
 
 #+begin_src emacs-lisp
-
+;; -*- lexical-binding: t; -*-
 ;; Claude Code Emacs Integration using claude-code.el
 ;; This uses the dedicated Emacs package: https://github.com/stevemolitor/claude-code.el
 
@@ -2987,221 +3030,9 @@ Claude Code integration using the dedicated claude-code.el package for better Em
 (use-package claude-code
   :ensure nil ; Already installed via package-vc-install above
   :bind-keymap
-  ("C-c c" . claude-code-command-map) ; Using the same prefix as our previous setup
-  :custom
-  ;; Terminal type for Claude terminal emulation
-  (claude-code-term-name "xterm-256color")
-  
-  ;; Path to Claude executable (should be available from Nix)
-  (claude-code-program "claude-code")
-  
-  ;; Startup delay to prevent terminal layout issues
-  (claude-code-startup-delay 0.1)
-  
-  ;; Buffer size threshold for confirmation prompt
-  (claude-code-large-buffer-threshold 1000)
-  
+    ("C-c c" . claude-code-command-map)
   :config
-  ;; Enable claude-code mode globally
-  (claude-code-mode 1)
-  
-  ;; Configure the Claude window to appear on the right side
-  (add-to-list 'display-buffer-alist
-               '("^\\*claude\\*"
-                 (display-buffer-in-side-window)
-                 (side . right)
-                 (window-width . 0.33)))
-  
-  ;; Optional: Use a font with good Unicode support for Claude REPL
-  ;; Uncomment if you have JuliaMono or similar font installed
-  ;; (custom-set-faces
-  ;;  '(claude-code-repl-face ((t (:family "JuliaMono")))))
-  
-  ;; Hook for additional setup after Claude starts
-  (add-hook 'claude-code-start-hook 
-            (lambda ()
-              (message "Claude Code session started!")))
-  
-  :hook
-  ;; Add any hooks you want when Claude Code starts
-  (claude-code-start . (lambda () 
-                         (message "Claude Code is ready for coding assistance!"))))
-
-;; Enhanced keybindings and which-key descriptions
-(with-eval-after-load 'claude-code
-  ;; The package already provides these bindings via claude-code-command-map:
-  ;; C-c c c - Start Claude in current project root
-  ;; C-c c d - Start Claude in current directory  
-  ;; C-c c t - Toggle Claude window
-  ;; C-c c b - Switch to Claude buffer
-  ;; C-c c k - Kill Claude session
-  ;; C-c c s - Send command to Claude
-  ;; C-c c x - Send command with current file and line context
-  ;; C-c c r - Send region or buffer to Claude
-  ;; C-c c e - Fix error at point
-  ;; C-c c / - Access Claude slash commands menu
-  ;; C-c c m - Show all commands (transient menu)
-  ;; C-c c y - Send return key to Claude
-  ;; C-c c n - Send escape key to Claude
-  
-  ;; Which-key integration for better discoverability
-  (with-eval-after-load 'which-key
-    (which-key-add-key-based-replacements
-      "C-c c" "claude-code"
-      "C-c c c" "start in project"
-      "C-c c d" "start in directory"
-      "C-c c t" "toggle window"
-      "C-c c b" "switch to buffer"
-      "C-c c k" "kill session"
-      "C-c c s" "send command"
-      "C-c c x" "send with context"
-      "C-c c r" "send region/buffer"
-      "C-c c e" "fix error at point"
-      "C-c c /" "slash commands"
-      "C-c c m" "menu (transient)"
-      "C-c c y" "send return"
-      "C-c c n" "send escape")))
-
-;; Integration with Evil mode if enabled
-(with-eval-after-load 'evil
-  ;; Add Claude Code commands to Evil's normal state
-  (evil-define-key 'normal 'global
-    (kbd "<leader>c") claude-code-command-map))
-
-;; Python-specific enhancements
-(with-eval-after-load 'python
-  (defun claude-code-python-help ()
-    "Ask Claude for Python-specific help with current context."
-    (interactive)
-    (claude-code-send-command-with-context 
-     "Help me with this Python code. Explain what it does, suggest improvements, and point out any potential issues."))
-  
-  (defun claude-code-python-debug ()
-    "Ask Claude to help debug Python code."
-    (interactive)
-    (claude-code-send-command-with-context
-     "Help me debug this Python code. Look for potential bugs, logic errors, and suggest fixes."))
-  
-  (defun claude-code-python-optimize ()
-    "Ask Claude to optimize Python code."
-    (interactive)
-    (claude-code-send-command-with-context
-     "Optimize this Python code for better performance, readability, and following Python best practices."))
-  
-  (defun claude-code-python-tests ()
-    "Ask Claude to generate tests for Python code."
-    (interactive)
-    (claude-code-send-command-with-context
-     "Generate comprehensive unit tests for this Python code using pytest. Include edge cases and proper test structure."))
-  
-  ;; Add Python-specific bindings to python-mode
-  (add-hook 'python-ts-mode-hook
-            (lambda ()
-              (local-set-key (kbd "C-c c h") 'claude-code-python-help)
-              (local-set-key (kbd "C-c c d") 'claude-code-python-debug)
-              (local-set-key (kbd "C-c c o") 'claude-code-python-optimize)
-              (local-set-key (kbd "C-c c g") 'claude-code-python-tests)))
-  
-  ;; Update which-key for Python mode
-  (with-eval-after-load 'which-key
-    (which-key-add-major-mode-key-based-replacements 'python-ts-mode
-      "C-c c h" "python help"
-      "C-c c d" "debug python"
-      "C-c c o" "optimize python" 
-      "C-c c g" "generate tests")))
-
-;; Project integration enhancements
-(with-eval-after-load 'project
-  (defun claude-code-analyze-project ()
-    "Ask Claude to analyze the entire project."
-    (interactive)
-    (claude-code
-     "/analyze Tell me about this project structure, main functionality, and suggest improvements."))
-  
-  (defun claude-code-project-help ()
-    "Get Claude's help with project-wide questions."
-    (interactive)
-    (claude-code)
-    (with-current-buffer "*claude*"
-      (insert "/help")))
-  
-  ;; Add to project prefix map
-  (define-key project-prefix-map (kbd "c") 'claude-code)
-  (define-key project-prefix-map (kbd "C") 'claude-code-analyze-project))
-
-;; Compilation integration
-(defun claude-code-fix-compilation-error ()
-  "Send compilation errors to Claude for help."
-  (interactive)
-  (if-let ((compilation-buf (get-buffer "*compilation*")))
-      (let ((error-output (with-current-buffer compilation-buf
-                            (buffer-substring-no-properties (point-min) (point-max)))))
-        (claude-code-send-command
-         (format "I'm getting this compilation error. Please help me fix it:\n\n%s" error-output)))
-    (message "No compilation buffer found")))
-
-;; Add compilation error fixing to our keymap
-(with-eval-after-load 'claude-code
-  (define-key claude-code-command-map (kbd "E") 'claude-code-fix-compilation-error)
-  
-  (with-eval-after-load 'which-key
-    (which-key-add-key-based-replacements
-      "C-c c E" "fix compilation error")))
-
-;; Integration with org-mode
-(with-eval-after-load 'org
-  (defun claude-code-explain-org-block ()
-    "Send current org source block to Claude for explanation."
-    (interactive)
-    (when (org-in-src-block-p)
-      (let* ((block-info (org-babel-get-src-block-info))
-             (code (nth 1 block-info))
-             (lang (nth 0 block-info)))
-        (claude-code-send-command
-         (format "Explain this %s code:\n\n```%s\n%s\n```" lang lang code)))))
-  
-  ;; Add org-mode specific binding
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (local-set-key (kbd "C-c c o") 'claude-code-explain-org-block)))
-  
-  (with-eval-after-load 'which-key
-    (which-key-add-major-mode-key-based-replacements 'org-mode
-      "C-c c o" "explain org block")))
-
-;; Quick commands for common tasks
-(defun claude-code-quick-review ()
-  "Quick code review with Claude."
-  (interactive)
-  (claude-code-send-region 
-   "Please review this code for potential improvements, bugs, and best practices."))
-
-(defun claude-code-quick-explain ()
-  "Quick explanation of code with Claude."
-  (interactive)
-  (claude-code-send-region
-   "Please explain what this code does in clear, simple terms."))
-
-(defun claude-code-quick-refactor ()
-  "Quick refactoring suggestions with Claude."
-  (interactive)
-  (claude-code-send-region
-   "Please suggest how to refactor this code to make it cleaner, more efficient, or more maintainable."))
-
-;; Add quick commands to the keymap
-(with-eval-after-load 'claude-code
-  (define-key claude-code-command-map (kbd "q r") 'claude-code-quick-review)
-  (define-key claude-code-command-map (kbd "q e") 'claude-code-quick-explain)
-  (define-key claude-code-command-map (kbd "q f") 'claude-code-quick-refactor)
-  
-  (with-eval-after-load 'which-key
-    (which-key-add-key-based-replacements
-      "C-c c q" "quick commands"
-      "C-c c q r" "quick review"
-      "C-c c q e" "quick explain"
-      "C-c c q f" "quick refactor")))
-
-(message "Claude Code integration with claude-code.el loaded successfully!")
+    (claude-code-mode)) 
 
 #+end_src
  

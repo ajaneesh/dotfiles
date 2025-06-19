@@ -14,7 +14,7 @@ final: prev: {
         mu4e
       ];
     };
-    claude-code = final.emacsPackages.trivialBuild {
+    emacs-claude-code = final.emacsPackages.trivialBuild {
       pname = "claude-code";
       version = "0.1.0";
       src = final.fetchFromGitHub {

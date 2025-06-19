@@ -23,6 +23,7 @@
 
         # Move files to XDG trash on the commandline
         trash = lib.mkIf pkgs.stdenv.isLinux "${pkgs.trash-cli}/bin/trash-put";
+        claude-code = "claude";
       };
     };
 

@@ -76,7 +76,7 @@
           org-roam-ui
           paredit
           pkgs.emacsPackagesCustom.mu4e-dashboard
-          pkgs.emacsPackagesCustom.claude-code
+          pkgs.emacsPackagesCustom.emacs-claude-code
           py-isort
           pytest
           python-black
