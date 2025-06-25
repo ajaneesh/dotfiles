@@ -30,6 +30,10 @@ this is now running as a systemd service
   ;; Set the right directory to store the native comp cache
   (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" user-emacs-directory))
 
+  ;; Suppress byte-compilation warnings for third-party packages
+  (setq byte-compile-warnings '(not obsolete docstrings unused lexical free-vars unresolved))
+  (setq warning-suppress-log-types '((comp) (bytecomp)))
+
   ;; Auto save and backup settings
   (setq
    backup-by-copying t
@@ -96,11 +100,11 @@ this is now running as a systemd service
     (defvar bootstrap-version)
     (let ((bootstrap-file
            (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-          (bootstrap-version 5))
+          (bootstrap-version 6))
       (unless (file-exists-p bootstrap-file)
         (with-current-buffer
             (url-retrieve-synchronously
-             "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+             "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
              'silent 'inhibit-cookies)
           (goto-char (point-max))
           (eval-print-last-sexp)))
@@ -2377,10 +2381,16 @@ Ajaneesh")
 
 #+begin_src emacs-lisp
 
-;; Use emojis in emails
-(use-package emojify
-  :ensure t
-  :hook (mu4e-view-mode . emojify-mode))
+;; Use emojis in emails - using built-in emoji support instead of emojify
+;; (use-package emojify
+;;   :ensure t
+;;   :hook (mu4e-view-mode . emojify-mode))
+
+;; Enable emoji rendering in mu4e using built-in support
+(add-hook 'mu4e-view-mode-hook
+          (lambda ()
+            (when (fboundp 'emoji-mode)
+              (emoji-mode 1))))
 
 ;; Centered reading with Olivetti
 (use-package olivetti

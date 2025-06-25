@@ -20,7 +20,7 @@ inputs.nixpkgs.lib.nixosSystem {
     globals
     inputs.wsl.nixosModules.wsl
     inputs.home-manager.nixosModules.home-manager
-    inputs.vscode-server.nixosModules.default
+    # inputs.vscode-server.nixosModules.default
     inputs.agenix.nixosModules.age 
     ({ config, pkgs, lib, ... }: {
       time.timeZone = "Asia/Kolkata";
@@ -49,24 +49,18 @@ inputs.nixpkgs.lib.nixosSystem {
       # Environment setup for WSLg
       environment = {
         systemPackages = with pkgs; [
-          # X11 utilities
+          # Essential X11 utilities for WSLg
           xorg.xhost
-          xorg.xorgserver
           xorg.xprop
           xorg.libX11
           xorg.libXft
           xorg.libXext
           xorg.libXrender
-          xorg.libXinerama
           xorg.libXcursor
-          wayland
 
           # Fonts and themes for GUI applications
           freetype
           fontconfig
-
-          libGL
-          libGLU
 
           google-chrome
         ];
@@ -75,7 +69,6 @@ inputs.nixpkgs.lib.nixosSystem {
           # WSLg automatically sets DISPLAY, so we don't need to set it manually
           # Only set these if you need to override defaults
           LIBGL_ALWAYS_INDIRECT = "1";
-          GTK_THEME = "Adwaita-dark";
           # For i3 socket
           I3SOCK = "/tmp/i3-ipc.sock";
         };
@@ -98,15 +91,10 @@ inputs.nixpkgs.lib.nixosSystem {
         wantedBy = [ "default.target" ];
         serviceConfig = {
           Type = "forking";
-          # Use the same Emacs you're using interactively
-          ExecStart = "${config.home-manager.users.nixos.home.path}/bin/emacs --daemon";
-          ExecStop = "${config.home-manager.users.nixos.home.path}/bin/emacsclient --eval '(kill-emacs)'";
+          ExecStart = "${pkgs.emacs}/bin/emacs --daemon";
+          ExecStop = "${pkgs.emacs}/bin/emacsclient --eval '(kill-emacs)'";
           Restart = "on-failure";
         };
-        # Add the PATH to match what you have in your shell
-        #   environment = {
-        #     PATH = "${config.home-manager.users.nixos.home.path}/bin:$PATH";
-        #   };
       };
       emacs.enable = true;
 
@@ -121,7 +109,7 @@ inputs.nixpkgs.lib.nixosSystem {
       };
 
       # Enable VSCode server for WSL integration
-      services.vscode-server.enable = true;
+      # services.vscode-server.enable = true;
 
       # Basic network config for WSL
       networking.hostName = "hydra";
