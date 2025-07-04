@@ -23,6 +23,12 @@
           # Any other TeX packages you might need
           ;
         })
+        # Language servers for Eglot
+        python3Packages.python-lsp-server  # pylsp for Python
+        nodePackages.typescript-language-server  # TypeScript/JavaScript LSP
+        nodePackages.vscode-langservers-extracted  # HTML/CSS/JSON LSP
+        nodePackages.yaml-language-server  # YAML LSP
+        terraform-ls  # Terraform LSP
       ];
 
       programs.emacs = {
@@ -34,6 +40,43 @@
           all-the-icons
           all-the-icons
           all-the-icons-completion
+          # JavaScript/TypeScript packages
+          add-node-modules-path
+          js2-mode
+          prettier-js
+          rjsx-mode
+          typescript-mode
+          web-mode
+          # Config file packages
+          csv-mode
+          dockerfile-mode
+          markdown-mode
+          nginx-mode
+          systemd
+          terraform-mode
+          toml-mode
+          yaml-mode
+          # Tree-sitter packages
+          treesit-grammars.with-all-grammars
+          # Productivity packages
+          avy
+          dashboard
+          diff-hl
+          evil-anzu
+          evil-goggles
+          helpful
+          highlight-indent-guides
+          multiple-cursors
+          rainbow-mode
+          # Python enhancements
+          dap-mode
+          ein
+          poetry
+          # Org enhancements
+          ob-restclient
+          org-bullets
+          org-download
+          # Existing packages
           cape
           cider
           clj-refactor
@@ -91,6 +134,8 @@
           vertico
           wgrep
           which-key
+          # Folding packages
+          origami
           yafolding
           yasnippet
           yasnippet-capf

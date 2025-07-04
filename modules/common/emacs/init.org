@@ -6,16 +6,19 @@ this is now running as a systemd service
 
 #+begin_src emacs-lisp
 ;; -*- lexical-binding: t; -*-
+(message "Loading: Server Process")
 
 (require 'server)
 (unless (server-running-p)
   (server-start))
 
+(message "Completed: Server Process")
 #+end_src
 
 * Startup performance
 
 #+begin_src emacs-lisp
+(message "Loading: Startup Performance")
 
   ;; 1. Performance Improvements
   (defun my/restore-gc-threshold ()
@@ -43,12 +46,13 @@ this is now running as a systemd service
    kept-old-versions 2
    version-control t)
 
-
+(message "Completed: Startup Performance")
 #+end_src
 
 * Setup package.el and Melpa
 
 #+begin_src emacs-lisp
+(message "Loading: Package Management")
 
   ;; Initialize package sources
   (require 'package)
@@ -61,6 +65,7 @@ this is now running as a systemd service
   (unless package-archive-contents
     (package-refresh-contents))
 
+(message "Completed: Package Management")
 #+end_src
 
 * Some required packages
@@ -74,6 +79,77 @@ this is now running as a systemd service
   :ensure nil
   :config
   (which-key-mode))
+
+;; High-impact productivity packages
+(use-package avy 
+  :ensure nil
+  :bind (("C-;" . avy-goto-char-timer)
+         ("M-g f" . avy-goto-line)
+         ("M-g w" . avy-goto-word-1))
+  :config
+  (setq avy-timeout-seconds 0.5))
+
+(use-package multiple-cursors 
+  :ensure nil
+  :bind (("C-S-c C-S-c" . mc/edit-lines)
+         ("C->" . mc/mark-next-like-this)
+         ("C-<" . mc/mark-previous-like-this)
+         ("C-c C-<" . mc/mark-all-like-this)))
+
+(use-package helpful 
+  :ensure nil
+  :bind (("C-h f" . helpful-callable)
+         ("C-h v" . helpful-variable)
+         ("C-h k" . helpful-key)
+         ("C-h x" . helpful-command)))
+
+(use-package diff-hl 
+  :ensure nil
+  :hook (prog-mode . diff-hl-mode)
+  :hook (magit-pre-refresh . diff-hl-magit-pre-refresh)
+  :hook (magit-post-refresh . diff-hl-magit-post-refresh)
+  :config
+  (diff-hl-flydiff-mode))
+
+;; Window configuration undo/redo (built-in)
+(use-package winner
+  :ensure nil
+  :config 
+  (winner-mode 1)
+  (global-set-key (kbd "C-c <left>") 'winner-undo)
+  (global-set-key (kbd "C-c <right>") 'winner-redo))
+
+;; Recent files (built-in)
+(use-package recentf
+  :ensure nil
+  :config
+  (setq recentf-max-menu-items 25
+        recentf-max-saved-items 100)
+  (recentf-mode 1))
+
+;; Startup dashboard
+(use-package dashboard 
+  :ensure nil
+  :config
+  (dashboard-setup-startup-hook)
+  (setq dashboard-startup-banner 'logo
+        dashboard-center-content t
+        dashboard-items '((recents . 10)
+                         (projects . 5)
+                         (bookmarks . 5))
+        dashboard-set-heading-icons t
+        dashboard-set-file-icons t))
+
+;; Visual improvements
+(use-package rainbow-mode 
+  :ensure nil
+  :hook prog-mode)
+
+(use-package highlight-indent-guides 
+  :ensure nil
+  :hook prog-mode
+  :config
+  (setq highlight-indent-guides-method 'bitmap))
 
 (use-package ligature
   :ensure nil)
@@ -196,6 +272,7 @@ this is now running as a systemd service
 * Get =evil-mode= up and running ASAP so that we dont have to struggle with emacs editing controls
 
 #+begin_src emacs-lisp
+(message "Loading: Evil Mode Configuration")
 
     (use-package undo-tree
       :ensure nil
@@ -260,6 +337,21 @@ this is now running as a systemd service
     :config
     (evil-commentary-mode))
 
+    ;; Visual feedback for evil operations
+    (use-package evil-goggles 
+      :ensure nil
+      :after evil
+      :config 
+      (evil-goggles-mode)
+      (setq evil-goggles-duration 0.200))
+
+    ;; Search count display
+    (use-package evil-anzu 
+      :ensure nil
+      :after evil
+      :config 
+      (global-anzu-mode))
+
       (use-package evil-matchit
       :ensure nil
       :config
@@ -281,11 +373,13 @@ this is now running as a systemd service
       (define-key org-mode-map (kbd "C-c n") #'org-next-block)
       (define-key org-mode-map (kbd "C-c p") #'org-previous-block) )
 
+(message "Completed: Evil Mode Configuration")
 #+end_src
 
 * Python configuration
 
 #+begin_src emacs-lisp
+(message "Loading: Python Configuration")
 
 ;; Remove ELPA python package from load path
 (setq load-path 
@@ -295,57 +389,155 @@ this is now running as a systemd service
        load-path))
 
 ;; Force load the built-in python.el first
-(load "/nix/store/ypkhlc24d7skgal25f58bnnbp9rp49li-emacs-29.4/share/emacs/29.4/lisp/progmodes/python")
+;; (load "/nix/store/ypkhlc24d7skgal25f58bnnbp9rp49li-emacs-29.4/share/emacs/29.4/lisp/progmodes/python")
 
 ;; TreeSit and Python configuration
+(message "Loading: TreeSitter Configuration")
 (use-package treesit
   :ensure nil
   :config
   (setq treesit-language-source-alist
-        '((python "https://github.com/tree-sitter/tree-sitter-python")))
+        '((python "https://github.com/tree-sitter/tree-sitter-python")
+          (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
+          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+          (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml")
+          (json "https://github.com/tree-sitter/tree-sitter-json")
+          (css "https://github.com/tree-sitter/tree-sitter-css")
+          (html "https://github.com/tree-sitter/tree-sitter-html")
+          (bash "https://github.com/tree-sitter/tree-sitter-bash")
+          (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+          (toml "https://github.com/tree-sitter/tree-sitter-toml")))
 
   (when (treesit-available-p)
     ;; Install grammar if needed
     (unless (treesit-language-available-p 'python)
       (treesit-install-language-grammar 'python))
+    (unless (treesit-language-available-p 'javascript)
+      (treesit-install-language-grammar 'javascript))
+    (unless (treesit-language-available-p 'typescript)
+      (treesit-install-language-grammar 'typescript))
+    (unless (treesit-language-available-p 'tsx)
+      (treesit-install-language-grammar 'tsx))
+    (unless (treesit-language-available-p 'yaml)
+      (treesit-install-language-grammar 'yaml))
+    (unless (treesit-language-available-p 'json)
+      (treesit-install-language-grammar 'json))
+    (unless (treesit-language-available-p 'css)
+      (treesit-install-language-grammar 'css))
+    (unless (treesit-language-available-p 'html)
+      (treesit-install-language-grammar 'html))
+    (unless (treesit-language-available-p 'bash)
+      (treesit-install-language-grammar 'bash))
+    (unless (treesit-language-available-p 'dockerfile)
+      (treesit-install-language-grammar 'dockerfile))
+    (unless (treesit-language-available-p 'toml)
+      (treesit-install-language-grammar 'toml))
     
     ;; Set up python-ts-mode
     (defvar python-ts-mode-map (make-sparse-keymap))
     (add-to-list 'major-mode-remap-alist
                  '(python-mode . python-ts-mode))
-    (add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))))
+    (add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
+    
+    ;; Set up yaml-ts-mode
+    (add-to-list 'major-mode-remap-alist
+                 '(yaml-mode . yaml-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.ya?ml\\'" . yaml-ts-mode))
+    
+    ;; Set up json-ts-mode  
+    (add-to-list 'major-mode-remap-alist
+                 '(json-mode . json-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.json\\'" . json-ts-mode))
+    
+    ;; Set up JavaScript/TypeScript treesitter modes
+    (add-to-list 'major-mode-remap-alist
+                 '(js2-mode . js-ts-mode))
+    (add-to-list 'major-mode-remap-alist
+                 '(typescript-mode . typescript-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+    
+    ;; Set up other treesitter modes
+    (add-to-list 'major-mode-remap-alist
+                 '(css-mode . css-ts-mode))
+    (add-to-list 'major-mode-remap-alist
+                 '(dockerfile-mode . dockerfile-ts-mode))
+    (add-to-list 'major-mode-remap-alist
+                 '(toml-mode . toml-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.css\\'" . css-ts-mode))
+    (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.toml\\'" . toml-ts-mode))))
 
-;; LSP and development tools configuration
-(use-package lsp-mode
-  :hook ((python-ts-mode . lsp-deferred))
-  :custom
-  (lsp-idle-delay 0.5)
-  (lsp-log-io nil)
-  (lsp-completion-provider :capf)
-  (lsp-keymap-prefix "C-c l")
-  :config
-  (lsp-enable-which-key-integration t)
-  (setq lsp-pyls-plugins-pylint-enabled t)
-  (setq lsp-pyls-plugins-autopep8-enabled nil)
-  (setq lsp-pyls-plugins-yapf-enabled t)
-  (setq lsp-pyls-plugins-pycodestyle-enabled t)
-  (setq lsp-pyright-use-library-code-for-types t)
-  (setq lsp-pyright-diagnostic-mode "workspace")
-  (setq lsp-pyright-auto-import-completions t))
+(message "Completed: TreeSitter Configuration")
 
-(use-package lsp-pyright
+;; Use Eglot (built-in) instead of lsp-mode for better compatibility
+(message "Loading: LSP Configuration - Eglot")
+(use-package eglot
   :ensure nil
-  :hook (python-ts-mode . (lambda ()
-                            (require 'lsp-pyright)
-                            (lsp-deferred))))
+  :hook ((python-ts-mode . eglot-ensure)
+         (yaml-mode . eglot-ensure)
+         (yaml-ts-mode . eglot-ensure)
+         (js-ts-mode . eglot-ensure)
+         (typescript-ts-mode . eglot-ensure)
+         (css-ts-mode . eglot-ensure))
+  :config
+  ;; Configure pylsp to use project virtual environment
+  (defun my/eglot-pylsp-venv-command ()
+    "Get pylsp command using project virtual environment if available."
+    (let ((venv-pylsp (expand-file-name ".venv/bin/pylsp" (project-root (project-current)))))
+      (if (file-exists-p venv-pylsp)
+          (list venv-pylsp)
+        '("pylsp"))))
+  
+  ;; Use project-specific pylsp if available, fallback to system
+  (add-to-list 'eglot-server-programs 
+               '(python-ts-mode . my/eglot-pylsp-venv-command))
+  
+  ;; Add YAML language server support
+  (add-to-list 'eglot-server-programs
+               '((yaml-mode yaml-ts-mode) . ("yaml-language-server" "--stdio")))
+  
+  ;; Add CSS language server support (from vscode-langservers-extracted)
+  (add-to-list 'eglot-server-programs
+               '(css-ts-mode . ("vscode-css-language-server" "--stdio")))
+  
+  ;; Configure pylsp settings
+  (setq-default eglot-workspace-configuration
+                '((:pylsp . (:plugins (:pycodestyle (:enabled t))
+                                     (:mccabe (:enabled nil))
+                                     (:pyflakes (:enabled t))
+                                     (:flake8 (:enabled t))
+                                     (:autopep8 (:enabled nil))
+                                     (:yapf (:enabled t)))))))
+
+(message "Completed: LSP Configuration - Eglot")
 
 ;; Development tools
+(message "Loading: Python Development Tools")
 (use-package python-black
   :after python
   :hook (python-ts-mode . python-black-on-save-mode))
 
 (use-package py-isort
   :hook (python-ts-mode . py-isort-before-save))
+
+;; Enhanced Python development tools
+(use-package poetry 
+  :ensure nil
+  :hook (python-ts-mode . poetry-tracking-mode))
+
+(use-package ein 
+  :ensure nil
+  :config
+  (setq ein:output-area-inlined-images t))
+
+(use-package dap-mode 
+  :ensure nil
+  :after lsp-mode
+  :config 
+  (dap-auto-configure-mode)
+  (require 'dap-python))
 
 ;; Environment Management
 (use-package pyvenv
@@ -365,12 +557,12 @@ this is now running as a systemd service
 	    (let ((map python-ts-mode-map))
 	      (define-key map (kbd "C-c C-f") 'python-black-buffer)
 	      (define-key map (kbd "C-c C-i") 'py-isort-buffer)
-	      (define-key map (kbd "C-c d") 'lsp-ui-doc-show)
-	      (define-key map (kbd "C-c C-d") 'lsp-find-definition)
-	      (define-key map (kbd "C-c C-r") 'lsp-find-references)
-	      (define-key map (kbd "M-.") 'lsp-find-definition)
-	      (define-key map [f3] 'lsp-find-definition)
-	      (define-key map [f4] 'my/smart-find-references)
+	      (define-key map (kbd "C-c d") 'eldoc-doc-buffer)  ; Show documentation
+	      (define-key map (kbd "C-c C-d") 'xref-find-definitions)  ; Eglot uses xref
+	      (define-key map (kbd "C-c C-r") 'xref-find-references)   ; Eglot uses xref
+	      (define-key map (kbd "M-.") 'xref-find-definitions)      ; Standard Emacs binding
+	      (define-key map [f3] 'xref-find-definitions)             ; Your F3 binding
+	      (define-key map [f4] 'xref-find-references)              ; Your F4 binding  
 	      (define-key map [M-left] 'xref-go-back))))
 
 
@@ -388,6 +580,7 @@ this is now running as a systemd service
 * =org-mode= base configuration
 
 #+begin_src emacs-lisp
+(message "Loading: Org Mode - Base Configuration")
 
 ;; TODO: Mode this to another section
 (setq-default fill-column 80)
@@ -414,6 +607,29 @@ this is now running as a systemd service
   :hook (org-mode . org-superstar-mode)
   :custom
   (org-superstar-headline-Bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
+
+;; Enhanced org-mode features
+(use-package org-bullets 
+  :ensure nil
+  :hook (org-mode . org-bullets-mode))
+
+(use-package org-download 
+  :ensure nil
+  :hook (org-mode . org-download-enable)
+  :config
+  (setq org-download-method 'directory
+        org-download-image-dir "images"))
+
+(use-package ob-restclient 
+  :ensure nil
+  :after org
+  :config
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((restclient . t)
+     (emacs-lisp . t)
+     (python . t)
+     (shell . t))))
 
 ;; This is needed as of Org 9.2
 ;; Fix org-tempo template expansion
@@ -1001,6 +1217,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
 * =vertico= configuration
 
 #+begin_src emacs-lisp
+(message "Loading: Completion System - Vertico")
   ;; Enable vertico
   (use-package vertico
     :ensure nil
@@ -1044,6 +1261,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
 * =consult= configuration
 
 #+begin_src emacs-lisp
+(message "Loading: Completion System - Consult")
 
   ;; Example configuration for Consult
   (use-package consult
@@ -1332,7 +1550,9 @@ this will allow us to make changes across multiple unopened files in file system
   :init (global-flycheck-mode)
   :config
   (setq flycheck-python-pylint-executable "pylint")
-  (setq flycheck-python-flake8-executable "flake8"))
+  (setq flycheck-python-flake8-executable "flake8")
+  ;; Disable problematic nix checker due to GLIBCXX version conflicts
+  (setq flycheck-disabled-checkers '(nix)))
 
 ;; More detailed coverage setup
 (defun setup-python-coverage ()
@@ -1402,42 +1622,42 @@ this will allow us to make changes across multiple unopened files in file system
 
 #+begin_src emacs-lisp
 
-  (use-package clojure-mode
-    :ensure nil
-    :custom
-    (clojure-align-forms-automatically t))
+(use-package clojure-mode
+  :ensure nil
+  :custom
+  (clojure-align-forms-automatically t))
 
-  (use-package cider
-    :ensure nil
-    :custom
-    (cider-repl-pop-to-buffer-on-connect nil)
-    (cider-save-file-on-load t)
-    (cider-save-file-on-load t)
-    :config
+(use-package cider
+  :ensure nil
+  :custom
+  (cider-repl-pop-to-buffer-on-connect nil)
+  (cider-save-file-on-load t)
+  (cider-save-file-on-load t)
+  :config
 
-    (setq cider-repl-display-help-banner nil)
-    (setq cider-print-fn 'puget)
-    (setq cider-repl-use-pretty-printing t)
-    (setq cider-clojure-cli-aliases ":dev:cider"))
+  (setq cider-repl-display-help-banner nil)
+  (setq cider-print-fn 'puget)
+  (setq cider-repl-use-pretty-printing t)
+  (setq cider-clojure-cli-aliases ":dev:cider"))
 
-  (use-package rainbow-delimiters
-    :ensure nil
-    :hook ((clojure-mode . rainbow-delimiters-mode)
-           (cider-repl-mode . rainbow-delimiters-mode)))
+(use-package rainbow-delimiters
+  :ensure nil
+  :hook ((clojure-mode . rainbow-delimiters-mode)
+         (cider-repl-mode . rainbow-delimiters-mode)))
 
-  ;; In your Clojure configuration section, add these key bindings:
-  (with-eval-after-load 'clojure-mode
-    (define-key clojure-mode-map [f3] 'cider-find-var)  ; equivalent to lsp-find-definition
-    (define-key clojure-mode-map [f4] 'cider-xref-fn-refs-select) ; equivalent to lsp-find-references
-    (define-key clojure-mode-map (kbd "M-.") 'cider-find-var)
-    (define-key clojure-mode-map (kbd "M-,") 'cider-pop-back))
+;; In your Clojure configuration section, add these key bindings:
+(with-eval-after-load 'clojure-mode
+  (define-key clojure-mode-map [f3] 'cider-find-var)  ; equivalent to lsp-find-definition
+  (define-key clojure-mode-map [f4] 'cider-xref-fn-refs-select) ; equivalent to lsp-find-references
+  (define-key clojure-mode-map (kbd "M-.") 'cider-find-var)
+  (define-key clojure-mode-map (kbd "M-,") 'cider-pop-back))
 
-  ;; Also add Evil bindings if needed
-  (with-eval-after-load 'evil
-    (evil-define-key '(normal visual) clojure-mode-map
+;; Also add Evil bindings if needed
+(with-eval-after-load 'evil
+  (evil-define-key '(normal visual) clojure-mode-map
     (kbd "C-.") 'embark-act
-      (kbd "M-.") 'cider-find-var
-      (kbd "M-,") 'cider-pop-back))
+    (kbd "M-.") 'cider-find-var
+    (kbd "M-,") 'cider-pop-back))
 
 #+end_src
 
@@ -1686,8 +1906,16 @@ Starting to believe i will never use DAP
   (use-package yafolding
     :ensure nil
     :hook ((json-mode . yafolding-mode)
+           (json-ts-mode . yafolding-mode)
            (python-ts-mode . yafolding-mode)
-           (clojure-mode . yafolding-mode))
+           (clojure-mode . yafolding-mode)
+           (yaml-mode . yafolding-mode)
+           (yaml-ts-mode . yafolding-mode)
+           (js-ts-mode . yafolding-mode)
+           (typescript-ts-mode . yafolding-mode)
+           (css-ts-mode . yafolding-mode)
+           (dockerfile-ts-mode . yafolding-mode)
+           (toml-ts-mode . yafolding-mode))
     :config
     ;; Global yafolding bindings
     (with-eval-after-load 'yafolding
@@ -1708,6 +1936,147 @@ Starting to believe i will never use DAP
       (evil-define-key 'normal json-mode-map
         [tab] 'yafolding-toggle-element
         (kbd "TAB") 'yafolding-toggle-element)))  
+
+  ;; Origami for universal folding support
+  (use-package origami
+    :ensure nil
+    :hook (prog-mode . origami-mode)
+    :config
+    ;; Enable for specific modes that work well with origami
+    (add-hook 'yaml-mode-hook 'origami-mode)
+    (add-hook 'yaml-ts-mode-hook 'origami-mode)
+    (add-hook 'js-ts-mode-hook 'origami-mode)
+    (add-hook 'typescript-ts-mode-hook 'origami-mode)
+    (add-hook 'css-ts-mode-hook 'origami-mode)
+    (add-hook 'json-ts-mode-hook 'origami-mode)
+    (add-hook 'dockerfile-ts-mode-hook 'origami-mode)
+    (add-hook 'toml-ts-mode-hook 'origami-mode)
+    (add-hook 'nix-mode-hook 'origami-mode)
+    (add-hook 'terraform-mode-hook 'origami-mode)
+    
+    ;; Key bindings for origami
+    (define-key origami-mode-map (kbd "C-c f o") 'origami-open-node)
+    (define-key origami-mode-map (kbd "C-c f c") 'origami-close-node)
+    (define-key origami-mode-map (kbd "C-c f t") 'origami-toggle-node)
+    (define-key origami-mode-map (kbd "C-c f r") 'origami-open-all-nodes)
+    (define-key origami-mode-map (kbd "C-c f m") 'origami-close-all-nodes)
+    (define-key origami-mode-map (kbd "C-c f s") 'origami-show-only-node)
+    
+    ;; Evil mode bindings for origami
+    (with-eval-after-load 'evil
+      (evil-define-key 'normal origami-mode-map
+        (kbd "zo") 'origami-open-node
+        (kbd "zc") 'origami-close-node
+        (kbd "za") 'origami-toggle-node
+        (kbd "zR") 'origami-open-all-nodes
+        (kbd "zM") 'origami-close-all-nodes)))
+
+#+end_src
+
+* JavaScript/TypeScript Development
+
+#+begin_src emacs-lisp
+
+;; Core JavaScript support
+(use-package js2-mode 
+  :ensure nil
+  :mode "\\.js\\'"
+  :config
+  (setq js2-basic-offset 2
+        js2-bounce-indent-p nil))
+
+;; TypeScript support
+(use-package typescript-mode 
+  :ensure nil
+  :mode ("\\.ts\\'" "\\.tsx\\'")
+  :config
+  (setq typescript-indent-level 2))
+
+;; React JSX support
+(use-package rjsx-mode 
+  :ensure nil
+  :mode "\\.jsx\\'"
+  :config
+  (setq js2-basic-offset 2))
+
+;; Web mode for mixed HTML/CSS/JS
+(use-package web-mode 
+  :ensure nil
+  :mode ("\\.html\\'" "\\.vue\\'" "\\.svelte\\'" "\\.tsx\\'")
+  :config
+  (setq web-mode-markup-indent-offset 2
+        web-mode-css-indent-offset 2
+        web-mode-code-indent-offset 2
+        web-mode-attr-indent-offset 2))
+
+;; Prettier for code formatting
+(use-package prettier-js 
+  :ensure nil
+  :hook ((js2-mode typescript-mode rjsx-mode web-mode) . prettier-js-mode)
+  :config
+  (setq prettier-js-args '("--single-quote" "--no-semi")))
+
+;; Add node_modules to PATH for project-local tools
+(use-package add-node-modules-path 
+  :ensure nil
+  :hook ((js2-mode typescript-mode rjsx-mode web-mode) . add-node-modules-path))
+
+;; Add Eglot support for JavaScript/TypeScript
+(with-eval-after-load 'eglot
+  (add-hook 'typescript-mode-hook #'eglot-ensure)
+  (add-hook 'js2-mode-hook #'eglot-ensure)
+  (add-hook 'rjsx-mode-hook #'eglot-ensure)
+  ;; Configure TypeScript language server
+  (add-to-list 'eglot-server-programs 
+               '((typescript-mode js2-mode rjsx-mode) . ("typescript-language-server" "--stdio"))))
+
+#+end_src
+
+* Configuration File Modes
+
+#+begin_src emacs-lisp
+
+;; YAML support
+(use-package yaml-mode 
+  :ensure nil
+  :mode "\\.ya?ml\\'")
+
+;; TOML support
+(use-package toml-mode 
+  :ensure nil
+  :mode "\\.toml\\'")
+
+;; Dockerfile support
+(use-package dockerfile-mode 
+  :ensure nil
+  :mode "Dockerfile\\'")
+
+;; Terraform support
+(use-package terraform-mode 
+  :ensure nil
+  :mode "\\.tf\\'")
+
+;; Nginx configuration
+(use-package nginx-mode 
+  :ensure nil
+  :mode "/nginx/.*\\.conf\\'")
+
+;; CSV files
+(use-package csv-mode 
+  :ensure nil
+  :mode "\\.csv\\'")
+
+;; Markdown support
+(use-package markdown-mode 
+  :ensure nil
+  :mode ("\\.md\\'" "\\.markdown\\'")
+  :config
+  (setq markdown-command "multimarkdown"))
+
+;; Systemd files
+(use-package systemd 
+  :ensure nil
+  :mode ("\\.service\\'" "\\.timer\\'" "\\.target\\'" "\\.socket\\'"))
 
 #+end_src
 
@@ -2038,9 +2407,9 @@ Place cursor at token and call C-. r for quick ripgrep using that token
 
 #+end_src
 
-
 * mu4e  - Basic Configuration
 #+begin_src emacs-lisp
+(message "Loading: Email - mu4e Basic Configuration")
 
 (use-package mu4e
   :ensure nil  ;; Provided by Nix, no need to install via package.el
@@ -2462,6 +2831,7 @@ Ajaneesh")
 * Font and Color Configuration
 
 #+begin_src emacs-lisp
+(message "Loading: Font and Color Configuration")
 
 ;; Basic font definitions - KEEP THESE
 (set-face-attribute 'default nil
@@ -2870,52 +3240,29 @@ This is something that i use often.  it kind of makes it easier to deal with =ls
 
 ;; Define the smart reference finder
 (defun my/smart-find-references ()
-  "Enhanced reference finder that auto-jumps when there are exactly two references."
+  "Enhanced reference finder using xref (works with Eglot)."
   (interactive)
-  (let* ((orig-buf (current-buffer))
-	 (orig-pos (point))
-	 (refs (lsp-request "textDocument/references"
-                            (lsp--make-reference-params nil nil)))
-	 (num-refs (length refs)))
-    (cond
-     ;; No references found
-     ((= num-refs 0)
-      (message "No references found"))
-     
-     ;; Exactly two references - try to jump to the other one
-     ((= num-refs 2)
-      (let* ((current-uri (lsp--buffer-uri))
-             (other-ref (car (seq-filter
-                              (lambda (ref)
-				(let ((ref-uri (lsp:location-uri ref)))
-				  (or (not (string= ref-uri current-uri))
-                                      (let* ((range (lsp:location-range ref))
-                                             (start (lsp:range-start range))
-                                             (line (lsp:position-line start))
-                                             (character (lsp:position-character start))
-                                             (cur-line (line-number-at-pos))
-                                             (cur-char (current-column)))
-					(or (/= (1+ line) cur-line)
-                                            (/= character cur-char))))))
-                              refs))))
-	(if other-ref
-            (lsp-goto-location other-ref)
-          (message "Cannot determine other reference location"))))
-     
-     ;; More than two references - show all references
-     (t (lsp-find-references)))))
+  ;; Use xref-find-references which works with Eglot
+  ;; xref provides the same functionality with a built-in interface
+  (call-interactively 'xref-find-references))
 
-(when (boundp 'python-ts-mode-map)
-  (dolist (buffer (buffer-list))
-    (with-current-buffer buffer
-      (when (derived-mode-p 'python-ts-mode)
-  	(define-key python-ts-mode-map [f4] 'my/smart-find-references)))))
+;; F4 binding is now handled in the main Python keybinding section above
 
 #+end_src
 
 * SQL Client configuration
 makes it easier to open a connection to Postgres.   In this setup, i save my connection properties in a .config/.. file and when i start a connection with =C-c s c=, i am prompted for a password and hitting =C-c s p= automatically enters the password from my secrets file. Having to do this as the connection routinue is not accepting password even if supplied along with other connection parameters. 
 #+begin_src emacs-lisp
+
+;; Declare SQL variables as dynamic to avoid lexical binding conflicts
+(defvar sql-user nil)
+(defvar sql-password nil) 
+(defvar sql-server nil)
+(defvar sql-database nil)
+(defvar sql-port nil)
+(defvar sql-product nil)
+(defvar sql-postgres-program nil)
+(defvar sql-postgres-options nil)
 
 ;; Function to read from secrets.json
 (defun my/read-postgres-secrets ()
@@ -2939,16 +3286,16 @@ makes it easier to open a connection to Postgres.   In this setup, i save my con
 (defun my/postgres-connect ()
   "Connect to PostgreSQL using settings from secrets file."
   (interactive)
-  ;; Get connection details
-  (let* ((pg-conn (my/read-postgres-secrets))
-         (sql-postgres-program "psql")
-         (sql-postgres-options '("-P" "pager=off"))
-         (sql-product 'postgres)
-         (sql-user (plist-get pg-conn :user))
-         (sql-password (plist-get pg-conn :password))
-         (sql-server (plist-get pg-conn :server))
-         (sql-database (plist-get pg-conn :database))
-         (sql-port (plist-get pg-conn :port)))
+  ;; Get connection details and set SQL variables dynamically
+  (let ((pg-conn (my/read-postgres-secrets)))
+    (setq sql-postgres-program "psql"
+          sql-postgres-options '("-P" "pager=off")
+          sql-product 'postgres
+          sql-user (plist-get pg-conn :user)
+          sql-password (plist-get pg-conn :password)
+          sql-server (plist-get pg-conn :server)
+          sql-database (plist-get pg-conn :database)
+          sql-port (plist-get pg-conn :port))
     
     ;; Override password handling to prevent prompting
     (advice-add 'sql-get-login :around
@@ -3032,16 +3379,12 @@ Claude Code integration using the dedicated claude-code.el package for better Em
 (use-package eat
   :ensure nil) ; Terminal emulator for Claude Code
 
-;; Install claude-code.el directly from GitHub
-;; (unless (package-installed-p 'claude-code)
-;;  (package-vc-install '(claude-code :url "https://github.com/stevemolitor/claude-code.el")))
-
 ;; Configure claude-code.el
 (use-package claude-code
   :ensure nil ; Already installed via package-vc-install above
   :bind-keymap
     ("C-c c" . claude-code-command-map)
-  :config
+    :config
     (claude-code-mode)) 
 
 #+end_src

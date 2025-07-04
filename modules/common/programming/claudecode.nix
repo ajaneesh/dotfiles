@@ -17,6 +17,10 @@ in
     home-manager.users.${config.user} = {
       home.packages = [
         pkgs.claude-code
+        # Create a claude-code wrapper script for Emacs integration
+        (pkgs.writeShellScriptBin "claude-code" ''
+          exec ${pkgs.claude-code}/bin/claude "$@"
+        '')
       ];
 
       # Simple zsh aliases
