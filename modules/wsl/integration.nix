@@ -9,7 +9,7 @@
   config = lib.mkIf config.wsl.enable {
     # Disable display manager for WSL
     services.xserver.displayManager.lightdm.enable = lib.mkForce false;
-    services.xserver.displayManager.gdm.enable = lib.mkForce false;
+    services.displayManager.gdm.enable = lib.mkForce false;
     services.xserver.enable = lib.mkForce false;
     
     # WSL-specific configurations

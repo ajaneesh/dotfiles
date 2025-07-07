@@ -31,7 +31,6 @@ inputs.nixpkgs.lib.nixosSystem {
         enable = lib.mkIf config.wsl.enable true;
         displayManager = {
           lightdm.enable = lib.mkIf config.wsl.enable false;
-          defaultSession = "none+i3";
           startx.enable = false;  # Using WSLg's built-in display manager
         };
         # Enable i3 window manager
@@ -39,6 +38,10 @@ inputs.nixpkgs.lib.nixosSystem {
           enable = true;
           # No need for special WSL configurations here - basic setup is sufficient
         };
+      };
+      
+      services.displayManager = {
+        defaultSession = "none+i3";
       };
 
       unfreePackages = [

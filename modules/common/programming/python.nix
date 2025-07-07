@@ -11,7 +11,7 @@ let
         libGL
         libGLU
         glib
-        glibc
+        # glibc removed - causes segfaults in nix-shell
         libgcc
   ];
 in
