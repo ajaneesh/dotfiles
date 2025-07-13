@@ -1,6 +1,8 @@
 { config, pkgs, lib, ... }:
 
 {
+  nixpkgs.config.allowUnfree = true;
+
   # This file contains common Home Manager packages and configurations
   # that are shared across all hosts.
 
@@ -97,7 +99,7 @@
     yt-dlp
     aerc
     himalaya
-    mbsync
+    
     msmtp
     notmuch
     w3m
@@ -207,6 +209,4 @@
     ];
   };
 
-  # Filter out nulls from the package list
-  home.packages = lib.filter (p: p != null) config.home.packages;
-}
+  }

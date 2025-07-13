@@ -308,7 +308,7 @@
         lookingglass = darwinConfigurations.lookingglass.config.home-manager.users."Noah.Masur".home;
         crostini = inputs.home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages."x86_64-linux";
-          extraSpecialArgs = { inherit inputs globals overlays; };
+          extraSpecialArgs = { inherit inputs overlays globals; };
           modules = [ ./hosts/crostini/default.nix ];
         };
       };

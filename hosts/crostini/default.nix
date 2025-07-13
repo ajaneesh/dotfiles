@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, globals, overlays, ... }: {
+{ config, pkgs, lib, inputs, overlays, globals, ... }: {
   # Home Manager configuration for Crostini
 
   home.username = globals.user;
@@ -10,7 +10,6 @@
 
   # Import the crostini-specific module
   imports = [
-    ../../modules/home-manager/crostini/default.nix
     ../../modules/home-manager/common/default.nix # Import the new common module
   ];
 

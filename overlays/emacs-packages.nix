@@ -21,7 +21,7 @@ final: prev: {
         owner = "stevemolitor"; 
         repo = "claude-code.el"; 
         rev = "main"; 
-        sha256 = "sha256-UtJH1am/00XSYYVsCKtmMgl/DE2XsFs+vg8DPBKUX0Q=";
+        sha256 = "sha256-RXs7iKWtUz1ZmjAWL0pZ8JdWMxNS85P3WZWLUR85ExQ=";
       };
       packageRequires = with final.emacsPackages; [
         transient
