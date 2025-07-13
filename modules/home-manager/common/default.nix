@@ -7,6 +7,12 @@
   # that are shared across all hosts.
 
   home.packages = with pkgs; [
+    # Fonts
+    pkgs.emacs-all-the-icons-fonts
+    dejavu_fonts
+    noto-fonts
+    noto-fonts-emoji
+
     # Core Utilities
     git
     vim

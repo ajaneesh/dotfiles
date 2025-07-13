@@ -16,6 +16,9 @@
   # Apply the common overlays
   nixpkgs.overlays = overlays;
 
+  # Enable font management for Home Manager
+  fonts.fontconfig.enable = true;
+
   # You can add packages here if you want them to be available on this host
   # home.packages = with pkgs; [
   #   hello
