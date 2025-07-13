@@ -1,22 +1,18 @@
 { config, pkgs, ... }:
 
 {
-  # i3 Window Manager Configuration
+  # Enable the common i3 configuration
+  i3.enable = true;
 
-  xsession.enable = true;
-  xsession.windowManager.i3 = {
-    enable = true;
-    config = {
-      modifier = "Mod4"; # Use the Super key as the modifier
-      bars = [
-        {
-          statusCommand = "${pkgs.i3status}/bin/i3status";
-        }
-      ];
-      keybindings = {
-        "Mod+d" = "exec ${pkgs.dmenu}/bin/dmenu_run";
-        "Mod+Return" = "exec ${pkgs.alacritty}/bin/alacritty";
-      };
-    };
+  # Crostini-specific additions for Xephyr support
+  home.packages = with pkgs; [
+    xorg.xorgserver  # Provides Xephyr
+    rofi             # Add rofi for launcher
+  ];
+
+  # Create the launcher script
+  home.file.".local/bin/i3-xephyr" = {
+    source = ./i3-xephyr.sh;
+    executable = true;
   };
 }

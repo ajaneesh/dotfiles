@@ -20,6 +20,9 @@
 
     home-manager.users.${config.user} = {
 
+      # Enable the common i3 configuration
+      i3.enable = true;
+
       # Clipboard sharing with Windows and i3 launcher script
       home.packages = with pkgs; [
 

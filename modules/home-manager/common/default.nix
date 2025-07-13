@@ -1,6 +1,10 @@
 { config, pkgs, lib, ... }:
 
 {
+  imports = [
+    ./i3.nix
+  ];
+  
   nixpkgs.config.allowUnfree = true;
 
   # This file contains common Home Manager packages and configurations
@@ -18,6 +22,10 @@
     i3status
     i3lock
     dmenu
+    sxhkd
+    pkgs.xorg.xorgserver
+    pkgs.xorg.setxkbmap
+    pkgs.xorg.xkeyboardconfig
 
     # Core Utilities
     git
@@ -103,6 +111,7 @@
     kitty
     wezterm
     alacritty
+    xterm
     nsxiv
     mupdf
     zathura
