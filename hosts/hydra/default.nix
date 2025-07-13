@@ -14,9 +14,9 @@ inputs.nixpkgs.lib.nixosSystem {
   system = "x86_64-linux";
   specialArgs = { };
   modules = [
-    ../../modules/common
-    ../../modules/nixos
     ../../modules/wsl
+    ../../modules/home-manager/common # Import the new common module
+    globals
     globals
     inputs.wsl.nixosModules.wsl
     inputs.home-manager.nixosModules.home-manager
@@ -50,32 +50,7 @@ inputs.nixpkgs.lib.nixosSystem {
       ];
 
       # Environment setup for WSLg
-      environment = {
-        systemPackages = with pkgs; [
-          # Essential X11 utilities for WSLg
-          xorg.xhost
-          xorg.xprop
-          xorg.libX11
-          xorg.libXft
-          xorg.libXext
-          xorg.libXrender
-          xorg.libXcursor
-
-          # Fonts and themes for GUI applications
-          freetype
-          fontconfig
-
-          google-chrome
-        ];
-
-        sessionVariables = {
-          # WSLg automatically sets DISPLAY, so we don't need to set it manually
-          # Only set these if you need to override defaults
-          LIBGL_ALWAYS_INDIRECT = "1";
-          # For i3 socket
-          I3SOCK = "/tmp/i3-ipc.sock";
-        };
-      };
+      
 
       # Font configuration
       fonts = {

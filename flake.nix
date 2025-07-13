@@ -306,6 +306,11 @@
       homeConfigurations = {
         tempest = nixosConfigurations.tempest.config.home-manager.users.${globals.user}.home;
         lookingglass = darwinConfigurations.lookingglass.config.home-manager.users."Noah.Masur".home;
+        crostini = inputs.home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages."x86_64-linux";
+          extraSpecialArgs = { inherit inputs globals overlays; };
+          modules = [ ./hosts/crostini/default.nix ];
+        };
       };
 
       # Disk formatting, only used once
