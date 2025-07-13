@@ -1,18 +1,3 @@
-# The Hydra
-# System configuration for WSL
-
-# See [readme](../README.md) to explain how this file works.
-
-{
-  inputs,
-  globals,
-  overlays,
-  ...
-}:
-
-inputs.nixpkgs.lib.nixosSystem {
-  system = "x86_64-linux";
-  specialArgs = { };
   modules = [
     ../../modules/wsl
     ../../modules/home-manager/common # Import the new common module
@@ -44,24 +29,8 @@ inputs.nixpkgs.lib.nixosSystem {
         defaultSession = "none+i3";
       };
 
-      unfreePackages = [
-        "google-chrome"
-        "claude-code"
-      ];
-
       # Environment setup for WSLg
       
-
-      # Font configuration
-      fonts = {
-        fontDir.enable = true;
-        enableGhostscriptFonts = true;
-        packages = with pkgs; [
-          dejavu_fonts
-          noto-fonts
-          noto-fonts-emoji
-        ];
-      };
 
       # Emacs service configuration
       systemd.user.services.emacs = {

@@ -10,6 +10,7 @@
 
   # Import the crostini-specific module
   imports = [
+    ../../modules/home-manager/crostini/i3.nix
     ../../modules/home-manager/common/default.nix # Import the new common module
   ];
 

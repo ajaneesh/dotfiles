@@ -13,6 +13,12 @@
     noto-fonts
     noto-fonts-emoji
 
+    # Window Managers
+    i3
+    i3status
+    i3lock
+    dmenu
+
     # Core Utilities
     git
     vim
@@ -88,6 +94,8 @@
     sumneko-lua-language-server
 
     # Applications
+    google-chrome
+    claude-code
     _1password-cli
     (if pkgs.stdenv.isLinux then _1password-gui else null)
     discord
