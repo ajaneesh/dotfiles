@@ -286,30 +286,21 @@
     rec {
 
       # Contains my full system builds, including home-manager
-      # nixos-rebuild switch --flake .#tempest
+      # nixos-rebuild switch --flake .#nixos-wsl
       nixosConfigurations = {
-        arrow = import ./hosts/arrow { inherit inputs globals overlays; };
-        tempest = import ./hosts/tempest { inherit inputs globals overlays; };
-        hydra = import ./hosts/hydra { inherit inputs globals overlays; };
-        flame = import ./hosts/flame { inherit inputs globals overlays; };
-        swan = import ./hosts/swan { inherit inputs globals overlays; };
+        nixos-wsl = import ./hosts/nixos-wsl { inherit inputs globals overlays; };
       };
 
-      # Contains my full Mac system builds, including home-manager
-      # darwin-rebuild switch --flake .#lookingglass
-      darwinConfigurations = {
-        lookingglass = import ./hosts/lookingglass { inherit inputs globals overlays; };
-      };
+      # No darwin configurations
 
       # For quickly applying home-manager settings with:
-      # home-manager switch --flake .#tempest
+      # home-manager switch --flake .#hm-common
       homeConfigurations = {
-        tempest = nixosConfigurations.tempest.config.home-manager.users.${globals.user}.home;
-        lookingglass = darwinConfigurations.lookingglass.config.home-manager.users."Noah.Masur".home;
-        crostini = inputs.home-manager.lib.homeManagerConfiguration {
+        # Unified home-manager configuration (works on all machines)
+        hm-common = inputs.home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages."x86_64-linux";
           extraSpecialArgs = { inherit inputs overlays globals; };
-          modules = [ ./hosts/crostini/default.nix ];
+          modules = [ ./home-manager/hm-common.nix ];
         };
       };
 
@@ -318,53 +309,7 @@
         root = import ./disks/root.nix;
       };
 
-      packages =
-        let
-          staff =
-            system:
-            import ./hosts/staff {
-              inherit
-                inputs
-                globals
-                overlays
-                system
-                ;
-            };
-        in
-        {
-          x86_64-linux.staff = staff "x86_64-linux";
-          x86_64-linux.arrow = inputs.nixos-generators.nixosGenerate rec {
-            system = "x86_64-linux";
-            format = "iso";
-            specialArgs = {
-              pkgs-stable = import inputs.nixpkgs-stable { inherit system; };
-              pkgs-caddy = import inputs.nixpkgs-caddy { inherit system; };
-            };
-            modules = import ./hosts/arrow/modules.nix { inherit inputs globals overlays; };
-          };
-          x86_64-linux.arrow-aws = inputs.nixos-generators.nixosGenerate rec {
-            system = "x86_64-linux";
-            format = "amazon";
-            specialArgs = {
-              pkgs-stable = import inputs.nixpkgs-stable { inherit system; };
-              pkgs-caddy = import inputs.nixpkgs-caddy { inherit system; };
-            };
-            modules = import ./hosts/arrow/modules.nix { inherit inputs globals overlays; } ++ [
-              (
-                { ... }:
-                {
-                  boot.kernelPackages = inputs.nixpkgs.legacyPackages.x86_64-linux.linuxKernel.packages.linux_6_6;
-                  amazonImage.sizeMB = 16 * 1024;
-                  permitRootLogin = "prohibit-password";
-                  boot.loader.systemd-boot.enable = inputs.nixpkgs.lib.mkForce false;
-                  boot.loader.efi.canTouchEfiVariables = inputs.nixpkgs.lib.mkForce false;
-                  services.amazon-ssm-agent.enable = true;
-                  users.users.ssm-user.extraGroups = [ "wheel" ];
-                }
-              )
-            ];
-          };
-        };
+      # No custom packages
 
       # Programs that can be run by calling this flake
       apps = forAllSystems (

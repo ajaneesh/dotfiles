@@ -1,0 +1,11 @@
+# This file is not meant to be tracked by git.
+#
+# You should create a `user.nix` file with your actual
+# user information.
+#
+# {
+#   programs.git = {
+#     userName = "Your Name";
+#     userEmail = "your.email@example.com";
+#   };
+# }
