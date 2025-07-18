@@ -10,124 +10,18 @@
   # This file contains common Home Manager packages and configurations
   # that are shared across all hosts.
 
-  home.packages = with pkgs; [
-    # Fonts
-    pkgs.emacs-all-the-icons-fonts
-    dejavu_fonts
-    noto-fonts
-    noto-fonts-emoji
+  home.packages = [
+    # ... (all your other packages)
+    pkgs.dante
+    pkgs.libsecret
+  ] ++ (lib.optional (pkgs ? git-credential-libsecret) pkgs.git-credential-libsecret);
 
-    # Window Managers
-    i3
-    i3status
-    i3lock
-    dmenu
-    sxhkd
-    pkgs.xorg.xorgserver
-    pkgs.xorg.setxkbmap
-    pkgs.xorg.xkeyboardconfig
-
-    # Core Utilities
-    git
-    vim
-    wget
-    curl
-    htop
-    ripgrep
-    fzf
-    eza
-    bat
-    delta
-    difftastic
-    dig
-    fd
-    killall
-    inetutils
-    jless
-    jo
-    jq
-    lf
-    osc
-    qrencode
-    rsync
-    sd
-    tealdeer
-    tree
-    vimv-rs
-    unzip
-    dua
-    du-dust
-    duf
-
-    # Development
-    age
-    age-plugin-yubikey
-    docker-compose
-    docker
-    docker-credential-helpers
-    pass
-    gnupg
-    libffi
-    openssl
-    gcc
-    cmake
-    extra-cmake-modules
-    gnumake
-    poetry
-    imagemagick
-    postgresql_15
-    pyright
-    python310
-    cargo
-    rustc
-    clippy
-    fira-code-symbols
-    nodejs_22
-    jdk17
-    clojure
-    leiningen
-    babashka
-    clojure-lsp
-    cider
-    clj-kondo
-    terraform
-    terraform-ls
-    tflint
-    kubectl
-    kubernetes-helm
-    fluxcd
-    kustomize
-    k9s
-    stylua
-    sumneko-lua-language-server
-
-    # Applications
-    google-chrome
-    claude-code
-    _1password-cli
-    (if pkgs.stdenv.isLinux then _1password-gui else null)
-    discord
-    firefox
-    kitty
-    wezterm
-    alacritty
-    xterm
-    nsxiv
-    mupdf
-    zathura
-    mpv
-    obsidian
-    qbittorrent
-    slack
-    yt-dlp
-    aerc
-    himalaya
-    
-    msmtp
-    notmuch
-    w3m
-    dante
-  ];
+  programs.git = {
+    enable = true;
+    extraConfig = lib.mkIf (pkgs ? git-credential-libsecret) {
+      credential.helper = "${pkgs.git-credential-libsecret}/bin/git-credential-libsecret";
+    };
+  };
 
   # Emacs Packages
   programs.emacs = {

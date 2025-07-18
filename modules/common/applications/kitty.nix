@@ -33,14 +33,11 @@
       # Set the Rofi terminal for running programs
       programs.rofi.terminal = lib.mkIf pkgs.stdenv.isLinux (lib.mkDefault "${pkgs.kitty}/bin/kitty");
 
-      # Display images in the terminal
-      programs.zsh.interactiveShellInit = # zsh
-        ''
-          if test "$TERM" = "xterm-kitty"
-              alias icat="kitty +kitten icat"
-              alias ssh="kitty +kitten ssh"
-          end
-        '';
+      # Display images in the terminal when using kitty
+      programs.zsh.shellAliases = {
+        icat = "kitty +kitten icat";
+        ssh = "kitty +kitten ssh";
+      };
 
       programs.kitty = {
         enable = true;

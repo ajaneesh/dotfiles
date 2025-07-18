@@ -15,6 +15,7 @@
     ../../modules/home-manager/crostini/start-i3.nix
     ../../modules/home-manager/crostini/sxhkdrc.nix
     ../../modules/home-manager/common/default.nix # Import the new common module
+    ../../modules/home-manager/common/age.nix
   ];
 
   # Apply the common overlays
@@ -27,4 +28,16 @@
   # home.packages = with pkgs; [
   #   hello
   # ];
+
+  # Git configuration will be set via shell scripts that read from age secrets
+  programs.git = {
+    userName = "Your Name"; # Placeholder - will be overridden by shell init
+    userEmail = "your.email@example.com"; # Placeholder - will be overridden by shell init
+  };
+
+  # Add shell aliases that use secrets when available (maintains reproducibility)
+  programs.bash.shellAliases = {
+    git-commit = ''git -c user.name="$(age-get-secret git-name 2>/dev/null || echo 'Your Name')" -c user.email="$(age-get-secret git-email 2>/dev/null || echo 'your.email@example.com')" commit'';
+    git-commit-signed = ''git -c user.name="$(age-get-secret git-name 2>/dev/null || echo 'Your Name')" -c user.email="$(age-get-secret git-email 2>/dev/null || echo 'your.email@example.com')" commit -S'';
+  };
 }

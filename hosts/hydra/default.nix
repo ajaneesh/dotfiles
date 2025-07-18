@@ -110,6 +110,22 @@
       clojure.enable = true;
       docker.enable = true;
       python.enable = true;
+
+      age.secrets = {
+        "git-user" = {
+          file = ../../private/git-user.age;
+          owner = globals.user;
+        };
+        "git-email" = {
+          file = ../../private/git-email.age;
+          owner = globals.user;
+        };
+      };
+
+      home-manager.users.${globals.user}.programs.git = {
+        userName = lib.last (lib.splitString "/" config.age.secrets.git-user.path);
+        userEmail = lib.last (lib.splitString "/" config.age.secrets.git-email.path);
+      };
     })
   ];
 }

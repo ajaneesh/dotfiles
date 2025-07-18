@@ -124,15 +124,6 @@ inputs.nixpkgs.lib.nixosSystem rec {
       terraform.enable = false;
       wezterm.enable = true;
       yt-dlp.enable = false;
-      gaming = {
-        dwarf-fortress.enable = false;
-        enable = false;
-        steam.enable = false;
-        moonlight.enable = false;
-        legendary.enable = false;
-        lutris.enable = false;
-        ryujinx.enable = false;
-      };
       services.vmagent.enable = true; # Enables Prometheus metrics
       services.openssh.enable = true; # Required for Cloudflare tunnel and identity file
 
