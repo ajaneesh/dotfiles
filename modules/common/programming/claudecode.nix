@@ -1,9 +1,5 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
+{ lib, pkgs, config, ... }:
+
 let
   cfg = config.claudecode;
 in
@@ -13,21 +9,20 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Install the official claude-code package from nixpkgs
-    home-manager.users.${config.user} = {
-      home.packages = [
-        pkgs.claude-code
-        # Create a claude-code wrapper script for Emacs integration
-        (pkgs.writeShellScriptBin "claude-code" ''
-          exec ${pkgs.claude-code}/bin/claude "$@"
-        '')
-      ];
+    home.packages = [
+      pkgs.claude-code
+      # The package executable is `claude`, this wrapper provides `claude-code`
+      # for consistency and for tools that might expect it.
+      (pkgs.writeShellScriptBin "claude-code" ''
+        #!''${pkgs.stdenv.shell}
+        exec "''${pkgs.claude-code}/bin/claude" "$@"
+      '')
+    ];
 
-      # Simple zsh aliases
-      # home.shellAliases = lib.mkIf config.zsh.enable {
-      #   cc = "claude-code";
-      #   ccf = "claude-code --files";
-      # };
+    # Add useful aliases for zsh
+    programs.zsh.shellAliases = {
+      cc = "claude-code";
+      ccf = "claude-code --files";
     };
   };
 }

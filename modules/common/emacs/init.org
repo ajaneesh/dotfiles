@@ -49,25 +49,6 @@ this is now running as a systemd service
 (message "Completed: Startup Performance")
 #+end_src
 
-* Setup package.el and Melpa
-
-#+begin_src emacs-lisp
-(message "Loading: Package Management")
-
-  ;; Initialize package sources
-  (require 'package)
-
-  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                           ("org" . "https://orgmode.org/elpa/")
-                           ("elpa" . "https://elpa.gnu.org/packages/")))
-
-  (package-initialize)
-  (unless package-archive-contents
-    (package-refresh-contents))
-
-(message "Completed: Package Management")
-#+end_src
-
 * Some required packages
 
 #+begin_src emacs-lisp
@@ -165,29 +146,6 @@ this is now running as a systemd service
 
 (use-package htmlize
   :ensure nil)
-
-#+end_src
-
-* Using straight.el for package management
-
-#+begin_src emacs-lisp
-  (unless (featurep 'straight)
-    ;; Bootstrap straight.el
-    (defvar bootstrap-version)
-    (let ((bootstrap-file
-           (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-          (bootstrap-version 6))
-      (unless (file-exists-p bootstrap-file)
-        (with-current-buffer
-            (url-retrieve-synchronously
-             "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-             'silent 'inhibit-cookies)
-          (goto-char (point-max))
-          (eval-print-last-sexp)))
-      (load bootstrap-file nil 'nomessage)))
-
-  ;; Use straight.el for use-package expressions
-  (straight-use-package 'use-package)
 
 #+end_src
 
@@ -534,7 +492,6 @@ this is now running as a systemd service
 
 (use-package dap-mode 
   :ensure nil
-  :after lsp-mode
   :config 
   (dap-auto-configure-mode)
   (require 'dap-python))
