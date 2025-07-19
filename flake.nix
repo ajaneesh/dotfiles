@@ -297,11 +297,11 @@
       # home-manager switch --flake .#hm-common
       homeConfigurations = {
         # Unified home-manager configuration (works on all machines)
-        hm-common = (inputs.home-manager.lib.homeManagerConfiguration {
+        hm-common = inputs.home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages."x86_64-linux";
           extraSpecialArgs = { inherit inputs overlays globals; };
           modules = [ ./home-manager/hm-common.nix ];
-        }).activationPackage;
+        };
       };
 
       # Disk formatting, only used once
