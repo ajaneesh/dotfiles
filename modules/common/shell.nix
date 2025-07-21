@@ -173,9 +173,9 @@
       start-i3 = "startx";
       
       # DPI-specific shortcuts for different displays
-      startx-small = "startx --dpi=96";    # Small fonts for high-res displays
-      startx-medium = "startx --dpi=120";  # Medium fonts (default)
-      startx-large = "startx --dpi=144";   # Large fonts for small displays
+      startx-small = "startx --dpi=88";    # Small fonts for high-res displays
+      startx-medium = "startx --dpi=110";  # Medium fonts (default)
+      startx-large = "startx --dpi=132";   # Large fonts for small displays
       startx-fixed = "startx --no-adaptive-dpi";  # Disable adaptive DPI
     };
     

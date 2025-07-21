@@ -35,7 +35,7 @@
           };
           scrolling.history = 10000;
           font = {
-            size = 14.0;
+            size = 12.0;
           };
           key_bindings = [
             {

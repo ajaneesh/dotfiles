@@ -44,7 +44,7 @@
         # Font configuration
         fonts = {
           names = [ "JetBrains Mono" ];
-          size = 9.0;
+          size = 8.0;
         };
         
         # Advanced key bindings with Emacs integration and terminal switching
@@ -198,7 +198,7 @@
           statusCommand = "${pkgs.i3status}/bin/i3status";
           fonts = {
             names = [ "JetBrains Mono" ];
-            size = 10.0;
+            size = 9.0;
           };
         }];
       };

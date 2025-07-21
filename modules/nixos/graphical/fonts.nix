@@ -35,11 +35,11 @@ in
         # style = "Regular";
         # size = 11.0;
       };
-      services.polybar.config."bar/main".font-0 = "Hack Nerd Font:size=10;2";
-      programs.rofi.font = "Hack Nerd Font 14";
+      services.polybar.config."bar/main".font-0 = "Hack Nerd Font:size=9;2";
+      programs.rofi.font = "Hack Nerd Font 12";
       programs.alacritty.settings.font.normal.family = fontName;
       programs.kitty.font.name = fontName;
-      services.dunst.settings.global.font = "Hack Nerd Font 14";
+      services.dunst.settings.global.font = "Hack Nerd Font 12";
     };
   };
 }

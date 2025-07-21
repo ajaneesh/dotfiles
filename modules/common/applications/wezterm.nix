@@ -119,7 +119,7 @@
             }
 
             config.font = wezterm.font('${font}', { weight = 'Bold'})
-            config.font_size = ${if pkgs.stdenv.isLinux then "14.0" else "18.0"}
+            config.font_size = ${if pkgs.stdenv.isLinux then "12.0" else "15.0"}
 
             -- Fix color blocks instead of text
             config.front_end = "WebGpu"
@@ -128,7 +128,7 @@
             config.hide_tab_bar_if_only_one_tab = true
             config.window_frame = {
               font = wezterm.font('${font}', { weight = 'Bold'}),
-              font_size = ${if pkgs.stdenv.isLinux then "12.0" else "16.0"},
+              font_size = ${if pkgs.stdenv.isLinux then "10.0" else "13.0"},
             }
 
             config.colors = {

@@ -9,7 +9,7 @@
   # MacOS-specific settings for Kitty
   home-manager.users.${config.user} = lib.mkIf pkgs.stdenv.isDarwin {
     programs.kitty = {
-      font.size = lib.mkForce 20;
+      font.size = lib.mkForce 17;
       settings = {
         shell = "/run/current-system/sw/bin/zsh";
         macos_traditional_fullscreen = true;
