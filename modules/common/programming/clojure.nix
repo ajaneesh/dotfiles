@@ -4,9 +4,6 @@
   options.clojure.enable = lib.mkEnableOption "Clojure programming language.";
 
   config = lib.mkIf config.clojure.enable {
-
-    home-manager.users.${config.user} = {
-
       home.packages = with pkgs; [
         fira-code-symbols
         nodejs_22
@@ -23,7 +20,6 @@
        #emacsPackages.clojure-ts-mode
        #emacsPackages.clojure-mode
       ];
-
-    };
   };
 }
+

@@ -17,6 +17,7 @@
     ../modules/common/terminals.nix
     
     # Programming languages and tools
+    ../modules/common/programming/clojure.nix
     ../modules/common/programming/claudecode.nix
     ../modules/common/programming/nodejs.nix
     ../modules/common/programming/language-servers.nix
@@ -24,6 +25,7 @@
   
   # Enable claude-code
   claudecode.enable = true;
+  clojure.enable = true;
   
   # Enable i3 window manager
   i3.enable = true;
