@@ -7,6 +7,7 @@
     ./alacritty.nix
     ./discord.nix
     ./firefox.nix
+    ./google-chrome.nix
     ./kitty.nix
     ./media.nix
     ./obsidian.nix

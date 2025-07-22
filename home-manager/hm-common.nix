@@ -31,6 +31,16 @@
   # Apply overlays and config for standalone use
   nixpkgs.overlays = overlays;
   nixpkgs.config.allowUnfree = true;
+
+  xdg.desktopEntries = {
+    "google-chrome" = {
+      name = "Google Chrome";
+      exec = "google-chrome-stable";
+      icon = "google-chrome";
+      terminal = false;
+      categories = [ "Network" "WebBrowser" ];
+    };
+  };
   
   # Font configuration
   fonts.fontconfig = {
@@ -44,6 +54,7 @@
   
   # Common applications for all machines
   home.packages = with pkgs; [
+    google-chrome
     # Core applications (available on all machines)
     
     # Desktop applications (will work on all machines with i3+Xephyr)  
