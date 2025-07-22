@@ -15,5 +15,4 @@
   # Ensure the global npm bin directory is in your PATH
   # This makes 'gemini' and other global npm packages discoverable
   home.sessionPath = [ "${config.home.homeDirectory}/.npm-global/bin" ];
-
 }
