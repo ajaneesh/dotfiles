@@ -55,6 +55,7 @@
   # Common applications for all machines
   home.packages = with pkgs; [
     google-chrome
+    postgresql
     # Core applications (available on all machines)
     
     # Desktop applications (will work on all machines with i3+Xephyr)  
