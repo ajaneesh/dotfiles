@@ -10,7 +10,7 @@
     # Terminal wrapper scripts for easy switching
     (writeShellScriptBin "term-xterm" ''
       exec ${xterm}/bin/xterm \
-        -fa "JetBrains Mono" -fs 10 \
+        -fa "JetBrains Mono" -fs 9 \
         -bg "#1d1f21" -fg "#c5c8c6" \
         -cr "#c5c8c6" \
         -e ${zsh}/bin/zsh "$@"

@@ -244,7 +244,7 @@
       fi
 
       # Focus the Xephyr window by starting a simple application
-      DISPLAY="$XEPHYR_DISPLAY" ${xterm}/bin/xterm -fa "JetBrains Mono" -fs 10 -e "echo 'i3 workspace ready. DPI: $DPI | Use Alt+Enter for terminal, Alt+d for dmenu, Alt+p for rofi | Alt+Shift+F5 to refresh display'; sleep 3" &
+      DISPLAY="$XEPHYR_DISPLAY" ${xterm}/bin/xterm -fa "JetBrains Mono" -fs 9 -e "echo 'i3 workspace ready. DPI: $DPI | Use Alt+Enter for terminal, Alt+d for dmenu, Alt+p for rofi | Alt+Shift+F5 to refresh display'; sleep 3" &
 
       # Function to cleanup on exit
       cleanup() {
