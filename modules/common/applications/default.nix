@@ -13,7 +13,7 @@
     ./obsidian.nix
     ./qbittorrent.nix
     ./slack.nix
-    ./wezterm.nix
+    
     ./yt-dlp.nix
   ];
 }

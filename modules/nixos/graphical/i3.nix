@@ -9,6 +9,7 @@ let
 
   lockCmd = "${pkgs.betterlockscreen}/bin/betterlockscreen --lock --display 1 --blur 0.5 --span";
   lockUpdate = "${pkgs.betterlockscreen}/bin/betterlockscreen --update ${config.wallpaper} --display 1 --span";
+  # Set default terminal
   terminal = "wezterm";
 in
 {

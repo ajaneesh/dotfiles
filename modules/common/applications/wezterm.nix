@@ -35,7 +35,7 @@
       home-manager.users.${config.user} = {
 
         # Set the i3 terminal
-        xsession.windowManager.i3.config.terminal = lib.mkIf pkgs.stdenv.isLinux "wezterm";
+        # xsession.windowManager.i3.config.terminal = lib.mkIf pkgs.stdenv.isLinux "wezterm";
 
         # Display images in the terminal
         programs.zsh.shellAliases = {
@@ -59,7 +59,7 @@
                 config.theme.colors.base0F # maroon
                 config.theme.colors.base0B # green
                 config.theme.colors.base0A # olive
-                config.theme.colors.base0D # navy
+                config.theme.colors.base0C # navy
                 config.theme.colors.base0E # purple
                 config.theme.colors.base0C # teal
                 config.theme.colors.base06 # silver
@@ -69,7 +69,7 @@
                 config.theme.colors.base08 # red
                 config.theme.colors.base0B # lime
                 config.theme.colors.base0A # yellow
-                config.theme.colors.base0D # blue
+                config.theme.colors.base0C # blue
                 config.theme.colors.base0E # fuchsia
                 config.theme.colors.base0C # aqua
                 config.theme.colors.base07 # white
@@ -119,7 +119,7 @@
             }
 
             config.font = wezterm.font('${font}', { weight = 'Bold'})
-            config.font_size = ${if pkgs.stdenv.isLinux then "12.0" else "15.0"}
+            config.font_size = ${if pkgs.stdenv.isLinux then "9.0" else "15.0"}
 
             -- Fix color blocks instead of text
             config.front_end = "WebGpu"
@@ -128,7 +128,7 @@
             config.hide_tab_bar_if_only_one_tab = true
             config.window_frame = {
               font = wezterm.font('${font}', { weight = 'Bold'}),
-              font_size = ${if pkgs.stdenv.isLinux then "10.0" else "13.0"},
+              font_size = ${if pkgs.stdenv.isLinux then "9.0" else "13.0"},
             }
 
             config.colors = {

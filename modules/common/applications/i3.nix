@@ -50,7 +50,7 @@
         # Advanced key bindings with Emacs integration and terminal switching
         keybindings = let modifier = "Mod1"; in {
           # Terminal launcher with switching capability
-          "${modifier}+Return" = "exec --no-startup-id terminal";
+          "${modifier}+Return" = "exec --no-startup-id term-urxvt";
           "${modifier}+Shift+Return" = "exec --no-startup-id term-xterm";
           "${modifier}+Ctrl+Return" = "exec --no-startup-id term-urxvt";
           "${modifier}+Alt+Return" = "exec --no-startup-id term-wezterm";

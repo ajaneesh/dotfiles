@@ -39,6 +39,27 @@
 
   # .Xresources for rxvt-unicode (based on your WSL config)
   home.file.".Xresources".text = ''
+    ! XTerm color scheme (Tomorrow Night)
+    *.foreground:   #c5c8c6
+    *.background:   #1d1f21
+    *.cursorColor:  #c5c8c6
+    *.color0:       #282a2e
+    *.color8:       #373b41
+    *.color1:       #a54242
+    *.color9:       #cc6666
+    *.color2:       #8c9440
+    *.color10:      #b5bd68
+    *.color3:       #de935f
+    *.color11:      #f0c674
+    *.color4:       #F5F5DC
+    *.color12:      #F5F5DC
+    *.color5:       #85678f
+    *.color13:      #b294bb
+    *.color6:       #5e8d87
+    *.color14:      #8abeb7
+    *.color7:       #707880
+    *.color15:      #c5c8c6
+
     ! URxvt color scheme (Tomorrow Night)
     URxvt.foreground:   #c5c8c6
     URxvt.background:   #1d1f21
@@ -61,8 +82,8 @@
     URxvt.color11:      #f0c674
 
     ! blue
-    URxvt.color4:       #5f819d
-    URxvt.color12:      #81a2be
+    URxvt.color4:       #F5F5DC
+    URxvt.color12:      #F5F5DC
 
     ! magenta
     URxvt.color5:       #85678f
@@ -89,7 +110,7 @@
     URxvt.urgentOnBell: true
     URxvt.depth: 24
     URxvt.iso14755: false
-    URxvt.font: xft:JetBrains Mono:size=10
+    URxvt.font: xft:JetBrains Mono:size=9
     URxvt.keysym.M-c: perl:clipboard:copy
     URxvt.keysym.M-v: perl:clipboard:paste
     URxvt.keysym.M-C-v: perl:clipboard:paste_escaped
