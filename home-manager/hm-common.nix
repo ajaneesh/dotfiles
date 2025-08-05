@@ -37,7 +37,7 @@
   xdg.desktopEntries = {
     "google-chrome" = {
       name = "Google Chrome";
-      exec = "google-chrome-stable --force-device-scale-factor=1";
+      exec = "google-chrome-stable --force-device-scale-factor=1 --disable-gpu --disable-software-rasterizer --disable-gpu-sandbox --disable-features=VizDisplayCompositor";
       icon = "google-chrome";
       terminal = false;
       categories = [ "Network" "WebBrowser" ];

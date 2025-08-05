@@ -29,7 +29,7 @@
         # Basic startup applications (adapted for Xephyr)
         startup = [
           # Set wallpaper if available
-          { command = "feh --bg-fill ~/.config/wallpaper.jpg || true"; always = true; notification = false; }
+          { command = "feh --bg-fill ~/.config/wallpaper.jpg 2>/dev/null || true"; always = true; notification = false; }
         ];
         
         # Simple default layout
@@ -49,14 +49,13 @@
         
         # Advanced key bindings with Emacs integration and terminal switching
         keybindings = let modifier = "Mod1"; in {
-          # Terminal launcher with switching capability
+          # Terminal launcher with logical progression
           "${modifier}+Return" = "exec --no-startup-id term-urxvt";
           "${modifier}+Shift+Return" = "exec --no-startup-id term-xterm";
-          "${modifier}+Ctrl+Return" = "exec --no-startup-id term-urxvt";
-          "${modifier}+Alt+Return" = "exec --no-startup-id term-wezterm";
+          "${modifier}+Ctrl+Return" = "exec --no-startup-id term-wezterm";
 
-          # Application launcher
-          "${modifier}+d" = "exec --no-startup-id ${pkgs.rofi}/bin/rofi -modes run -show run";
+          # Application launcher - Linux binaries only, no Windows executables
+          "${modifier}+d" = "exec --no-startup-id env PATH=\"$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin\" ${pkgs.rofi}/bin/rofi -modes run -show run";
           "${modifier}+p" = "exec --no-startup-id ${pkgs.rofi}/bin/rofi -show drun";
 
           # Window management
