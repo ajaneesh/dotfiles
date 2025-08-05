@@ -43,7 +43,7 @@
         
         # Font configuration
         fonts = {
-          names = [ "JetBrains Mono" ];
+          names = [ "pango:Source Sans Pro" ];
           size = 8.0;
         };
         

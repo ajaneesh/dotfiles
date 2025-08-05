@@ -37,20 +37,42 @@
   xdg.desktopEntries = {
     "google-chrome" = {
       name = "Google Chrome";
-      exec = "google-chrome-stable";
+      exec = "google-chrome-stable --force-device-scale-factor=1";
       icon = "google-chrome";
       terminal = false;
       categories = [ "Network" "WebBrowser" ];
     };
   };
+
+  # Chrome font configuration
+  xdg.configFile."google-chrome/Default/Preferences".text = builtins.toJSON {
+    webkit = {
+      webprefs = {
+        fonts = {
+          standard = {
+            Zyyy = "Source Sans Pro";
+          };
+          sansserif = {
+            Zyyy = "Source Sans Pro";
+          };
+          serif = {
+            Zyyy = "DejaVu Serif";
+          };
+          fixed = {
+            Zyyy = "JetBrains Mono";
+          };
+        };
+      };
+    };
+  };
   
-  # Font configuration
+  # Simple font configuration - minimal to avoid breaking i3
   fonts.fontconfig = {
     enable = true;
     defaultFonts = {
-      monospace = [ "JetBrains Mono" "Hack" "DejaVu Sans Mono" ];
       sansSerif = [ "Source Sans Pro" "DejaVu Sans" ];
       serif = [ "DejaVu Serif" ];
+      monospace = [ "JetBrains Mono" "Hack" "DejaVu Sans Mono" ];
     };
   };
   
@@ -58,6 +80,7 @@
   home.packages = with pkgs; [
     google-chrome
     postgresql
+    fontconfig                      # Font configuration utilities
     # Core applications (available on all machines)
     
     # Desktop applications (will work on all machines with i3+Xephyr)  
@@ -88,10 +111,10 @@
     meslo-lgs-nf                    # Powerline font
     emacs-all-the-icons-fonts       # Icons for treemacs and other Emacs packages
     jetbrains-mono                  # Programming font
-    fira-code                       # Programming font with ligatures
+    # fira-code                       # Programming font with ligatures - DISABLED
     hack-font                       # Clean monospace font
-    iosevka                         # Narrow programming font
-    victor-mono                     # Cursive programming font
+    # iosevka                         # Narrow programming font - DISABLED
+    # victor-mono                     # Cursive programming font - DISABLED
     nerd-fonts.hack                 # Nerd Font version of Hack
     dejavu_fonts                    # Standard fonts
     noto-fonts                      # Unicode fonts
