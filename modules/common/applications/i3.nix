@@ -56,7 +56,6 @@
 
           # Application launcher - Linux binaries only, no Windows executables
           "${modifier}+d" = "exec --no-startup-id env PATH=\"$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin\" ${pkgs.rofi}/bin/rofi -modes run -show run";
-          "${modifier}+p" = "exec --no-startup-id ${pkgs.rofi}/bin/rofi -show drun";
 
           # Window management
           "${modifier}+Shift+x" = "kill";
