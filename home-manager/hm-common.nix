@@ -122,6 +122,7 @@
     source-sans-pro                 # Sans serif font
     
     # Xephyr i3 launcher (renamed from i3-xephyr to startx) - ENHANCED FOR MULTI-DISPLAY
+    (import ../apps/restartx.nix { inherit pkgs; })
     (writeShellScriptBin "startx" ''
       #!/usr/bin/env bash
 
@@ -228,7 +229,6 @@
           -ac \
           -host-cursor \
           -reset \
-          -terminate \
           -dpi "$DPI" \
           -screen "$SCREEN_SIZE" \
           -resizeable \
