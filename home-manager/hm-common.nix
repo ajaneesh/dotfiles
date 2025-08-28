@@ -99,6 +99,7 @@
     xorg.xrdb        # X resource database
     xorg.xkill       # Kill X applications
     xorg.xrandr      # Display information (for startx script)
+    xorg.xset        # X11 settings (power management, screensaver)
     feh              # Background image setter
     picom            # Compositor
     dunst            # Notification daemon
@@ -123,6 +124,48 @@
     
     # Xephyr i3 launcher (renamed from i3-xephyr to startx) - ENHANCED FOR MULTI-DISPLAY
     (import ../apps/restartx.nix { inherit pkgs; })
+    # WSL X11 connection recovery utility
+    (writeShellScriptBin "wsl-x11-recover" ''
+      #!/usr/bin/env bash
+      echo "WSL X11 Connection Recovery Utility"
+      echo "Checking WSLg status..."
+      
+      # Check if WSLg is running
+      if ! pgrep -f "wslg" > /dev/null; then
+          echo "WSLg not running. Please restart WSL or check Windows WSL service."
+          exit 1
+      fi
+      
+      # Wait for X11 socket
+      echo "Waiting for X11 socket..."
+      timeout=30
+      while [ $timeout -gt 0 ] && [ ! -S "/tmp/.X11-unix/X0" ] && [ ! -S "/tmp/.X11-unix/X1" ]; do
+          sleep 1
+          timeout=$((timeout - 1))
+      done
+      
+      if [ $timeout -eq 0 ]; then
+          echo "Timeout waiting for X11 socket. WSLg may not be properly initialized."
+          exit 1
+      fi
+      
+      # Test X11 connection
+      export DISPLAY=:0
+      if ${xorg.xrandr}/bin/xrandr -q > /dev/null 2>&1; then
+          echo "X11 connection on :0 is working"
+      else
+          export DISPLAY=:1
+          if ${xorg.xrandr}/bin/xrandr -q > /dev/null 2>&1; then
+              echo "X11 connection on :1 is working"
+          else
+              echo "X11 connection failed on both :0 and :1"
+              exit 1
+          fi
+      fi
+      
+      echo "WSLg X11 connection is healthy. You can now restart Xephyr."
+      echo "Run: startx"
+    '')
     (writeShellScriptBin "startx" ''
       #!/usr/bin/env bash
 
@@ -255,12 +298,27 @@
       # Wait a bit for i3 to start
       sleep 2
 
-      # Set up auto-refresh if enabled
+      # Disable power management features that could kill Xephyr
+      DISPLAY="$XEPHYR_DISPLAY" ${xorg.xset}/bin/xset -dpms 2>/dev/null || true
+      DISPLAY="$XEPHYR_DISPLAY" ${xorg.xset}/bin/xset s off 2>/dev/null || true
+      DISPLAY="$XEPHYR_DISPLAY" ${xorg.xset}/bin/xset s noblank 2>/dev/null || true
+
+      # Set up auto-refresh and connection monitoring if enabled
       if [ "$AUTO_REFRESH" = true ]; then
-          # Background process to monitor for window resizes and auto-refresh
+          # Background process to monitor for window resizes, auto-refresh, and connection recovery
           (
               while kill -0 $XEPHYR_PID 2>/dev/null; do
                   sleep 5
+                  # Check if we can still communicate with X server
+                  if ! DISPLAY="$XEPHYR_DISPLAY" ${xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
+                      echo "X11 connection lost, attempting recovery..."
+                      # Wait a moment for potential reconnection
+                      sleep 2
+                      # Try to re-establish connection by reapplying settings
+                      DISPLAY="$XEPHYR_DISPLAY" ${xorg.xset}/bin/xset -dpms 2>/dev/null || true
+                      DISPLAY="$XEPHYR_DISPLAY" ${xorg.xset}/bin/xset s off 2>/dev/null || true
+                      DISPLAY="$XEPHYR_DISPLAY" ${xorg.xset}/bin/xset s noblank 2>/dev/null || true
+                  fi
                   # Refresh the display to fix canvas expansion issues
                   DISPLAY="$XEPHYR_DISPLAY" ${xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1 || true
               done
