@@ -81,6 +81,11 @@
     google-chrome
     postgresql
     fontconfig                      # Font configuration utilities
+    
+    # Create google-chrome alias for xdg-open compatibility
+    (writeShellScriptBin "google-chrome" ''
+      exec ${google-chrome}/bin/google-chrome-stable "$@"
+    '')
     # Core applications (available on all machines)
     
     # Desktop applications (will work on all machines with i3+Xephyr)  
@@ -171,6 +176,26 @@
 
       # Enhanced i3-xephyr: Launch i3 window manager in a nested X server using Xephyr
       # Multi-display aware with adaptive DPI and auto-refresh support
+
+      # Check WSLg availability before starting
+      echo "Checking WSLg X11 server..."
+      if [ ! -S "/tmp/.X11-unix/X0" ] && [ ! -S "/tmp/.X11-unix/X1" ]; then
+          echo "ERROR: No X11 socket found. WSLg may not be running."
+          echo "Try: wsl --shutdown (from Windows), then restart WSL"
+          exit 1
+      fi
+
+      # Test basic X11 connection
+      export DISPLAY=:0
+      if ! ${xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
+          export DISPLAY=:1  
+          if ! ${xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
+              echo "ERROR: Cannot connect to X11 server on :0 or :1"
+              echo "WSLg X server may be crashed. Try restarting WSL."
+              exit 1
+          fi
+      fi
+      echo "WSLg X11 connection verified on $DISPLAY"
 
       # Parse command line arguments
       ADAPTIVE_DPI=true
@@ -311,13 +336,30 @@
                   sleep 5
                   # Check if we can still communicate with X server
                   if ! DISPLAY="$XEPHYR_DISPLAY" ${xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
-                      echo "X11 connection lost, attempting recovery..."
+                      echo "X11 connection lost, checking WSLg status..."
+                      
+                      # Check if WSLg sockets still exist
+                      if [ ! -S "/tmp/.X11-unix/X0" ] && [ ! -S "/tmp/.X11-unix/X1" ]; then
+                          echo "FATAL: WSLg X11 server crashed. Xephyr cannot continue."
+                          echo "Run 'wsl --shutdown' from Windows CMD, then restart WSL"
+                          kill $XEPHYR_PID $I3_PID 2>/dev/null || true
+                          exit 1
+                      fi
+                      
+                      echo "WSLg sockets exist, attempting Xephyr recovery..."
                       # Wait a moment for potential reconnection
-                      sleep 2
+                      sleep 3
                       # Try to re-establish connection by reapplying settings
                       DISPLAY="$XEPHYR_DISPLAY" ${xorg.xset}/bin/xset -dpms 2>/dev/null || true
                       DISPLAY="$XEPHYR_DISPLAY" ${xorg.xset}/bin/xset s off 2>/dev/null || true
                       DISPLAY="$XEPHYR_DISPLAY" ${xorg.xset}/bin/xset s noblank 2>/dev/null || true
+                      
+                      # Test recovery
+                      if ! DISPLAY="$XEPHYR_DISPLAY" ${xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
+                          echo "Recovery failed. Xephyr display $XEPHYR_DISPLAY is unresponsive."
+                      else
+                          echo "Recovery successful!"
+                      fi
                   fi
                   # Refresh the display to fix canvas expansion issues
                   DISPLAY="$XEPHYR_DISPLAY" ${xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1 || true
