@@ -7,7 +7,7 @@ final: prev: {
         owner = "rougier"; 
         repo = "mu4e-dashboard"; 
         rev = "main"; 
-        sha256 = "sha256-bCelxaT+qaR2W80Cr591A4cRycIFJmXjeY8/aqIpl5g=";
+        sha256 = "sha256-neRNHOI+4mRG04DcY1l9SS8kJGf9Zjb+RmaBWtx21/o=";
       };
       packageRequires = with final.emacsPackages; [
         async
@@ -21,7 +21,7 @@ final: prev: {
         owner = "stevemolitor"; 
         repo = "claude-code.el"; 
         rev = "main"; 
-        sha256 = "sha256-ESHCKR+Hpv2wyRAvq/jOVKJz96Jmo8y9AvaXpLp7BFU=";
+        sha256 = "sha256-neRNHOI+4mRG04DcY1l9SS8kJGf9Zjb+RmaBWtx21/o=";
       };
       packageRequires = with final.emacsPackages; [
         transient
