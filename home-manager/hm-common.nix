@@ -79,6 +79,8 @@
   # Common applications for all machines
   home.packages = with pkgs; [
     google-chrome
+    awscli2
+    google-cloud-sdk
     postgresql
     fontconfig                      # Font configuration utilities
     
@@ -108,6 +110,11 @@
     feh              # Background image setter
     picom            # Compositor
     dunst            # Notification daemon
+    
+    # Cursor themes for Xephyr
+    adwaita-icon-theme
+    vanilla-dmz      # Default cursor theme
+    xorg.xcursorgen  # Cursor generation utilities
     
     # Terminal info and utilities
     ncurses          # Terminal capabilities
@@ -295,7 +302,6 @@
       # Start Xephyr with calculated DPI and enhanced options
       ${xorg.xorgserver}/bin/Xephyr "$XEPHYR_DISPLAY" \
           -ac \
-          -host-cursor \
           -reset \
           -dpi "$DPI" \
           -screen "$SCREEN_SIZE" \
@@ -314,6 +320,18 @@
 
       # Set up the nested display environment
       export NESTED_DISPLAY="$XEPHYR_DISPLAY"
+
+      # Set cursor theme to fix invisible cursor issue
+      DISPLAY="$XEPHYR_DISPLAY" ${xorg.xrdb}/bin/xrdb -merge << 'EOF'
+Xcursor.theme: DMZ-White
+Xcursor.size: 16
+*cursorColor: white
+*cursorBlink: true
+EOF
+      
+      # Also set environment variables for cursor theme
+      export XCURSOR_THEME=DMZ-White
+      export XCURSOR_SIZE=16
 
       # Start i3 in the nested X server
       echo "Starting i3 on display $XEPHYR_DISPLAY..."
