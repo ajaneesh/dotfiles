@@ -222,27 +222,27 @@
         "disk /" = {
           position = 2;
           settings = {
-            format = "💾 %avail";
+            format = "Disk: %avail";
           };
         };
         "memory" = {
           position = 3;
           settings = {
-            format = "🧠 %used/%total";
+            format = "Mem: %used/%total";
             threshold_degraded = "1G";
-            format_degraded = "🧠 LOW: %available";
+            format_degraded = "Mem LOW: %available";
           };
         };
         "cpu_usage" = {
           position = 4;
           settings = {
-            format = "⚡ %usage";
+            format = "CPU: %usage";
           };
         };
         "tztime local" = {
           position = 5;
           settings = {
-            format = "📅 %Y-%m-%d %H:%M:%S";
+            format = "%Y-%m-%d %H:%M:%S";
           };
         };
       };
