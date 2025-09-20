@@ -52,6 +52,7 @@ this is now running as a systemd service
 * Some required packages
 
 #+begin_src emacs-lisp
+(message "Loading: Some required packages")
 
 (use-package treemacs-all-the-icons
   :ensure nil)
@@ -91,6 +92,11 @@ this is now running as a systemd service
   :hook (magit-post-refresh . diff-hl-magit-post-refresh)
   :config
   (diff-hl-flydiff-mode))
+
+(use-package magit
+  :ensure nil
+  :config
+  (define-key magit-mode-map (kbd "<C-tab>") nil))
 
 ;; Window configuration undo/redo (built-in)
 (use-package winner
@@ -147,12 +153,14 @@ this is now running as a systemd service
 (use-package htmlize
   :ensure nil)
 
+(message "Completed: Some required packages")
 #+end_src
 
 * SSH Tunnel Configuration (need external library that uses pem key and secrets)
 ** TODO This is only for the ssh tunneling.  I need to turn this into a module that can be loaded from git.  Having it in this folder will mean that it cannot be made available to others in a reproducible fashion
 
 #+begin_src emacs-lisp
+(message "Loading: SSH Tunnel Configuration")
 
   ;; Add my library path to load-path
   (push "~/lib/elisp/" load-path)
@@ -168,12 +176,13 @@ this is now running as a systemd service
   ;; Optional: setup default keybindings
   (ssh-tunnel-setup-default-keybindings)
 
-
+(message "Completed: SSH Tunnel Configuration")
 #+end_src
 
 * Basic UI Configuration
 
 #+begin_src emacs-lisp
+(message "Loading: Basic UI Configuration")
 
   (setq inhibit-startup-message t)
 
@@ -217,14 +226,18 @@ this is now running as a systemd service
     (windmove-default-keybindings 'super))
 
   ;; Ace-window - for more complex window management
+  ;; Press C-x o, then a character to jump to a window.
   (use-package ace-window
     :ensure nil
-    :bind (("M-o" . ace-window))
+    :bind (("M-o" . ace-window)
+           ("C-x o" . ace-window)
+           ("C-x C-o" . ace-swap-window))
     :custom
     (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)) ; Use letters instead of numbers
     :config
     (ace-window-display-mode 1)) ; Optionally show persistent window labels
 
+(message "Completed: Basic UI Configuration")
 #+end_src
 
 * Get =evil-mode= up and running ASAP so that we dont have to struggle with emacs editing controls
@@ -530,6 +543,7 @@ this is now running as a systemd service
     (kbd "M-.") 'lsp-find-definition
     (kbd "M-,") 'xref-go-back))
 
+(message "Completed: Python Configuration")
 #+end_src
 
 #+RESULTS:
@@ -628,6 +642,7 @@ this is now running as a systemd service
 * =org-roam= and =org-ui= configuration
 
 #+begin_src emacs-lisp 
+(message "Loading: org-roam and org-ui configuration")
 
 (use-package org-roam
   :ensure nil
@@ -666,12 +681,14 @@ this is now running as a systemd service
   ;; Add a key binding
   (global-set-key (kbd "C-c n g") 'my/org-roam-ui-open))
 
+(message "Completed: org-roam and org-ui configuration")
 #+end_src
 
 * =org-mode= wrapping
 ** Automatic wrapping: Enable auto-fill-mode for automatic wrapping as you type:
 
 #+begin_src emacs-lisp
+(message "Loading: org-mode wrapping")
   ;; (add-hook 'org-mode-hook 'auto-fill-mode)
 #+end_src
   
@@ -692,12 +709,13 @@ this is now running as a systemd service
     (setq truncate-lines nil))       
 
     (add-hook 'org-mode-hook 'my/set-org-visual-wrap)
-  
+(message "Completed: org-mode wrapping")
 #+end_src
 
 * =org-mode= workflow customization
 ** Org Agenda Custom View
 #+begin_src emacs-lisp
+(message "Loading: org-mode workflow customization")
 
 ;; Org Agenda Custom Views
 (setq org-agenda-custom-commands
@@ -1115,6 +1133,7 @@ this is now running as a systemd service
 ;; Bind to convenient keys
 (global-set-key (kbd "C-c s s") 'my/create-todays-standup)
 (global-set-key (kbd "C-c s r") 'my/refresh-standup-report)
+(message "Completed: org-mode workflow customization")
 #+end_src
 * Buffer customizations (prot tips to ensure they open in specific windows)
 Need to borrow some useful configuration to control mini buffer from Prot's youtube video.  I have deferred this for a while.  Once i live with my configuration for a while i will be in a better position to understand what exactly i am missing.  Better not start with what someone feels is a good way to configure buffers. 
@@ -1122,6 +1141,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
 * =project.el= configuration
 
 #+begin_src emacs-lisp
+(message "Loading: project.el configuration")
 
   ;; Project configuration
   (use-package project
@@ -1167,6 +1187,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
   (with-eval-after-load 'evil
     (evil-define-key '(normal visual) prog-mode-map
       (kbd "C-.") 'embark-act))
+(message "Completed: project.el configuration")
 #+end_src
 
 #+RESULTS:
@@ -1190,12 +1211,14 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
   (use-package savehist
     :ensure nil
     :init
-    (savehist-mode))  
+    (savehist-mode))
+(message "Completed: Completion System - Vertico")
 #+end_src
 
 * =marginalia= configuration
 
 #+begin_src emacs-lisp
+(message "Loading: marginalia configuration")
 
   ;; Enable rich annotations using the Marginalia package
   (use-package marginalia
@@ -1213,6 +1236,7 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
     ;; the mode gets enabled right away. Note that this forces loading the
     ;; package.
     (marginalia-mode))
+(message "Completed: marginalia configuration")
 #+end_src
 
 * =consult= configuration
@@ -1338,11 +1362,22 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
     (("C-c p f" . consult-project-extra-find)
      ("C-c p o" . consult-project-extra-find-other-window)))
 
+  (defun my/fast-project-find ()
+    "Find files in the current project using consult-find."
+    (interactive)
+    (let ((project-root (project-current)))
+      (when project-root
+        (consult-find (project-root project-root)))))
+
+  (advice-add 'consult-project-extra-find :override #'my/fast-project-find)
+
+(message "Completed: Completion System - Consult")
 #+end_src
     
 * Consult - Custom extensions
 
 #+begin_src emacs-lisp
+(message "Loading: Consult - Custom extensions")
 
   (defun my/consult-find-across-projects ()
     "Find files across all known projects."
@@ -1355,12 +1390,14 @@ Need to borrow some useful configuration to control mini buffer from Prot's yout
   (global-set-key (kbd "C-c p F") #'my/consult-find-across-projects)
   (global-set-key (kbd "M-s F") #'my/consult-find-across-projects)
 
+(message "Completed: Consult - Custom extensions")
 #+end_src
 
 * =dgrep= for search and replace across files (not buffers)
 this will allow us to make changes across multiple unopened files in file system within a project using a combination of consult-ripgrep, embark-act and wgrep-change-to-wgrep-mode
 
 #+begin_src emacs-lisp
+(message "Loading: dgrep configuration")
 
 (use-package wgrep
   :ensure nil
@@ -1387,11 +1424,13 @@ this will allow us to make changes across multiple unopened files in file system
   ;; Ensure `C-c C-c` works in `wgrep-mode` with `evil-mode`
   (evil-define-key 'normal wgrep-mode-map (kbd "C-c C-c") 'wgrep-finish-edit))
 
+(message "Completed: dgrep configuration")
 #+end_src
 
 * =embark= configuration
 
 #+begin_src emacs-lisp
+(message "Loading: embark configuration")
 (use-package embark
   :ensure nil
   :bind
@@ -1427,23 +1466,27 @@ this will allow us to make changes across multiple unopened files in file system
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
+(message "Completed: embark configuration")
 #+end_src
 
 * =orderless= configuration
 
 #+begin_src emacs-lisp
+(message "Loading: orderless configuration")
 
   (use-package orderless
     :ensure nil
     :custom
     (completion-styles '(orderless basic))
     (completion-category-defaults nil)
-    (completion-category-overrides '((file (styles basic partial-completion)))))  
+    (completion-category-overrides '((file (styles basic partial-completion)))))
+(message "Completed: orderless configuration")
 #+end_src
 
 * =cape= Configuration
 
 #+begin_src emacs-lisp
+(message "Loading: cape Configuration")
 
 ;; diabling company as we have corfu and cape for completions.
 ;; (global-company-mode -1)
@@ -1472,11 +1515,13 @@ this will allow us to make changes across multiple unopened files in file system
   (dolist (source cape-completion-sources)
     (add-to-list 'completion-at-point-functions source)))
 
+(message "Completed: cape Configuration")
 #+end_src
 
 * Python test configuration
 
 #+begin_src emacs-lisp 
+(message "Loading: Python test configuration")
 
 (use-package pytest
   :ensure nil
@@ -1529,23 +1574,25 @@ this will allow us to make changes across multiple unopened files in file system
 (global-set-key (kbd "C-c C-t") 'run-pytest-with-coverage)
 (global-set-key (kbd "C-c C-v") 'setup-python-coverage)
 
-
+(message "Completed: Python test configuration")
 #+end_src
 
 * Python BDD Specific configuration
 
 #+begin_src emacs-lisp 
+(message "Loading: Python BDD Specific configuration")
 
 (use-package feature-mode
   :ensure nil)
 (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
 
-
+(message "Completed: Python BDD Specific configuration")
 #+end_src
 
 * =corfu= Configuration
 
 #+begin_src emacs-lisp
+(message "Loading: corfu Configuration")
 
   (use-package corfu
     :ensure nil
@@ -1571,6 +1618,7 @@ this will allow us to make changes across multiple unopened files in file system
       (corfu-mode 1)))
 
   (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
+(message "Completed: corfu Configuration")
 #+end_src
 
 * =magit= to start working with Git.
@@ -1578,6 +1626,7 @@ this will allow us to make changes across multiple unopened files in file system
 * Clojure support
 
 #+begin_src emacs-lisp
+(message "Loading: Clojure support")
 
 (use-package clojure-mode
   :ensure nil
@@ -1616,11 +1665,13 @@ this will allow us to make changes across multiple unopened files in file system
     (kbd "M-.") 'cider-find-var
     (kbd "M-,") 'cider-pop-back))
 
+(message "Completed: Clojure support")
 #+end_src
 
 * Cider REPL Configuration
 
 #+begin_src emacs-lisp
+(message "Loading: Cider REPL Configuration")
 
   ;; Debugging Setup
   (setq cider-cljs-lein-repl
@@ -1654,10 +1705,12 @@ this will allow us to make changes across multiple unopened files in file system
   (setq cider-repl-history-file ".cider-repl-history")
   (setq cider-repl-wrap-history t)
   (setq cider-repl-history-size 3000)
+(message "Completed: Cider REPL Configuration")
 #+end_src
 
 * =treemacs= configuration
 #+begin_src emacs-lisp
+(message "Loading: treemacs configuration")
 
 (defun my/treemacs-peek ()
   "Peek at file content in a temporary window without creating a permanent buffer."
@@ -1710,6 +1763,7 @@ this will allow us to make changes across multiple unopened files in file system
   (define-key treemacs-mode-map (kbd "P") #'my/treemacs-peek)
   (define-key treemacs-mode-map (kbd "q") #'my/treemacs-close-peek))
 
+(message "Completed: treemacs configuration")
 #+end_src
 
 * debugging with dap-mode?
@@ -1717,14 +1771,16 @@ this will allow us to make changes across multiple unopened files in file system
 Starting to believe i will never use DAP
 
 #+begin_src emacs-lisp
+(message "Loading: debugging with dap-mode?")
 
   ;; will implement later.
-  
+(message "Completed: debugging with dap-mode?")
 #+end_src
 
 * Some packages that make it easy to work with JSON-MEM
 
 #+begin_src emacs-lisp
+(message "Loading: Some packages that make it easy to work with JSON-MEM")
 
 ;; JSON navigation with TAB behavior similar to org-mode
 (defun my/json-next-element ()
@@ -1815,11 +1871,13 @@ Starting to believe i will never use DAP
   :hook
   (emacs-lisp-mode . my/yasnippet-capf-h))
 
+(message "Completed: Some packages that make it easy to work with JSON-MEM")
 #+end_src
 
 * YASnippet Configuration
 
 #+begin_src emacs-lisp
+(message "Loading: YASnippet Configuration")
   ;; Basic YASnippet setup
   (use-package yasnippet
     :ensure nil
@@ -1928,11 +1986,13 @@ Starting to believe i will never use DAP
         (kbd "zR") 'origami-open-all-nodes
         (kbd "zM") 'origami-close-all-nodes)))
 
+(message "Completed: YASnippet Configuration")
 #+end_src
 
 * JavaScript/TypeScript Development
 
 #+begin_src emacs-lisp
+(message "Loading: JavaScript/TypeScript Development")
 
 ;; Core JavaScript support
 (use-package js2-mode 
@@ -1987,11 +2047,13 @@ Starting to believe i will never use DAP
   (add-to-list 'eglot-server-programs 
                '((typescript-mode js2-mode rjsx-mode) . ("typescript-language-server" "--stdio"))))
 
+(message "Completed: JavaScript/TypeScript Development")
 #+end_src
 
 * Configuration File Modes
 
 #+begin_src emacs-lisp
+(message "Loading: Configuration File Modes")
 
 ;; YAML support
 (use-package yaml-mode 
@@ -2035,16 +2097,18 @@ Starting to believe i will never use DAP
   :ensure nil
   :mode ("\\.service\\'" "\\.timer\\'" "\\.target\\'" "\\.socket\\'"))
 
+(message "Completed: Configuration File Modes")
 #+end_src
 
 * REST support
 
 #+begin_src emacs-lisp
+(message "Loading: REST support")
 
   (use-package restclient
     :ensure nil
     :mode ("\\.http\\'" . restclient-mode))
-  
+(message "Completed: REST support")
 #+end_src
 
 * Uvicron compilation mappings for FastAPI projects
@@ -2052,6 +2116,7 @@ Starting to believe i will never use DAP
 This is just an easy for me to start up my various python projects.  I realize that this is not generic and is better off outside of dotfiles.  It makes no sense for people who are not involved in these projects
 
 #+begin_src emacs-lisp
+(message "Loading: Uvicorn compilation mappings for FastAPI projects")
 ;; Create a keymap for uvicorn commands
 (defvar uvicorn-command-map
   (let ((map (make-sparse-keymap)))
@@ -2098,7 +2163,8 @@ This is just an easy for me to start up my various python projects.  I realize t
     "C-c u 1" "start iOCR"
     "C-c u 2" "start CVC"
     "C-c u 3" "start Billi"
-    "C-c u 4" "start Billi capture"))  
+    "C-c u 4" "start Billi capture"))
+(message "Completed: Uvicorn compilation mappings for FastAPI projects")
 #+end_src
 
 * Evil - Elisp keymap customization
@@ -2106,6 +2172,7 @@ This doesnt seem to be working as expected.  messing up the code.  Can move this
 Needs to be placed along with all the other with-eval-after-load 'evil customizations so that they are all in one place
 
 #+begin_src emacs-lisp
+(message "Loading: Evil - Elisp keymap customization")
 
 (with-eval-after-load 'evil
   (evil-define-key '(normal visual) emacs-lisp-mode-map
@@ -2113,14 +2180,16 @@ Needs to be placed along with all the other with-eval-after-load 'evil customiza
     (kbd "]e") 'evil-cp-end-of-defun    
     (kbd "[e") 'evil-cp-beginning-of-defun  
     (kbd "M-j") 'evil-cp-next-sexp      
-    (kbd "M-k") 'evil-cp-previous-sexp)) 
+    (kbd "M-k") 'evil-cp-previous-sexp))
 
+(message "Completed: Evil - Elisp keymap customization")
 #+end_src
 
 * Evil - Buffer customization
 This overrides evil behaviour of using Esc to close special buffers.  This sometimes causes more harm than good.  this becomes necessary because in buffers like python compilation and repl and eshell, if Vi is active, then you are forced to hit esc to use other commands that allow you do search in the buffer etc.  The solution is to learn to some some emacs native navigation commands to move around in such buffers otherwise, hitting Esc closes the buffers and for someone using Vi, hitting Esc is second nature 
 
 #+begin_src emacs-lisp
+(message "Loading: Evil - Buffer customization")
 
   ;; Prevent ESC from closing windows in special buffers
   (with-eval-after-load 'evil
@@ -2137,12 +2206,14 @@ This overrides evil behaviour of using Esc to close special buffers.  This somet
   (add-hook 'special-mode-hook #'my/prevent-escape-window-close)
   (add-hook 'cider-repl-mode-hook #'my/prevent-escape-window-close)
 
+(message "Completed: Evil - Buffer customization")
 #+end_src
 
 * MANAGED BY EMACS
 ** TODO Have no clue if this is actually being used at all
 
 #+begin_src emacs-lisp
+(message "Loading: MANAGED BY EMACS")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -2163,11 +2234,13 @@ This overrides evil behaviour of using Esc to close special buffers.  This somet
 			     (project-root
 			      (project-current)))))))
 
+(message "Completed: MANAGED BY EMACS")
 #+end_src
 
 * Tramp specific setup
 
 #+begin_src emacs-lisp
+(message "Loading: Tramp specific setup")
 ;; Prevent TRAMP from hanging with Vertico
 (setq remote-file-name-inhibit-cache nil)
 ;; (setq tramp-shell-prompt-pattern "\\(?:^\\|\r\\)[^]#$%>\n]*#?[]#$%>].* *\\(^[\\[[0-9;]*[a-zA-Z] *\\)*")
@@ -2187,6 +2260,7 @@ This overrides evil behaviour of using Esc to close special buffers.  This somet
 
 ;; Optional: Disable Cape file completion on remote files
 (setq cape-file-directory-must-exist nil)
+(message "Completed: Tramp specific setup")
 #+end_src
 
 * EWW configuration
@@ -2194,6 +2268,7 @@ This overrides evil behaviour of using Esc to close special buffers.  This somet
 ** TODO Probably something that i will get rid of later on.  I dont see myself using this at all
 
 #+begin_src emacs-lisp 
+(message "Loading: EWW configuration")
 
 ;; EWW configuration
 (require 'eww)
@@ -2210,12 +2285,14 @@ This overrides evil behaviour of using Esc to close special buffers.  This somet
 (global-set-key (kbd "C-c w") 'eww)
 (global-set-key (kbd "C-c o") 'browse-url-external) ;; Open in external browser when needed
 
+(message "Completed: EWW configuration")
 #+end_src
 
 * Nix mode
 ** TODO There is also a =nix-ts-mode=.  wonder if that is complementary to this.  Need to figure it out
 
 #+begin_src emacs-lisp
+(message "Loading: Nix mode")
 
 (use-package transient
   :ensure nil)
@@ -2223,11 +2300,13 @@ This overrides evil behaviour of using Esc to close special buffers.  This somet
 (use-package nix-mode
   :ensure nil)
 
+(message "Completed: Nix mode")
 #+end_src
 
 * mu4e-dashboard
 
 #+begin_src emacs-lisp 
+(message "Loading: mu4e-dashboard")
 
 ;; Load mu4e-dashboard
 (use-package mu4e-dashboard
@@ -2243,12 +2322,14 @@ This overrides evil behaviour of using Esc to close special buffers.  This somet
   :bind (:map mu4e-main-mode-map
               ("d" . mu4e-dashboard)))
 
+(message "Completed: mu4e-dashboard")
 #+end_src
 
 * Editor customization for programming modes
 ** move-text
 
 #+begin_src emacs-lisp
+(message "Loading: Editor customization for programming modes")
 
 (use-package move-text
   :ensure nil
@@ -2362,6 +2443,7 @@ Place cursor at token and call C-. r for quick ripgrep using that token
 
 (global-set-key (kbd "M-s R") 'my/consult-ripgrep-dwim)
 
+(message "Completed: Editor customization for programming modes")
 #+end_src
 
 * mu4e  - Basic Configuration
@@ -2489,11 +2571,13 @@ Place cursor at token and call C-. r for quick ripgrep using that token
         shr-use-fonts t
         shr-max-width 90
         shr-discard-aria-hidden t))
+(message "Completed: Email - mu4e Basic Configuration")
 #+end_src
 
 * mu4e - Appearance and UI Enhancements
 
 #+begin_src emacs-lisp
+(message "Loading: mu4e - Appearance and UI Enhancements")
 
 ;; Header appearance with Modus themes
 (with-eval-after-load 'modus-themes
@@ -2528,12 +2612,13 @@ Place cursor at token and call C-. r for quick ripgrep using that token
 (with-eval-after-load 'mu4e
   (my/force-mu4e-use-xwidget))
 
+(message "Completed: mu4e - Appearance and UI Enhancements")
 #+end_src
 
 * mu4e - Notification and Alerts
 
 #+begin_src emacs-lisp
-
+(message "Loading: mu4e - Notification and Alerts")
 
 ;; Email notifications
 (use-package mu4e-alert
@@ -2544,12 +2629,14 @@ Place cursor at token and call C-. r for quick ripgrep using that token
   (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
   (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
 
+(message "Completed: mu4e - Notification and Alerts")
 #+end_src
 
 * mu4e - org-mime integration for composition
 ** Hooks that could potentially interfere with org-message
 
 #+begin_src emacs-lisp
+(message "Loading: mu4e - org-mime integration for composition")
 
 ;; ;; Automatically convert org buffer to HTML email when sending
 ;; (add-hook 'message-send-hook
@@ -2605,11 +2692,13 @@ Place cursor at token and call C-. r for quick ripgrep using that token
 
 (setq org-latex-create-formula-image-program 'dvipng)
 (setq org-preview-latex-default-process 'dvipng)
+(message "Completed: mu4e - org-mime integration for composition")
 #+end_src
 
 * mu4e - org-msg integration
 
 #+begin_src emacs-lisp 
+(message "Loading: mu4e - org-msg integration")
 
 (use-package org-msg
   :ensure nil
@@ -2681,11 +2770,13 @@ Ajaneesh")
           (lambda ()
             (org-msg-mode 1)
             (message "org-msg activated for composition")))
+(message "Completed: mu4e - org-msg integration")
 #+end_src
 
 ** mu4e - toggle between mime and msg packages for org/html support
 
 #+begin_src emacs-lisp 
+(message "Loading: mu4e - toggle between mime and msg packages for org/html support")
 
 ;; (defun my/toggle-org-msg-mode ()
 ;;   "Toggle between org-msg and standard composition."
@@ -2701,11 +2792,13 @@ Ajaneesh")
 ;;   (define-key mu4e-headers-mode-map (kbd "C-c m") 'my/toggle-org-msg-mode)
 ;;   (define-key mu4e-view-mode-map (kbd "C-c m") 'my/toggle-org-msg-mode))
 
+(message "Completed: mu4e - toggle between mime and msg packages for org/html support")
 #+end_src
 
 * mu4e - Enhacement Packages
 
 #+begin_src emacs-lisp
+(message "Loading: mu4e - Enhacement Packages")
 
 ;; Use emojis in emails - using built-in emoji support instead of emojify
 ;; (use-package emojify
@@ -2735,11 +2828,13 @@ Ajaneesh")
   :after (marginalia all-the-icons)
   :hook (marginalia-mode . all-the-icons-completion-marginalia-setup))
 
+(message "Completed: mu4e - Enhacement Packages")
 #+end_src
 
 * mu4e - Convenience Functions
 
 #+begin_src emacs-lisp
+(message "Loading: mu4e - Convenience Functions")
 
 ;; Function to toggle between HTML and plain text view
 (defun my/toggle-html-plain-text ()
@@ -2756,11 +2851,13 @@ Ajaneesh")
 ;; Add the toggle command to mu4e-view-mode-map
 (with-eval-after-load 'mu4e-view
   (define-key mu4e-view-mode-map (kbd "C-c t") 'my/toggle-html-plain-text))
+(message "Completed: mu4e - Convenience Functions")
 #+end_src
 
 * mixed-pitch-mode configuration for org-mode
 
 #+begin_src emacs-lisp
+(message "Loading: mixed-pitch-mode configuration for org-mode")
 
 ;; Configure mixed-pitch mode for Org
 (use-package mixed-pitch
@@ -2783,6 +2880,7 @@ Ajaneesh")
           line-number
           line-number-current-line)))
 
+(message "Completed: mixed-pitch-mode configuration for org-mode")
 #+end_src
 
 * Font and Color Configuration
@@ -2997,14 +3095,13 @@ Ajaneesh")
 ;; Key binding for toggling themes - currently conflicting with treemacs
 ;; (global-set-key (kbd "C-c t t") 'my/toggle-modus-theme)
 
-
-
-
+(message "Completed: Font and Color Configuration")
 #+end_src
 
 * Global Configuration
 
 #+begin_src emacs-lisp
+(message "Loading: Global Configuration")
 
 ;; ESC cancels all
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
@@ -3205,11 +3302,13 @@ This is something that i use often.  it kind of makes it easier to deal with =ls
 
 ;; F4 binding is now handled in the main Python keybinding section above
 
+(message "Completed: Global Configuration")
 #+end_src
 
 * SQL Client configuration
 makes it easier to open a connection to Postgres.   In this setup, i save my connection properties in a .config/.. file and when i start a connection with =C-c s c=, i am prompted for a password and hitting =C-c s p= automatically enters the password from my secrets file. Having to do this as the connection routinue is not accepting password even if supplied along with other connection parameters. 
 #+begin_src emacs-lisp
+(message "Loading: SQL Client configuration")
 
 ;; Declare SQL variables as dynamic to avoid lexical binding conflicts
 (defvar sql-user nil)
@@ -3318,6 +3417,7 @@ If in minibuffer during password prompt, inserts and submits."
 (with-eval-after-load 'sql
   (define-key sql-mode-map (kbd "C-c C-c") 'sql-send-paragraph))
 
+(message "Completed: SQL Client configuration")
 #+end_src
 
 * Claude Code Integration
@@ -3325,6 +3425,7 @@ If in minibuffer during password prompt, inserts and submits."
 Claude Code integration using the dedicated claude-code.el package for better Emacs integration.
 
 #+begin_src emacs-lisp
+(message "Loading: Claude Code Integration")
 ;; -*- lexical-binding: t; -*-
 ;; Claude Code Emacs Integration using claude-code.el
 ;; This uses the dedicated Emacs package: https://github.com/stevemolitor/claude-code.el
@@ -3342,7 +3443,12 @@ Claude Code integration using the dedicated claude-code.el package for better Em
   :bind-keymap
     ("C-c c" . claude-code-command-map)
     :config
-    (claude-code-mode)) 
+    (claude-code-mode))
 
+(message "Completed: Claude Code Integration")
+
+(message "Emacs configuration loaded successfully!")
 #+end_src
+ 
+nd_src
  
