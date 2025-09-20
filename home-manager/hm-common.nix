@@ -102,6 +102,7 @@
     
     # WSL/i3 utilities
     xclip            # Clipboard integration
+    autocutsel       # Clipboard synchronization
     i3-resurrect     # Session saving/restoring
     xorg.xrdb        # X resource database
     xorg.xkill       # Kill X applications
@@ -335,6 +336,7 @@ EOF
 
       # Start i3 in the nested X server
       echo "Starting i3 on display $XEPHYR_DISPLAY..."
+      DISPLAY="$XEPHYR_DISPLAY" ${pkgs.autocutsel}/bin/autocutsel -fork
       DISPLAY="$XEPHYR_DISPLAY" ${i3}/bin/i3 &
       I3_PID=$!
 

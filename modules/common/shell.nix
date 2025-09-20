@@ -26,6 +26,9 @@
     
     # Enhanced ZSH configuration with git integration
     initContent = ''
+      # Disable bracketed paste mode to prevent paste warnings
+      unset zle_bracketed_paste
+
       # Git prompt integration
       autoload -Uz vcs_info
       precmd() { vcs_info }
