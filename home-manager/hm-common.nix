@@ -336,8 +336,13 @@ EOF
 
       # Start i3 in the nested X server
       echo "Starting i3 on display $XEPHYR_DISPLAY..."
-      DISPLAY="$XEPHYR_DISPLAY" ${pkgs.autocutsel}/bin/autocutsel -fork
-      DISPLAY="$XEPHYR_DISPLAY" ${i3}/bin/i3 &
+      
+      # Set up fontconfig environment to fix "Cannot load default config file" error
+      export FONTCONFIG_FILE=${pkgs.fontconfig.out}/etc/fonts/fonts.conf
+      export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
+      
+      DISPLAY="$XEPHYR_DISPLAY" FONTCONFIG_FILE="$FONTCONFIG_FILE" FONTCONFIG_PATH="$FONTCONFIG_PATH" ${pkgs.autocutsel}/bin/autocutsel -fork
+      DISPLAY="$XEPHYR_DISPLAY" FONTCONFIG_FILE="$FONTCONFIG_FILE" FONTCONFIG_PATH="$FONTCONFIG_PATH" ${i3}/bin/i3 &
       I3_PID=$!
 
       # Wait a bit for i3 to start
