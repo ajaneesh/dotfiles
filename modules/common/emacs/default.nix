@@ -120,6 +120,7 @@
           paredit
           pkgs.emacsPackagesCustom.mu4e-dashboard
           pkgs.emacsPackagesCustom.emacs-claude-code
+          pkgs.emacsPackagesCustom.org-notion
           py-isort
           pytest
           python-black
