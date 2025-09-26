@@ -102,6 +102,7 @@
     
     # WSL/i3 utilities
     xclip            # Clipboard integration
+    xsel             # Alternative clipboard tool
     autocutsel       # Clipboard synchronization
     i3-resurrect     # Session saving/restoring
     xorg.xrdb        # X resource database
