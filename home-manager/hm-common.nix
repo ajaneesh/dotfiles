@@ -102,7 +102,6 @@
     
     # WSL/i3 utilities
     xclip            # Clipboard integration
-    xsel             # X selection utilities
     autocutsel       # Clipboard synchronization
     i3-resurrect     # Session saving/restoring
     xorg.xrdb        # X resource database
@@ -121,7 +120,6 @@
     # Terminal info and utilities
     ncurses          # Terminal capabilities
     procps           # For pkill command in startx script
-    dbus             # D-Bus session bus
     
     # Fonts for proper display
     meslo-lgs-nf                    # Powerline font
@@ -336,10 +334,10 @@ EOF
       export XCURSOR_THEME=DMZ-White
       export XCURSOR_SIZE=16
 
-      # Start i3 in the nested X server with D-Bus session
-      echo "Starting i3 on display $XEPHYR_DISPLAY with D-Bus session..."
-      DISPLAY="$XEPHYR_DISPLAY" ${pkgs.autocutsel}/bin/autocutsel -s CLIPBOARD -fork
-      DISPLAY="$XEPHYR_DISPLAY" ${pkgs.dbus}/bin/dbus-run-session ${i3}/bin/i3 &
+      # Start i3 in the nested X server
+      echo "Starting i3 on display $XEPHYR_DISPLAY..."
+      DISPLAY="$XEPHYR_DISPLAY" ${pkgs.autocutsel}/bin/autocutsel -fork
+      DISPLAY="$XEPHYR_DISPLAY" ${i3}/bin/i3 &
       I3_PID=$!
 
       # Wait a bit for i3 to start
