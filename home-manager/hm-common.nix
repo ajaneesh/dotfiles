@@ -341,7 +341,45 @@ EOF
       export FONTCONFIG_FILE=${pkgs.fontconfig.out}/etc/fonts/fonts.conf
       export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
       
-      DISPLAY="$XEPHYR_DISPLAY" FONTCONFIG_FILE="$FONTCONFIG_FILE" FONTCONFIG_PATH="$FONTCONFIG_PATH" ${pkgs.autocutsel}/bin/autocutsel -fork
+      # Start clipboard synchronization between host (:0) and Xephyr display
+      DISPLAY=":0" ${pkgs.autocutsel}/bin/autocutsel -fork -selection PRIMARY
+      DISPLAY=":0" ${pkgs.autocutsel}/bin/autocutsel -fork -selection CLIPBOARD
+      DISPLAY="$XEPHYR_DISPLAY" FONTCONFIG_FILE="$FONTCONFIG_FILE" FONTCONFIG_PATH="$FONTCONFIG_PATH" ${pkgs.autocutsel}/bin/autocutsel -fork -selection PRIMARY
+      DISPLAY="$XEPHYR_DISPLAY" FONTCONFIG_FILE="$FONTCONFIG_FILE" FONTCONFIG_PATH="$FONTCONFIG_PATH" ${pkgs.autocutsel}/bin/autocutsel -fork -selection CLIPBOARD
+      
+      # Start bidirectional clipboard bridge between host and Xephyr
+      (
+        LAST_HOST_CLIPBOARD=""
+        LAST_XEPHYR_CLIPBOARD=""
+        
+        while kill -0 $XEPHYR_PID 2>/dev/null; do
+          # Copy from host clipboard to Xephyr clipboard (if changed)
+          HOST_CLIPBOARD=$(DISPLAY=":0" ${pkgs.xclip}/bin/xclip -o -selection clipboard 2>/dev/null || echo "")
+          if [ -n "$HOST_CLIPBOARD" ] && [ "$HOST_CLIPBOARD" != "$LAST_HOST_CLIPBOARD" ]; then
+            echo "$HOST_CLIPBOARD" | DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xclip}/bin/xclip -i -selection clipboard 2>/dev/null || true
+            echo "$HOST_CLIPBOARD" | DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xclip}/bin/xclip -i -selection primary 2>/dev/null || true
+            LAST_HOST_CLIPBOARD="$HOST_CLIPBOARD"
+          fi
+          
+          # Copy from Xephyr clipboard to host clipboard (if changed)
+          XEPHYR_CLIPBOARD=$(DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xclip}/bin/xclip -o -selection clipboard 2>/dev/null || echo "")
+          if [ -n "$XEPHYR_CLIPBOARD" ] && [ "$XEPHYR_CLIPBOARD" != "$LAST_XEPHYR_CLIPBOARD" ] && [ "$XEPHYR_CLIPBOARD" != "$HOST_CLIPBOARD" ]; then
+            echo "$XEPHYR_CLIPBOARD" | DISPLAY=":0" ${pkgs.xclip}/bin/xclip -i -selection clipboard 2>/dev/null || true
+            LAST_XEPHYR_CLIPBOARD="$XEPHYR_CLIPBOARD"
+          fi
+          
+          # Also check primary selection (for middle-click paste)
+          XEPHYR_PRIMARY=$(DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xclip}/bin/xclip -o -selection primary 2>/dev/null || echo "")
+          if [ -n "$XEPHYR_PRIMARY" ] && [ "$XEPHYR_PRIMARY" != "$LAST_XEPHYR_CLIPBOARD" ] && [ "$XEPHYR_PRIMARY" != "$HOST_CLIPBOARD" ]; then
+            echo "$XEPHYR_PRIMARY" | DISPLAY=":0" ${pkgs.xclip}/bin/xclip -i -selection clipboard 2>/dev/null || true
+            LAST_XEPHYR_CLIPBOARD="$XEPHYR_PRIMARY"
+          fi
+          
+          sleep 0.5
+        done
+      ) &
+      CLIPBOARD_PID=$!
+      
       DISPLAY="$XEPHYR_DISPLAY" FONTCONFIG_FILE="$FONTCONFIG_FILE" FONTCONFIG_PATH="$FONTCONFIG_PATH" ${i3}/bin/i3 &
       I3_PID=$!
 
@@ -400,6 +438,7 @@ EOF
       cleanup() {
           echo "Cleaning up..."
           [ -n "$REFRESH_PID" ] && kill "$REFRESH_PID" 2>/dev/null
+          [ -n "$CLIPBOARD_PID" ] && kill "$CLIPBOARD_PID" 2>/dev/null
           [ -n "$I3_PID" ] && kill "$I3_PID" 2>/dev/null
           [ -n "$XEPHYR_PID" ] && kill "$XEPHYR_PID" 2>/dev/null
           exit 0
