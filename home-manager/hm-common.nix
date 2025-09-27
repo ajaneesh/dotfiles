@@ -21,11 +21,17 @@
     ../modules/common/programming/claudecode.nix
     ../modules/common/programming/nodejs.nix
     ../modules/common/programming/language-servers.nix
+    ../modules/common/programming/rust.nix
+    ../modules/common/programming/devcontainers.nix
+    ../modules/common/programming/docker.nix
   ];
   
   # Enable claude-code
   claudecode.enable = true;
   clojure.enable = true;
+  docker.enable = true;
+  rust.enable = true;
+  devcontainers.enable = true;
   
   # Enable i3 window manager
   i3.enable = true;
