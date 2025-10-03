@@ -156,29 +156,6 @@ this is now running as a systemd service
 (message "Completed: Some required packages")
 #+end_src
 
-* SSH Tunnel Configuration (need external library that uses pem key and secrets)
-** TODO This is only for the ssh tunneling.  I need to turn this into a module that can be loaded from git.  Having it in this folder will mean that it cannot be made available to others in a reproducible fashion
-
-#+begin_src emacs-lisp
-(message "Loading: SSH Tunnel Configuration")
-
-  ;; Add my library path to load-path
-  (push "~/lib/elisp/" load-path)
-
-#+end_src
-
-** Need to externalize secrets and put this in a github repo as a package so that this can be loaded from other machines without having to copy it around
-
-#+begin_src emacs-lisp
-
-  (require 'ssh-tunnel-manager)
-
-  ;; Optional: setup default keybindings
-  (ssh-tunnel-setup-default-keybindings)
-
-(message "Completed: SSH Tunnel Configuration")
-#+end_src
-
 * Basic UI Configuration
 
 #+begin_src emacs-lisp

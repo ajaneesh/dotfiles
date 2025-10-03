@@ -1,23 +1,12 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+{ config, pkgs, lib, ... }:
 
-  options.rust.enable = lib.mkEnableOption "Rust programming language.";
+{
+  options.rust.enable = lib.mkEnableOption "Enable Rust development environment";
 
   config = lib.mkIf config.rust.enable {
-
-    home-manager.users.${config.user} = {
-
-      home.packages = with pkgs; [
-        cargo
-        rustc
-        clippy
-        gcc
-      ];
-    };
+    home.packages = with pkgs; [
+      rustup
+      wasm-pack
+    ];
   };
 }
