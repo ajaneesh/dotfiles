@@ -723,6 +723,7 @@
         "osc": "osc",
         "ren": "ren",
         "rep": "rep",
+        "rust-overlay": "rust-overlay_2",
         "snipe-nvim-src": "snipe-nvim-src",
         "telescope-nvim-src": "telescope-nvim-src",
         "telescope-project-nvim-src": "telescope-project-nvim-src",
@@ -752,6 +753,26 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "rev": "a229311fcb45b88a95fdfa5cecd8349c809a272a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_2": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1758940228,
+        "narHash": "sha256-sTS04L9LKqzP1oiVXYDwcMzfFSF0DnSJQFzZBpEgLFE=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "5bfedf3fbbf5caf8e39f7fcd62238f54d82aa1e2",
         "type": "github"
       },
       "original": {
