@@ -188,6 +188,11 @@
     (writeShellScriptBin "startx" ''
       #!/usr/bin/env bash
 
+      # Source Home Manager environment variables
+      if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+      fi
+
       # Enhanced i3-xephyr: Launch i3 window manager in a nested X server using Xephyr
       # Multi-display aware with adaptive DPI and auto-refresh support
 
