@@ -7,7 +7,24 @@
 
   config = lib.mkIf config.i3.enable {
     # Advanced i3 configuration with Emacs integration and terminal switching
-    
+
+    # Configure fontconfig for proper monospace fonts
+    fonts.fontconfig.enable = true;
+
+    home.file.".config/fontconfig/conf.d/10-monospace.conf".text = ''
+      <?xml version="1.0"?>
+      <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+      <fontconfig>
+        <alias>
+          <family>monospace</family>
+          <prefer>
+            <family>JetBrains Mono</family>
+            <family>DejaVu Sans Mono</family>
+          </prefer>
+        </alias>
+      </fontconfig>
+    '';
+
     # Install required packages
     home.packages = with pkgs; [
       i3
@@ -231,10 +248,8 @@ EOF
 
         # Start i3 in the nested X server
         echo "Starting i3 on display $XEPHYR_DISPLAY..."
-        
-        # Set up fontconfig environment to fix "Cannot load default config file" error
-        export FONTCONFIG_FILE=${pkgs.fontconfig.out}/etc/fonts/fonts.conf
-        export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
+
+        # Set up XDG config home for proper config file discovery
         export XDG_CONFIG_HOME="$HOME/.config"
 
         # Start clipboard synchronization between host (:0) and Xephyr display
@@ -473,6 +488,7 @@ EOF
         # Environment variables
         Environment = [
           "DISPLAY=:0"
+          "XDG_CONFIG_HOME=%h/.config"
           "PATH=%h/.nix-profile/bin:${pkgs.lib.makeBinPath (with pkgs; [
             xorg.xorgserver
             i3
