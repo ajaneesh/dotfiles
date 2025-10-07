@@ -31,6 +31,12 @@
       inputs.nixpkgs.follows = "nixpkgs"; # Use system packages list for their inputs
     };
 
+    # Provides declarative rust toolchains
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # vscode-server = {
     #   url = "github:nix-community/nixos-vscode-server";
     #   inputs.nixpkgs.follows = "nixpkgs";
@@ -301,7 +307,10 @@
       homeConfigurations = {
         # Unified home-manager configuration (works on all machines)
         hm-common = inputs.home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages."x86_64-linux";
+          pkgs = import nixpkgs {
+            system = "x86_64-linux";
+            overlays = overlays ++ [ inputs.rust-overlay.overlays.default ];
+          };
           extraSpecialArgs = { inherit inputs overlays globals; };
           modules = [ ./home-manager/hm-common.nix ];
         };

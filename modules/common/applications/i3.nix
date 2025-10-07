@@ -235,12 +235,13 @@ EOF
         # Set up fontconfig environment to fix "Cannot load default config file" error
         export FONTCONFIG_FILE=${pkgs.fontconfig.out}/etc/fonts/fonts.conf
         export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
-        
+        export XDG_CONFIG_HOME="$HOME/.config"
+
         # Start clipboard synchronization between host (:0) and Xephyr display
         DISPLAY=":0" ${pkgs.autocutsel}/bin/autocutsel -fork -selection PRIMARY
         DISPLAY=":0" ${pkgs.autocutsel}/bin/autocutsel -fork -selection CLIPBOARD
-        DISPLAY="$XEPHYR_DISPLAY" FONTCONFIG_FILE="$FONTCONFIG_FILE" FONTCONFIG_PATH="$FONTCONFIG_PATH" ${pkgs.autocutsel}/bin/autocutsel -fork -selection PRIMARY
-        DISPLAY="$XEPHYR_DISPLAY" FONTCONFIG_FILE="$FONTCONFIG_FILE" FONTCONFIG_PATH="$FONTCONFIG_PATH" ${pkgs.autocutsel}/bin/autocutsel -fork -selection CLIPBOARD
+        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.autocutsel}/bin/autocutsel -fork -selection PRIMARY
+        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.autocutsel}/bin/autocutsel -fork -selection CLIPBOARD
         
         # Start bidirectional clipboard bridge between host and Xephyr
         (
@@ -275,7 +276,7 @@ EOF
         ) &
         CLIPBOARD_PID=$!
         
-        DISPLAY="$XEPHYR_DISPLAY" WAYLAND_DISPLAY="" FONTCONFIG_FILE="$FONTCONFIG_FILE" FONTCONFIG_PATH="$FONTCONFIG_PATH" ${pkgs.i3}/bin/i3 &
+        DISPLAY="$XEPHYR_DISPLAY" WAYLAND_DISPLAY="" ${pkgs.i3}/bin/i3 &
         I3_PID=$!
 
         # Wait a bit for i3 to start
