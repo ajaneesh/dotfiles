@@ -76,6 +76,5 @@
     # Terminal info and utilities
     ncurses          # Terminal capabilities
     procps           # For pkill command in startx script
-    
   ];
 }
