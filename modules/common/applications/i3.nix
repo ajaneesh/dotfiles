@@ -275,7 +275,7 @@ EOF
         ) &
         CLIPBOARD_PID=$!
         
-        DISPLAY="$XEPHYR_DISPLAY" FONTCONFIG_FILE="$FONTCONFIG_FILE" FONTCONFIG_PATH="$FONTCONFIG_PATH" ${pkgs.i3}/bin/i3 &
+        DISPLAY="$XEPHYR_DISPLAY" WAYLAND_DISPLAY="" FONTCONFIG_FILE="$FONTCONFIG_FILE" FONTCONFIG_PATH="$FONTCONFIG_PATH" ${pkgs.i3}/bin/i3 &
         I3_PID=$!
 
         # Wait a bit for i3 to start
@@ -405,7 +405,7 @@ EOF
           "${modifier}+Ctrl+Return" = "exec --no-startup-id term-wezterm";
 
           # Application launcher - Linux binaries only, no Windows executables
-          "${modifier}+d" = "exec --no-startup-id env PATH=\"$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin\" ${pkgs.rofi}/bin/rofi -modes run -show run";
+          "${modifier}+d" = "exec --no-startup-id env GDK_BACKEND=x11 PATH=\"$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin\" ${pkgs.rofi}/bin/rofi -modes run -show run";
 
           # Window management
           "${modifier}+Shift+x" = "kill";
