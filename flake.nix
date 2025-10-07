@@ -36,7 +36,10 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
     # Community packages; used for Firefox extensions
-    nur.url = "github:nix-community/nur";
+    nur = {
+      url = "github:nix-community/nur";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Use official Firefox binary for macOS
     firefox-darwin = {

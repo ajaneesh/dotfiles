@@ -6,7 +6,6 @@
   config = lib.mkIf config.clojure.enable {
       home.packages = with pkgs; [
         fira-code-symbols
-        nodejs_22
         jdk17
         clojure
         leiningen
