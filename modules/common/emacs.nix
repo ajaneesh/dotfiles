@@ -68,7 +68,6 @@
       mixed-pitch
       modus-themes
       move-text
-      mu4e-alert
       nix-mode
       olivetti
       orderless
@@ -78,7 +77,6 @@
       org-roam
       org-roam-ui
       paredit
-      pkgs.emacsPackagesCustom.mu4e-dashboard
       pkgs.emacsPackagesCustom.emacs-claude-code
       py-isort
       pytest
