@@ -287,42 +287,76 @@ EOF
         DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s off 2>/dev/null || true
         DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s noblank 2>/dev/null || true
 
+        # Create a PID file for systemd service to track
+        PIDFILE="/tmp/xephyr-$DISPLAY_NUM.pid"
+        echo $XEPHYR_PID > "$PIDFILE"
+        echo "Created PID file: $PIDFILE"
+
         # Set up auto-refresh and connection monitoring if enabled
         if [ "$AUTO_REFRESH" = true ]; then
-            # Background process to monitor for window resizes, auto-refresh, and connection recovery
+            # Enhanced background process: monitors connection, auto-refresh, and keeps session alive
             (
+                RECOVERY_ATTEMPTS=0
+                MAX_RECOVERY_ATTEMPTS=10
+
                 while kill -0 $XEPHYR_PID 2>/dev/null; do
                     sleep 5
+
+                    # Keep-alive: Check if i3 is still running, restart if needed
+                    if ! ${pkgs.procps}/bin/pgrep -f "i3.*$XEPHYR_DISPLAY" >/dev/null; then
+                        echo "WARNING: i3 process died, restarting on $XEPHYR_DISPLAY..."
+                        DISPLAY="$XEPHYR_DISPLAY" WAYLAND_DISPLAY="" ${pkgs.i3}/bin/i3 &
+                        I3_PID=$!
+                        sleep 2
+                    fi
+
                     # Check if we can still communicate with X server
                     if ! DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
-                        echo "X11 connection lost, checking WSLg status..."
-                        
+                        echo "X11 connection lost (attempt $((RECOVERY_ATTEMPTS+1))/$MAX_RECOVERY_ATTEMPTS), checking WSLg status..."
+
                         # Check if WSLg sockets still exist
                         if [ ! -S "/tmp/.X11-unix/X0" ] && [ ! -S "/tmp/.X11-unix/X1" ]; then
                             echo "FATAL: WSLg X11 server crashed. Xephyr cannot continue."
                             echo "Run 'wsl --shutdown' from Windows CMD, then restart WSL"
-                            kill $XEPHYR_PID $I3_PID 2>/dev/null || true
-                            exit 1
+                            echo "Or try: systemctl --user restart xephyr-i3.service"
+                            RECOVERY_ATTEMPTS=$((RECOVERY_ATTEMPTS+1))
+
+                            if [ $RECOVERY_ATTEMPTS -ge $MAX_RECOVERY_ATTEMPTS ]; then
+                                echo "Max recovery attempts reached. Giving up."
+                                kill $XEPHYR_PID 2>/dev/null || true
+                                exit 1
+                            fi
+
+                            # Wait longer for WSLg to recover
+                            sleep 10
+                            continue
                         fi
-                        
+
                         echo "WSLg sockets exist, attempting Xephyr recovery..."
                         # Wait a moment for potential reconnection
                         sleep 3
+
                         # Try to re-establish connection by reapplying settings
-                        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset -dpms 2>/dev/null || true
-                        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s off 2>/dev/null || true
-                        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s noblank 2>/dev/null || true
-                        
-                        # Test recovery
-                        if ! DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
-                            echo "Recovery failed. Xephyr display $XEPHYR_DISPLAY is unresponsive."
-                        else
+                        if DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset -dpms 2>/dev/null; then
+                            DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s off 2>/dev/null || true
+                            DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s noblank 2>/dev/null || true
                             echo "Recovery successful!"
+                            RECOVERY_ATTEMPTS=0
+                        else
+                            echo "Recovery attempt failed, will retry..."
+                            RECOVERY_ATTEMPTS=$((RECOVERY_ATTEMPTS+1))
                         fi
+                    else
+                        # Connection is healthy, reset recovery counter
+                        RECOVERY_ATTEMPTS=0
                     fi
+
                     # Refresh the display to fix canvas expansion issues
                     DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1 || true
                 done
+
+                # Cleanup PID file when Xephyr exits
+                rm -f "$PIDFILE"
             ) &
             REFRESH_PID=$!
         fi
@@ -369,7 +403,93 @@ EOF
         echo "Xephyr window should appear shortly."
         echo "Use 'pkill -f Xephyr' to stop if needed."
       '')
+
+      # Systemd service control wrapper
+      (writeShellScriptBin "xephyr-service" ''
+        #!/usr/bin/env bash
+
+        case "''${1:-status}" in
+          start)
+            echo "Starting Xephyr i3 service..."
+            systemctl --user start xephyr-i3.service
+            ;;
+          stop)
+            echo "Stopping Xephyr i3 service..."
+            systemctl --user stop xephyr-i3.service
+            ;;
+          restart)
+            echo "Restarting Xephyr i3 service..."
+            systemctl --user restart xephyr-i3.service
+            ;;
+          status)
+            systemctl --user status xephyr-i3.service
+            ;;
+          enable)
+            echo "Enabling Xephyr i3 service to start on login..."
+            systemctl --user enable xephyr-i3.service
+            echo "Service will auto-start on next login"
+            ;;
+          disable)
+            echo "Disabling Xephyr i3 service auto-start..."
+            systemctl --user disable xephyr-i3.service
+            ;;
+          logs)
+            journalctl --user -u xephyr-i3.service -f
+            ;;
+          *)
+            echo "Usage: xephyr-service {start|stop|restart|status|enable|disable|logs}"
+            echo ""
+            echo "Commands:"
+            echo "  start    - Start the Xephyr i3 session"
+            echo "  stop     - Stop the Xephyr i3 session"
+            echo "  restart  - Restart the Xephyr i3 session"
+            echo "  status   - Show service status"
+            echo "  enable   - Enable auto-start on login"
+            echo "  disable  - Disable auto-start"
+            echo "  logs     - Follow service logs"
+            exit 1
+            ;;
+        esac
+      '')
     ];
+
+    # Systemd user service for persistent Xephyr/i3 session
+    systemd.user.services.xephyr-i3 = {
+      Unit = {
+        Description = "Xephyr i3 Window Manager Session";
+        After = [ "graphical-session-pre.target" ];
+        PartOf = [ "graphical-session.target" ];
+      };
+
+      Service = {
+        Type = "simple";
+        ExecStart = "${pkgs.bash}/bin/bash -c 'exec startx'";
+        Restart = "on-failure";
+        RestartSec = "5s";
+
+        # Important: Don't kill the service when the shell exits
+        KillMode = "control-group";
+
+        # Environment variables
+        Environment = [
+          "DISPLAY=:0"
+          "PATH=%h/.nix-profile/bin:${pkgs.lib.makeBinPath (with pkgs; [
+            xorg.xorgserver
+            i3
+            xterm
+            procps
+            xorg.xrandr
+            xorg.xset
+            coreutils
+            bash
+          ])}"
+        ];
+      };
+
+      Install = {
+        WantedBy = [ "default.target" ];
+      };
+    };
 
     # Advanced i3 configuration using Home Manager's native module
     xsession.windowManager.i3 = {
