@@ -1,10 +1,9 @@
 { config, pkgs, lib, ... }:
 
 {
-  imports = [
-    ./i3.nix
-  ];
-  
+  # Ensure the home-manager command is always available
+  programs.home-manager.enable = true;
+
   nixpkgs.config.allowUnfree = true;
 
   # This file contains common Home Manager packages and configurations

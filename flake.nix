@@ -303,16 +303,31 @@
       # No darwin configurations
 
       # For quickly applying home-manager settings with:
-      # home-manager switch --flake .#hm-common
+      # home-manager switch --flake .#hm-debian
       homeConfigurations = {
-        # Unified home-manager configuration (works on all machines)
-        hm-common = inputs.home-manager.lib.homeManagerConfiguration {
+        hm-debian = inputs.home-manager.lib.homeManagerConfiguration {
           pkgs = import nixpkgs {
             system = "x86_64-linux";
             overlays = overlays ++ [ inputs.rust-overlay.overlays.default ];
           };
           extraSpecialArgs = { inherit inputs overlays globals; };
-          modules = [ ./home-manager/hm-common.nix ];
+          modules = [ ./home-manager/hm-debian.nix ];
+        };
+        hm-wsl = inputs.home-manager.lib.homeManagerConfiguration {
+          pkgs = import nixpkgs {
+            system = "x86_64-linux";
+            overlays = overlays ++ [ inputs.rust-overlay.overlays.default ];
+          };
+          extraSpecialArgs = { inherit inputs overlays globals; };
+          modules = [ ./home-manager/hm-wsl.nix ];
+        };
+        hm-crostini = inputs.home-manager.lib.homeManagerConfiguration {
+          pkgs = import nixpkgs {
+            system = "x86_64-linux";
+            overlays = overlays ++ [ inputs.rust-overlay.overlays.default ];
+          };
+          extraSpecialArgs = { inherit inputs overlays globals; };
+          modules = [ ./home-manager/hm-crostini.nix ];
         };
       };
 
