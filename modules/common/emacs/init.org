@@ -2883,15 +2883,15 @@ Place cursor at token and call C-. r for quick ripgrep using that token
 ;; Basic font definitions - KEEP THESE
 (set-face-attribute 'default nil
                     :family "JetBrains Mono"
-                    :height 90)
+                    :height 75)
 
 (set-face-attribute 'fixed-pitch nil 
                     :family "JetBrains Mono"
-                    :height 90)
+                    :height 75)
 
 (set-face-attribute 'variable-pitch nil
                     :family "Source Sans Pro"
-                    :height 110)
+                    :height 95)
 
 ;; Ligature config - KEEP THIS
 (use-package ligature
@@ -2912,8 +2912,8 @@ Place cursor at token and call C-. r for quick ripgrep using that token
   ;; Define our font families
   (let* ((fixed-font "JetBrains Mono")
          (variable-font "Source Sans Pro")
-         (code-font-size 90)
-         (ui-font-size 120)
+         (code-font-size 75)
+         (ui-font-size 95)
          
          ;; Variable tuple for org headings
          (variable-tuple
