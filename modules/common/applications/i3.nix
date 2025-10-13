@@ -50,6 +50,7 @@
       xorg.xkill
       xorg.xrandr
       xorg.xset
+      xorg.xprop       # For WM debugging
       feh
       picom
       dunst
