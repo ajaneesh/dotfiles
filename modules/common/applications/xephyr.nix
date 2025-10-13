@@ -90,7 +90,7 @@
         # Parse command line arguments
         ADAPTIVE_DPI=true
         AUTO_REFRESH=true
-        CUSTOM_DPI="''${1#*=}"
+        CUSTOM_DPI=""
         
         while [[ $# -gt 0 ]]; do
           case $1 in
@@ -123,6 +123,8 @@
           esac
         done
 
+        echo "DEBUG: ADAPTIVE_DPI=$ADAPTIVE_DPI, CUSTOM_DPI=$CUSTOM_DPI"
+
         # Find an available display number
         DISPLAY_NUM=1
         while [ -S "/tmp/.X11-unix/X$DISPLAY_NUM" ] || [ -f "/tmp/.X$DISPLAY_NUM-lock" ]; do
@@ -132,14 +134,16 @@
         XEPHYR_DISPLAY=":$DISPLAY_NUM"
 
         # Get display information
-        DISPLAY_INFO=$(${pkgs.xorg.xrandr}/bin/xrandr | grep ' connected primary|^[^ ].*connected' | head -1)
-        
+        DISPLAY_INFO=$(${pkgs.xorg.xrandr}/bin/xrandr | grep -E ' connected primary|^[^ ].*connected' | head -1)
+        echo "DEBUG: DISPLAY_INFO=$DISPLAY_INFO"
+
         if [ -n "$DISPLAY_INFO" ]; then
             # Extract resolution
             RESOLUTION=$(echo "$DISPLAY_INFO" | grep -o '[0-9]*x[0-9]*' | head -1)
             # Extract physical size for DPI calculation
             PHYSICAL_SIZE=$(echo "$DISPLAY_INFO" | grep -o '[0-9]*mm x [0-9]*mm')
-            
+            echo "DEBUG: RESOLUTION=$RESOLUTION, PHYSICAL_SIZE=$PHYSICAL_SIZE"
+
             if [ -n "$RESOLUTION" ]; then
                 WIDTH=$(echo $RESOLUTION | cut -d'x' -f1)
                 HEIGHT=$(echo $RESOLUTION | cut -d'x' -f2)
