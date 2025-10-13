@@ -222,6 +222,16 @@
         # Set up XDG config home for proper config file discovery
         export XDG_CONFIG_HOME="$HOME/.config"
 
+        # Set up fontconfig environment to prevent errors
+        export FONTCONFIG_FILE="${pkgs.fontconfig.out}/etc/fonts/fonts.conf"
+        export FONTCONFIG_PATH="${pkgs.fontconfig.out}/etc/fonts"
+
+        # Create log directory for i3 debugging
+        I3_LOG_DIR="$HOME/.local/share/i3/logs"
+        mkdir -p "$I3_LOG_DIR"
+        I3_LOG_FILE="$I3_LOG_DIR/i3-$XEPHYR_DISPLAY-$(date +%Y%m%d-%H%M%S).log"
+        echo "i3 log file: $I3_LOG_FILE"
+
         # Start clipboard synchronization between host (:0) and Xephyr display
         DISPLAY=":0" ${pkgs.autocutsel}/bin/autocutsel -fork -selection PRIMARY
         DISPLAY=":0" ${pkgs.autocutsel}/bin/autocutsel -fork -selection CLIPBOARD
@@ -260,8 +270,10 @@
           done
         ) &
         CLIPBOARD_PID=$!
-        
-        DISPLAY="$XEPHYR_DISPLAY" WAYLAND_DISPLAY="" ${pkgs.i3}/bin/i3 &
+
+        # Start i3 with logging enabled
+        echo "=== i3 started at $(date) ===" >> "$I3_LOG_FILE"
+        DISPLAY="$XEPHYR_DISPLAY" WAYLAND_DISPLAY="" ${pkgs.i3}/bin/i3 >> "$I3_LOG_FILE" 2>&1 &
         I3_PID=$!
 
         # Wait a bit for i3 to start
@@ -289,10 +301,26 @@
 
                     # Keep-alive: Check if i3 is still running, restart if needed
                     if ! ${pkgs.procps}/bin/pgrep -f "i3.*$XEPHYR_DISPLAY" >/dev/null; then
-                        echo "WARNING: i3 process died, restarting on $XEPHYR_DISPLAY..."
-                        DISPLAY="$XEPHYR_DISPLAY" WAYLAND_DISPLAY="" ${pkgs.i3}/bin/i3 &
+                        echo "WARNING: i3 process died at $(date), restarting on $XEPHYR_DISPLAY..."
+                        echo "=== i3 crashed and restarting at $(date) ===" >> "$I3_LOG_FILE"
+
+                        # Give a moment for cleanup
+                        sleep 1
+
+                        # Restart i3 with logging and proper fontconfig environment
+                        DISPLAY="$XEPHYR_DISPLAY" WAYLAND_DISPLAY="" \
+                        FONTCONFIG_FILE="${pkgs.fontconfig.out}/etc/fonts/fonts.conf" \
+                        FONTCONFIG_PATH="${pkgs.fontconfig.out}/etc/fonts" \
+                        ${pkgs.i3}/bin/i3 >> "$I3_LOG_FILE" 2>&1 &
                         I3_PID=$!
                         sleep 2
+
+                        # Check if restart was successful
+                        if ${pkgs.procps}/bin/pgrep -f "i3.*$XEPHYR_DISPLAY" >/dev/null; then
+                            echo "i3 restarted successfully"
+                        else
+                            echo "ERROR: i3 failed to restart - check log: $I3_LOG_FILE"
+                        fi
                     fi
 
                     # Check if we can still communicate with X server
@@ -432,7 +460,59 @@
             echo "  disable  - Disable auto-start"
             echo "  logs     - Follow service logs"
             exit 1
-            ;; 
+            ;;
+        esac
+      '')
+
+      # i3 log viewer for debugging crashes
+      (writeShellScriptBin "i3-logs" ''
+        #!/usr/bin/env bash
+
+        I3_LOG_DIR="$HOME/.local/share/i3/logs"
+
+        if [ ! -d "$I3_LOG_DIR" ]; then
+            echo "No i3 logs found at $I3_LOG_DIR"
+            exit 1
+        fi
+
+        case "''${1:-tail}" in
+          tail|follow)
+            LATEST_LOG=$(ls -t "$I3_LOG_DIR"/i3-*.log 2>/dev/null | head -1)
+            if [ -z "$LATEST_LOG" ]; then
+                echo "No i3 log files found"
+                exit 1
+            fi
+            echo "Following: $LATEST_LOG"
+            tail -f "$LATEST_LOG"
+            ;;
+          latest|cat)
+            LATEST_LOG=$(ls -t "$I3_LOG_DIR"/i3-*.log 2>/dev/null | head -1)
+            if [ -z "$LATEST_LOG" ]; then
+                echo "No i3 log files found"
+                exit 1
+            fi
+            echo "=== $LATEST_LOG ==="
+            cat "$LATEST_LOG"
+            ;;
+          list|ls)
+            echo "Available i3 logs:"
+            ls -lth "$I3_LOG_DIR"/i3-*.log 2>/dev/null || echo "No log files found"
+            ;;
+          clean)
+            echo "Cleaning old i3 logs (keeping last 10)..."
+            ls -t "$I3_LOG_DIR"/i3-*.log 2>/dev/null | tail -n +11 | xargs -r rm -v
+            echo "Done"
+            ;;
+          *)
+            echo "Usage: i3-logs {tail|latest|list|clean}"
+            echo ""
+            echo "Commands:"
+            echo "  tail     - Follow the latest i3 log file (default)"
+            echo "  latest   - Show the latest i3 log file"
+            echo "  list     - List all i3 log files"
+            echo "  clean    - Remove old log files (keep last 10)"
+            exit 1
+            ;;
         esac
       '')
     ];
@@ -458,6 +538,8 @@
         Environment = [
           "DISPLAY=:0"
           "XDG_CONFIG_HOME=%h/.config"
+          "FONTCONFIG_FILE=${pkgs.fontconfig.out}/etc/fonts/fonts.conf"
+          "FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts"
           "PATH=%h/.nix-profile/bin:${pkgs.lib.makeBinPath (with pkgs; [
             xorg.xorgserver
             i3
