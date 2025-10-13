@@ -274,6 +274,7 @@
         (import ./overlays/mpv-scripts.nix inputs)
         (import ./overlays/nextcloud-apps.nix inputs)
         (import ./overlays/betterlockscreen.nix)
+        (import ./overlays/fix-xss-lock.nix)
         (import ./overlays/gh-collaborators.nix inputs)
         (import ./overlays/osc.nix inputs)
         (import ./overlays/ren-rep.nix inputs)

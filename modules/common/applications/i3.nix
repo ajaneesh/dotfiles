@@ -53,6 +53,14 @@
       feh
       picom
       dunst
+      # Simple lock script using system i3lock (has proper setuid permissions)
+      (pkgs.writeShellScriptBin "lock-screen" ''
+        # Show a message before locking
+        ${pkgs.libnotify}/bin/notify-send "Locking screen..." "Type your password and press Enter to unlock" -t 2000 || true
+
+        # Use system i3lock (installed via apt) which has proper PAM permissions
+        /usr/bin/i3lock -n -c 000000
+      '')
     ];
 
     # Advanced i3 configuration using Home Manager's native module
@@ -166,7 +174,10 @@
           # Mode switching for Emacs integration
           "${modifier}+Escape" = "mode default";
           "${modifier}+ctrl+0" = "mode emacs";
-          
+
+          # Lock screen
+          "${modifier}+Shift+z" = "exec --no-startup-id lock-screen";
+
           # Exit
           "${modifier}+Shift+e" = "exec i3-nagbar -t warning -m 'Exit i3?' -B 'Yes' 'i3-msg exit'";
 
