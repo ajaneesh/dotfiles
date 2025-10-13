@@ -299,8 +299,15 @@
                 while kill -0 $XEPHYR_PID 2>/dev/null; do
                     sleep 5
 
+                    # Check if Xephyr process is still alive
+                    if ! kill -0 $XEPHYR_PID 2>/dev/null; then
+                        echo "FATAL: Xephyr process died unexpectedly!"
+                        exit 1
+                    fi
+
                     # Keep-alive: Check if i3 is still running, restart if needed
-                    if ! ${pkgs.procps}/bin/pgrep -f "i3.*$XEPHYR_DISPLAY" >/dev/null; then
+                    # Note: We check if the i3 PID is still alive, not pattern matching
+                    if ! kill -0 $I3_PID 2>/dev/null; then
                         echo "WARNING: i3 process died at $(date), restarting on $XEPHYR_DISPLAY..."
                         echo "=== i3 crashed and restarting at $(date) ===" >> "$I3_LOG_FILE"
 
@@ -316,8 +323,8 @@
                         sleep 2
 
                         # Check if restart was successful
-                        if ${pkgs.procps}/bin/pgrep -f "i3.*$XEPHYR_DISPLAY" >/dev/null; then
-                            echo "i3 restarted successfully"
+                        if kill -0 $I3_PID 2>/dev/null; then
+                            echo "i3 restarted successfully (PID: $I3_PID)"
                         else
                             echo "ERROR: i3 failed to restart - check log: $I3_LOG_FILE"
                         fi
@@ -362,9 +369,15 @@
                     else
                         # Connection is healthy, reset recovery counter
                         RECOVERY_ATTEMPTS=0
+
+                        # Keepalive: Actively ping Xephyr to prevent idle timeout
+                        # Re-apply power management settings to keep Xephyr active
+                        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset -dpms 2>/dev/null || true
+                        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s off 2>/dev/null || true
+                        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s noblank 2>/dev/null || true
                     fi
 
-                    # Refresh the display to fix canvas expansion issues
+                    # Refresh the display to fix canvas expansion issues and keep it active
                     DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1 || true
                 done
 
