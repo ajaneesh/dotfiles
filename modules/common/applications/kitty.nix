@@ -43,7 +43,7 @@
         enable = true;
         environment = { };
         extraConfig = "";
-        font.size = 12;
+        font.size = 8;
         keybindings = {
           # Use shift+enter to complete text suggestions in zsh
           "shift+enter" = "send_text all \\x1F";

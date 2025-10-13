@@ -10,7 +10,7 @@
     # Terminal wrapper scripts for easy switching
     (writeShellScriptBin "term-xterm" ''
       exec ${xterm}/bin/xterm \
-        -fa "JetBrains Mono" -fs 9 \
+        -fa "JetBrains Mono" -fs 8 \
         -bg "#1d1f21" -fg "#c5c8c6" \
         -cr "#c5c8c6" \
         -e ${zsh}/bin/zsh "$@"
@@ -110,7 +110,7 @@
     URxvt.urgentOnBell: true
     URxvt.depth: 24
     URxvt.iso14755: false
-    URxvt.font: xft:JetBrains Mono:size=9
+    URxvt.font: xft:JetBrains Mono:size=8
     URxvt.keysym.M-c: perl:clipboard:copy
     URxvt.keysym.M-v: perl:clipboard:paste
     URxvt.keysym.M-C-v: perl:clipboard:paste_escaped
@@ -131,7 +131,7 @@
 
     -- Font configuration
     config.font = wezterm.font('JetBrains Mono')
-    config.font_size = 10.0
+    config.font_size = 8.0
 
     -- Color scheme
     config.color_scheme = 'Tomorrow Night'
