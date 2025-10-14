@@ -242,12 +242,24 @@
         DISPLAY="$XEPHYR_DISPLAY" ${pkgs.autocutsel}/bin/autocutsel -fork -selection PRIMARY
         DISPLAY="$XEPHYR_DISPLAY" ${pkgs.autocutsel}/bin/autocutsel -fork -selection CLIPBOARD
         
-        # Start bidirectional clipboard bridge between host and Xephyr
+        # Start bidirectional clipboard bridge between host, Windows, and Xephyr
         (
           LAST_HOST_CLIPBOARD=""
           LAST_XEPHYR_CLIPBOARD=""
-          
+          LAST_WINDOWS_CLIPBOARD=""
+
           while kill -0 $XEPHYR_PID 2>/dev/null; do
+            # Copy from Windows clipboard to X11 displays (if changed)
+            WINDOWS_CLIPBOARD=$(powershell.exe -Command "Get-Clipboard" 2>/dev/null | tr -d '\r' || echo "")
+            if [ -n "$WINDOWS_CLIPBOARD" ] && [ "$WINDOWS_CLIPBOARD" != "$LAST_WINDOWS_CLIPBOARD" ]; then
+              echo "$WINDOWS_CLIPBOARD" | DISPLAY=":0" ${pkgs.xclip}/bin/xclip -i -selection clipboard 2>/dev/null || true
+              echo "$WINDOWS_CLIPBOARD" | DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xclip}/bin/xclip -i -selection clipboard 2>/dev/null || true
+              echo "$WINDOWS_CLIPBOARD" | DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xclip}/bin/xclip -i -selection primary 2>/dev/null || true
+              LAST_WINDOWS_CLIPBOARD="$WINDOWS_CLIPBOARD"
+              LAST_HOST_CLIPBOARD="$WINDOWS_CLIPBOARD"
+              LAST_XEPHYR_CLIPBOARD="$WINDOWS_CLIPBOARD"
+            fi
+
             # Copy from host clipboard to Xephyr clipboard (if changed)
             HOST_CLIPBOARD=$(DISPLAY=":0" ${pkgs.xclip}/bin/xclip -o -selection clipboard 2>/dev/null || echo "")
             if [ -n "$HOST_CLIPBOARD" ] && [ "$HOST_CLIPBOARD" != "$LAST_HOST_CLIPBOARD" ]; then
@@ -255,21 +267,25 @@
               echo "$HOST_CLIPBOARD" | DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xclip}/bin/xclip -i -selection primary 2>/dev/null || true
               LAST_HOST_CLIPBOARD="$HOST_CLIPBOARD"
             fi
-            
-            # Copy from Xephyr clipboard to host clipboard (if changed)
+
+            # Copy from Xephyr clipboard to host and Windows clipboard (if changed)
             XEPHYR_CLIPBOARD=$(DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xclip}/bin/xclip -o -selection clipboard 2>/dev/null || echo "")
             if [ -n "$XEPHYR_CLIPBOARD" ] && [ "$XEPHYR_CLIPBOARD" != "$LAST_XEPHYR_CLIPBOARD" ] && [ "$XEPHYR_CLIPBOARD" != "$HOST_CLIPBOARD" ]; then
               echo "$XEPHYR_CLIPBOARD" | DISPLAY=":0" ${pkgs.xclip}/bin/xclip -i -selection clipboard 2>/dev/null || true
+              echo "$XEPHYR_CLIPBOARD" | clip.exe 2>/dev/null || true
               LAST_XEPHYR_CLIPBOARD="$XEPHYR_CLIPBOARD"
+              LAST_WINDOWS_CLIPBOARD="$XEPHYR_CLIPBOARD"
             fi
-            
+
             # Also check primary selection (for middle-click paste)
             XEPHYR_PRIMARY=$(DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xclip}/bin/xclip -o -selection primary 2>/dev/null || echo "")
             if [ -n "$XEPHYR_PRIMARY" ] && [ "$XEPHYR_PRIMARY" != "$LAST_XEPHYR_CLIPBOARD" ] && [ "$XEPHYR_PRIMARY" != "$HOST_CLIPBOARD" ]; then
               echo "$XEPHYR_PRIMARY" | DISPLAY=":0" ${pkgs.xclip}/bin/xclip -i -selection clipboard 2>/dev/null || true
+              echo "$XEPHYR_PRIMARY" | clip.exe 2>/dev/null || true
               LAST_XEPHYR_CLIPBOARD="$XEPHYR_PRIMARY"
+              LAST_WINDOWS_CLIPBOARD="$XEPHYR_PRIMARY"
             fi
-            
+
             sleep 0.5
           done
         ) &
@@ -342,7 +358,7 @@
                         if [ ! -S "/tmp/.X11-unix/X0" ] && [ ! -S "/tmp/.X11-unix/X1" ]; then
                             echo "FATAL: WSLg X11 server crashed. Xephyr cannot continue."
                             echo "Run 'wsl --shutdown' from Windows CMD, then restart WSL"
-                            echo "Or try: systemctl --user restart xephyr-i3.service"
+                            echo "Then restart Xephyr with: startx"
                             RECOVERY_ATTEMPTS=$((RECOVERY_ATTEMPTS+1))
 
                             if [ $RECOVERY_ATTEMPTS -ge $MAX_RECOVERY_ATTEMPTS ]; then
@@ -433,54 +449,6 @@
         echo "Use 'pkill -f Xephyr' to stop if needed."
       '')
 
-      # Systemd service control wrapper
-      (writeShellScriptBin "xephyr-service" ''
-        #!/usr/bin/env bash
-
-        case "''${1:-status}" in
-          start)
-            echo "Starting Xephyr i3 service..."
-            systemctl --user start xephyr-i3.service
-            ;; 
-          stop)
-            echo "Stopping Xephyr i3 service..."
-            systemctl --user stop xephyr-i3.service
-            ;; 
-          restart)
-            echo "Restarting Xephyr i3 service..."
-            systemctl --user restart xephyr-i3.service
-            ;; 
-          status)
-            systemctl --user status xephyr-i3.service
-            ;; 
-          enable)
-            echo "Enabling Xephyr i3 service to start on login..."
-            systemctl --user enable xephyr-i3.service
-            echo "Service will auto-start on next login"
-            ;; 
-          disable)
-            echo "Disabling Xephyr i3 service auto-start..."
-            systemctl --user disable xephyr-i3.service
-            ;; 
-          logs)
-            journalctl --user -u xephyr-i3.service -f
-            ;; 
-          *)
-            echo "Usage: xephyr-service {start|stop|restart|status|enable|disable|logs}"
-            echo ""
-            echo "Commands:"
-            echo "  start    - Start the Xephyr i3 session"
-            echo "  stop     - Stop the Xephyr i3 session"
-            echo "  restart  - Restart the Xephyr i3 session"
-            echo "  status   - Show service status"
-            echo "  enable   - Enable auto-start on login"
-            echo "  disable  - Disable auto-start"
-            echo "  logs     - Follow service logs"
-            exit 1
-            ;;
-        esac
-      '')
-
       # i3 log viewer for debugging crashes
       (writeShellScriptBin "i3-logs" ''
         #!/usr/bin/env bash
@@ -533,46 +501,5 @@
         esac
       '')
     ];
-
-    # Systemd user service for persistent Xephyr/i3 session
-    systemd.user.services.xephyr-i3 = {
-      Unit = {
-        Description = "Xephyr i3 Window Manager Session";
-        After = [ "graphical-session-pre.target" ];
-        PartOf = [ "graphical-session.target" ];
-      };
-
-      Service = {
-        Type = "simple";
-        ExecStart = "${pkgs.bash}/bin/bash -c 'exec startx'";
-        Restart = "on-failure";
-        RestartSec = "5s";
-
-        # Important: Don't kill the service when the shell exits
-        KillMode = "control-group";
-
-        # Environment variables
-        Environment = [
-          "DISPLAY=:0"
-          "XDG_CONFIG_HOME=%h/.config"
-          "FONTCONFIG_FILE=${pkgs.fontconfig.out}/etc/fonts/fonts.conf"
-          "FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts"
-          "PATH=%h/.nix-profile/bin:${pkgs.lib.makeBinPath (with pkgs; [
-            xorg.xorgserver
-            i3
-            xterm
-            procps
-            xorg.xrandr
-            xorg.xset
-            coreutils
-            bash
-          ])}"
-        ];
-      };
-
-      Install = {
-        WantedBy = [ "default.target" ];
-      };
-    };
   };
 }
