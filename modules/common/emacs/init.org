@@ -164,6 +164,29 @@ this is now running as a systemd service
 (message "Completed: Some required packages")
 #+end_src
 
+* SSH Tunnel Configuration
+
+This section loads a custom SSH tunnel manager library from =~/lib/elisp/=. The library provides SSH tunnel management functionality using PEM keys and secrets. It's only loaded if the directory exists.
+
+Note: This is currently kept as a local library and should be externalized into a proper package repository for better portability and reproducibility.
+
+#+begin_src emacs-lisp
+(message "Loading: SSH Tunnel Configuration")
+
+(let ((lib-path (expand-file-name "~/lib/elisp/")))
+  (if (file-directory-p lib-path)
+      (progn
+        (message "SSH tunnel library directory found: %s" lib-path)
+        (push lib-path load-path)
+        (require 'ssh-tunnel-manager)
+        ;; Setup default keybindings
+        (ssh-tunnel-setup-default-keybindings)
+        (message "SSH tunnel manager loaded successfully"))
+    (message "SSH tunnel library directory not found: %s - skipping configuration" lib-path)))
+
+(message "Completed: SSH Tunnel Configuration")
+#+end_src
+
 * Basic UI Configuration
 
 #+begin_src emacs-lisp
