@@ -30,8 +30,9 @@
           transparency = 10
           idle_threshold = 120
           monitor = 0
-          follow = mouse
+          follow = none
           sticky_history = yes
+          force_xinerama = false
           history_length = 20
           line_height = 0
           separator_height = 2

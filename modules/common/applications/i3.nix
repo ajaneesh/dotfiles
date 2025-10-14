@@ -186,7 +186,8 @@
           "${modifier}+Shift+z" = "exec --no-startup-id lock-screen";
 
           # Screenshot to clipboard
-          "${modifier}+plus" = "exec --no-startup-id screenshot-clip";
+          "${modifier}+Shift+equal" = "exec --no-startup-id screenshot-clip";
+          "${modifier}+Shift+plus" = "exec --no-startup-id screenshot-clip";
 
           # Exit
           "${modifier}+Shift+e" = "exec i3-nagbar -t warning -m 'Exit i3?' -B 'Yes' 'i3-msg exit'";
