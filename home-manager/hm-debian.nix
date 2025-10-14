@@ -3,11 +3,15 @@
 {
   imports = [
     ../modules/common/applications/i3.nix
+    ../modules/common/applications/screenshots.nix
     ./hm-common.nix
   ];
 
   # Enable i3 natively for Debian
   i3.enable = true;
+
+  # Enable screenshot tools
+  screenshots.enable = true;
 
   # Required Debian system packages for reproducible setup:
   # Run this once to set up the system:

@@ -18,6 +18,7 @@
       autocutsel
       xorg.xorgserver
       procps # For pkill in startx
+      dbus # For notification daemon
 
       (import ../../../apps/restartx.nix { inherit pkgs; })
       (writeShellScriptBin "wsl-x11-recover" ''
@@ -291,9 +292,25 @@
         ) &
         CLIPBOARD_PID=$!
 
+        # Start DBus session for notifications
+        export DBUS_SESSION_BUS_ADDRESS="unix:path=/tmp/dbus-session-$DISPLAY_NUM"
+        ${pkgs.dbus}/bin/dbus-daemon \
+          --config-file=${pkgs.dbus}/share/dbus-1/session.conf \
+          --address="$DBUS_SESSION_BUS_ADDRESS" \
+          --nofork \
+          --print-pid &
+        DBUS_PID=$!
+        sleep 1
+        echo "DBus session started: $DBUS_SESSION_BUS_ADDRESS (PID: $DBUS_PID)"
+
+        # Start notification daemon (dunst) with proper environment
+        DISPLAY="$XEPHYR_DISPLAY" DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" ${pkgs.dunst}/bin/dunst &
+        DUNST_PID=$!
+        sleep 1
+
         # Start i3 with logging enabled
         echo "=== i3 started at $(date) ===" >> "$I3_LOG_FILE"
-        DISPLAY="$XEPHYR_DISPLAY" WAYLAND_DISPLAY="" ${pkgs.i3}/bin/i3 >> "$I3_LOG_FILE" 2>&1 &
+        DISPLAY="$XEPHYR_DISPLAY" WAYLAND_DISPLAY="" DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" ${pkgs.i3}/bin/i3 >> "$I3_LOG_FILE" 2>&1 &
         I3_PID=$!
 
         # Wait a bit for i3 to start
@@ -415,8 +432,11 @@
             echo "Cleaning up..."
             [ -n "$REFRESH_PID" ] && kill "$REFRESH_PID" 2>/dev/null
             [ -n "$CLIPBOARD_PID" ] && kill "$CLIPBOARD_PID" 2>/dev/null
+            [ -n "$DUNST_PID" ] && kill "$DUNST_PID" 2>/dev/null
             [ -n "$I3_PID" ] && kill "$I3_PID" 2>/dev/null
+            [ -n "$DBUS_PID" ] && kill "$DBUS_PID" 2>/dev/null
             [ -n "$XEPHYR_PID" ] && kill "$XEPHYR_PID" 2>/dev/null
+            rm -f "/tmp/dbus-session-$DISPLAY_NUM"
             exit 0
         }
 
