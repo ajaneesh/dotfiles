@@ -57,5 +57,6 @@
 
     # Terminal info and utilities
     ncurses          # Terminal capabilities
+    jq               # JSON processor
   ];
 }

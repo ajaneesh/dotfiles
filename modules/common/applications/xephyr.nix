@@ -199,8 +199,8 @@
             echo "Starting i3 on $DIRECT_DISPLAY..."
             echo "=== i3 started at $(date) ===" >> "$I3_LOG_FILE"
 
-            # Start i3 with all environment variables set
-            ${pkgs.i3}/bin/i3 >> "$I3_LOG_FILE" 2>&1 &
+            # Start i3 (matching Xephyr mode - pass display vars explicitly, fontconfig inherited)
+            DISPLAY="$DIRECT_DISPLAY" WAYLAND_DISPLAY="" DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" ${pkgs.i3}/bin/i3 >> "$I3_LOG_FILE" 2>&1 &
             I3_PID=$!
 
             # Wait for i3 to start
@@ -211,6 +211,7 @@
                 echo ""
                 echo "Environment configured:"
                 echo "  DISPLAY=$DISPLAY"
+                echo "  XDG_CONFIG_HOME=$XDG_CONFIG_HOME"
                 echo "  FONTCONFIG_FILE=$FONTCONFIG_FILE"
                 echo "  FONTCONFIG_PATH=$FONTCONFIG_PATH"
                 echo "  WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
