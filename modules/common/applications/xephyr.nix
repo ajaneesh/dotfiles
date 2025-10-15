@@ -92,39 +92,153 @@
         ADAPTIVE_DPI=true
         AUTO_REFRESH=true
         CUSTOM_DPI=""
-        
+        DIRECT_DISPLAY=""
+
         while [[ $# -gt 0 ]]; do
           case $1 in
-            --dpi=*) 
+            --display=*)
+              DIRECT_DISPLAY="''${1#*=}"
+              shift
+              ;;
+            --dpi=*)
               CUSTOM_DPI="''${1#*=}"
               ADAPTIVE_DPI=false
               shift
-              ;; 
+              ;;
             --no-adaptive-dpi)
               ADAPTIVE_DPI=false
               shift
-              ;; 
+              ;;
             --no-auto-refresh)
               AUTO_REFRESH=false
               shift
-              ;; 
+              ;;
             -h|--help)
               echo "Usage: startx [OPTIONS]"
               echo "Options:"
+              echo "  --display=DISPLAY   Launch i3 directly on specified display (e.g., :1.0)"
+              echo "                      Bypasses Xephyr and sets up environment for external X server"
               echo "  --dpi=NUMBER        Set custom DPI (disables adaptive DPI)"
               echo "  --no-adaptive-dpi   Use fixed DPI instead of adaptive"
               echo "  --no-auto-refresh   Disable automatic xrandr refresh"
               echo "  -h, --help          Show this help"
               exit 0
-              ;; 
+              ;;
             *)
               echo "Unknown option: $1"
               exit 1
-              ;; 
+              ;;
           esac
         done
 
         echo "DEBUG: ADAPTIVE_DPI=$ADAPTIVE_DPI, CUSTOM_DPI=$CUSTOM_DPI"
+
+        # Direct display mode: launch i3 directly without Xephyr
+        if [ -n "$DIRECT_DISPLAY" ]; then
+            echo "Direct display mode: launching i3 on $DIRECT_DISPLAY"
+
+            # Set up all necessary environment variables
+            export DISPLAY="$DIRECT_DISPLAY"
+            export XDG_CONFIG_HOME="$HOME/.config"
+            export FONTCONFIG_FILE="${pkgs.fontconfig.out}/etc/fonts/fonts.conf"
+            export FONTCONFIG_PATH="${pkgs.fontconfig.out}/etc/fonts"
+            export WAYLAND_DISPLAY=""  # Force X11 mode, disable Wayland
+
+            # Verify the display is accessible
+            if ! ${pkgs.xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
+                echo "ERROR: Cannot connect to display $DIRECT_DISPLAY"
+                echo "Make sure your X server (e.g., MobaXterm) is running and DISPLAY is correct"
+                exit 1
+            fi
+            echo "Display $DIRECT_DISPLAY is accessible"
+
+            # Create log directory
+            I3_LOG_DIR="$HOME/.local/share/i3/logs"
+            mkdir -p "$I3_LOG_DIR"
+            I3_LOG_FILE="$I3_LOG_DIR/i3-direct-$(date +%Y%m%d-%H%M%S).log"
+            echo "i3 log file: $I3_LOG_FILE"
+
+            # Extract display number for dbus path
+            DISPLAY_NUM=$(echo "$DIRECT_DISPLAY" | sed 's/[^0-9]//g')
+
+            # Start DBus session for notifications
+            export DBUS_SESSION_BUS_ADDRESS="unix:path=/tmp/dbus-session-direct-$DISPLAY_NUM"
+            if [ -S "/tmp/dbus-session-direct-$DISPLAY_NUM" ]; then
+                echo "DBus session already exists at $DBUS_SESSION_BUS_ADDRESS"
+            else
+                echo "Starting DBus session..."
+                ${pkgs.dbus}/bin/dbus-daemon \
+                  --config-file=${pkgs.dbus}/share/dbus-1/session.conf \
+                  --address="$DBUS_SESSION_BUS_ADDRESS" \
+                  --nofork \
+                  --print-pid &
+                DBUS_PID=$!
+                sleep 1
+                echo "DBus session started: $DBUS_SESSION_BUS_ADDRESS (PID: $DBUS_PID)"
+            fi
+
+            # Start notification daemon (dunst)
+            if ${pkgs.procps}/bin/pgrep -f "dunst.*$DIRECT_DISPLAY" >/dev/null; then
+                echo "Dunst already running for $DIRECT_DISPLAY"
+            else
+                echo "Starting dunst notification daemon..."
+                ${pkgs.dunst}/bin/dunst &
+                DUNST_PID=$!
+                sleep 1
+                echo "Dunst started (PID: $DUNST_PID)"
+            fi
+
+            # Kill any existing i3 on this display
+            I3_EXISTING=$(${pkgs.procps}/bin/pgrep -f "i3.*" || echo "")
+            if [ -n "$I3_EXISTING" ]; then
+                echo "Killing existing i3 process(es): $I3_EXISTING"
+                kill $I3_EXISTING 2>/dev/null || true
+                sleep 1
+            fi
+
+            echo "Starting i3 on $DIRECT_DISPLAY..."
+            echo "=== i3 started at $(date) ===" >> "$I3_LOG_FILE"
+
+            # Start i3 with all environment variables set
+            ${pkgs.i3}/bin/i3 >> "$I3_LOG_FILE" 2>&1 &
+            I3_PID=$!
+
+            # Wait for i3 to start
+            sleep 2
+
+            if kill -0 $I3_PID 2>/dev/null; then
+                echo "i3 started successfully on $DIRECT_DISPLAY (PID: $I3_PID)"
+                echo ""
+                echo "Environment configured:"
+                echo "  DISPLAY=$DISPLAY"
+                echo "  FONTCONFIG_FILE=$FONTCONFIG_FILE"
+                echo "  FONTCONFIG_PATH=$FONTCONFIG_PATH"
+                echo "  WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
+                echo "  DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS"
+                echo ""
+                echo "Press Ctrl+C to exit and kill i3"
+            else
+                echo "ERROR: Failed to start i3 - check log: $I3_LOG_FILE"
+                exit 1
+            fi
+
+            # Cleanup function
+            cleanup() {
+                echo "Cleaning up..."
+                [ -n "$DUNST_PID" ] && kill "$DUNST_PID" 2>/dev/null
+                [ -n "$I3_PID" ] && kill "$I3_PID" 2>/dev/null
+                [ -n "$DBUS_PID" ] && kill "$DBUS_PID" 2>/dev/null
+                rm -f "/tmp/dbus-session-direct-$DISPLAY_NUM"
+                exit 0
+            }
+
+            # Set up signal handlers
+            trap cleanup SIGINT SIGTERM
+
+            # Wait for i3 to exit
+            wait $I3_PID
+            cleanup
+        fi
 
         # Find an available display number
         DISPLAY_NUM=1
