@@ -59,5 +59,27 @@
         };
       };
     };
+
+    # Font preferences for Profile 2 (if it exists)
+    xdg.configFile."google-chrome/Profile 5/Preferences".text = builtins.toJSON {
+      webkit = {
+        webprefs = {
+          fonts = {
+            standard = {
+              Zyyy = "Source Sans Pro";
+            };
+            sansserif = {
+              Zyyy = "Source Sans Pro";
+            };
+            serif = {
+              Zyyy = "DejaVu Serif";
+            };
+            fixed = {
+              Zyyy = "JetBrains Mono";
+            };
+          };
+        };
+      };
+    };
   };
 }
