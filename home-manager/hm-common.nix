@@ -11,7 +11,6 @@
     ../modules/common/applications/home-manager.nix
     ../modules/common/applications/age.nix
     ../modules/common/applications/google-chrome.nix
-    ../modules/common/applications/i3.nix
     ../modules/common/shell.nix
     ../modules/common/git.nix
     ../modules/common/emacs.nix
@@ -44,8 +43,6 @@
     disableTests = true;
   };
   
-  # Enable i3 window manager
-  i3.enable = true;
   fonts.enable = true;
   
   # Apply overlays and config for standalone use
@@ -54,27 +51,18 @@
 
   # Common applications for all machines
   home.packages = with pkgs; [
+    gh
     google-cloud-sdk
     postgresql
-    fontconfig                      # Font configuration utilities
-    
-    # Core applications (available on all machines)
-    
-    # Desktop applications (will work on all machines with i3+Xephyr)  
-    # nautilus       # File manager - REMOVED
-    # _1password-cli # Password manager CLI - COMMENTED OUT
-    # keybase        # Keybase client - COMMENTED OUT
-    # charm          # Development tools - COMMENTED OUT
-    
-    dbus             # D-Bus message bus
-    
-    # Cursor themes for Xephyr
-    adwaita-icon-theme
-    vanilla-dmz      # Default cursor theme
-    xorg.xcursorgen  # Cursor generation utilities
-    
+    gemini-cli
+
+    firefox
+    gnugrep
+    vim
+
     # Terminal info and utilities
+    less
     ncurses          # Terminal capabilities
-    procps           # For pkill command in startx script
+    jq               # JSON processor
   ];
 }

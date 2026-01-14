@@ -7,12 +7,13 @@ final: prev: {
         owner = "stevemolitor"; 
         repo = "claude-code.el"; 
         rev = "main"; 
-       sha256 = "sha256-Zh/7QcGQVlhNCKG0ASV8vL7/MI/ZIIozoSokfmQeZbo=";
+       sha256 = "sha256-ISlD6q1hceckry1Jd19BX1MfobHJxng5ulX2gq9f644=";
 
       };
       packageRequires = with final.emacsPackages; [
         transient
         eat
+        inheritenv
       ];
     };
     org-notion = final.emacsPackages.trivialBuild {
