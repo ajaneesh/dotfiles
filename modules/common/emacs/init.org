@@ -164,6 +164,29 @@ this is now running as a systemd service
 (message "Completed: Some required packages")
 #+end_src
 
+* SSH Tunnel Configuration
+
+This section loads a custom SSH tunnel manager library from =~/lib/elisp/=. The library provides SSH tunnel management functionality using PEM keys and secrets. It's only loaded if the directory exists.
+
+Note: This is currently kept as a local library and should be externalized into a proper package repository for better portability and reproducibility.
+
+#+begin_src emacs-lisp
+(message "Loading: SSH Tunnel Configuration")
+
+(let ((lib-path (expand-file-name "~/lib/elisp/")))
+  (if (file-directory-p lib-path)
+      (progn
+        (message "SSH tunnel library directory found: %s" lib-path)
+        (push lib-path load-path)
+        (require 'ssh-tunnel-manager)
+        ;; Setup default keybindings
+        (ssh-tunnel-setup-default-keybindings)
+        (message "SSH tunnel manager loaded successfully"))
+    (message "SSH tunnel library directory not found: %s - skipping configuration" lib-path)))
+
+(message "Completed: SSH Tunnel Configuration")
+#+end_src
+
 * Basic UI Configuration
 
 #+begin_src emacs-lisp
@@ -2883,15 +2906,15 @@ Place cursor at token and call C-. r for quick ripgrep using that token
 ;; Basic font definitions - KEEP THESE
 (set-face-attribute 'default nil
                     :family "JetBrains Mono"
-                    :height 80)
+                    :height 85)
 
 (set-face-attribute 'fixed-pitch nil 
                     :family "JetBrains Mono"
-                    :height 80)
+                    :height 85)
 
 (set-face-attribute 'variable-pitch nil
                     :family "Source Sans Pro"
-                    :height 95)
+                    :height 105)
 
 ;; Ligature config - KEEP THIS
 (use-package ligature
@@ -2912,8 +2935,8 @@ Place cursor at token and call C-. r for quick ripgrep using that token
   ;; Define our font families
   (let* ((fixed-font "JetBrains Mono")
          (variable-font "Source Sans Pro")
-         (code-font-size 80)
-         (ui-font-size 95)
+         (code-font-size 85)
+         (ui-font-size 105)
          
          ;; Variable tuple for org headings
          (variable-tuple
