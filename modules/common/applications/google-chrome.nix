@@ -1,21 +1,18 @@
 { config, pkgs, lib, ... }:
 
+let
+  google-chrome-with-flags = pkgs.writeShellScriptBin "google-chrome" ''
+    #!${pkgs.runtimeShell}
+    exec ${pkgs.google-chrome}/bin/google-chrome-stable --ozone-platform=x11 --disable-gpu --disable-software-rasterizer --disable-features=VizDisplayCompositor "$@"
+  '';
+in
 {
   options.chrome.enable = lib.mkEnableOption "Google Chrome browser";
 
   config = lib.mkIf config.chrome.enable {
-    home.packages = [ pkgs.google-chrome ];
+    home.packages = [ pkgs.google-chrome google-chrome-with-flags ];
 
-    xdg.desktopEntries = {
-      "google-chrome" = {
-        name = "Google Chrome";
-        exec = "google-chrome-stable --force-device-scale-factor=0.75 --disable-gpu --disable-software-rasterizer --disable-gpu-sandbox --disable-features=VizDisplayCompositor";
-        icon = "google-chrome";
-        terminal = false;
-        categories = [ "Network" "WebBrowser" ];
-      };
-    };
-
+    /*
     # Font preferences for Default profile
     xdg.configFile."google-chrome/Default/Preferences".text = builtins.toJSON {
       webkit = {
@@ -81,5 +78,6 @@
         };
       };
     };
+    */
   };
 }

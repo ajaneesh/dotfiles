@@ -7,7 +7,7 @@ final: prev: {
         owner = "stevemolitor"; 
         repo = "claude-code.el"; 
         rev = "main"; 
-       sha256 = "sha256-AW3Q5XScvT3UAmzvoMS53iZtijrii6pwvQjw+VW353w=";
+       sha256 = "sha256-ISlD6q1hceckry1Jd19BX1MfobHJxng5ulX2gq9f644=";
 
       };
       packageRequires = with final.emacsPackages; [
