@@ -65,6 +65,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixgl = {
+      url = "github:guibou/nixGL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Wallpapers
     wallpapers = {
       url = "gitlab:exorcist365/wallpapers";
@@ -280,6 +285,7 @@
         (import ./overlays/ren-rep.nix inputs)
         (import ./overlays/volnoti.nix)
         (import ./overlays/emacs-packages.nix)
+        (import ./overlays/aws-overlay.nix)
       ];
 
       # System types to support.
@@ -325,7 +331,10 @@
         hm-crostini = inputs.home-manager.lib.homeManagerConfiguration {
           pkgs = import nixpkgs {
             system = "x86_64-linux";
-            overlays = overlays ++ [ inputs.rust-overlay.overlays.default ];
+            overlays = overlays ++ [
+              inputs.rust-overlay.overlays.default
+              inputs.nixgl.overlay
+            ];
           };
           extraSpecialArgs = { inherit inputs overlays globals; };
           modules = [ ./home-manager/hm-crostini.nix ];

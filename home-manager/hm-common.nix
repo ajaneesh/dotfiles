@@ -38,10 +38,9 @@
 
   chrome.enable = true;
 
-  aws = {
-    enable = true;
-    disableTests = true;
-  };
+#  aws = {
+#    enable = true;
+#  };
   
   fonts.enable = true;
   
