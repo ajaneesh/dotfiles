@@ -2,8 +2,8 @@
 
 {
   programs.git = {
-    userName = "Your Name"; # Will be overridden by age secrets
-    userEmail = "your.email@example.com"; # Will be overridden by age secrets
+    settings.user.name = "Your Name"; # Will be overridden by age secrets
+    settings.user.email = "your.email@example.com"; # Will be overridden by age secrets
   };
 
   programs.zsh.shellAliases = {

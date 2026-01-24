@@ -248,7 +248,7 @@
     tree             # Directory tree visualization
     htop             # Better top replacement
     bottom           # Modern system monitor (btm)
-    du-dust          # Better du replacement (dust)
+    dust          # Better du replacement (dust)
     procs            # Modern ps replacement
     bandwhich        # Network bandwidth monitor
     hyperfine        # Command-line benchmarking tool

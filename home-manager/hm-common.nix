@@ -54,6 +54,7 @@
     google-cloud-sdk
     postgresql
     gemini-cli
+    firefox
 
     # Terminal info and utilities
     ncurses          # Terminal capabilities
