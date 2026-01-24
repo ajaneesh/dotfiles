@@ -51,12 +51,18 @@
 
   # Common applications for all machines
   home.packages = with pkgs; [
+    gh
     google-cloud-sdk
     postgresql
     gemini-cli
     firefox
 
+    firefox
+    gnugrep
+    vim
+
     # Terminal info and utilities
+    less
     ncurses          # Terminal capabilities
     jq               # JSON processor
   ];

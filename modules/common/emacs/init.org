@@ -2998,11 +2998,11 @@ Place cursor at token and call C-. r for quick ripgrep using that token
   (with-eval-after-load 'mu4e
     (custom-theme-set-faces
      'user
-     `(mu4e-header-face ((t (:family ,variable-font :height 90))))
-     `(mu4e-header-title-face ((t (:family ,variable-font :height 90))))
-     `(mu4e-header-key-face ((t (:family ,variable-font :height 90))))
-     `(mu4e-header-value-face ((t (:family ,variable-font :height 90))))
-     `(mu4e-contact-face ((t (:family ,variable-font :height 90))))
+     `(mu4e-header-face ((t (:family ,variable-font :height 80))))
+     `(mu4e-header-title-face ((t (:family ,variable-font :height 80))))
+     `(mu4e-header-key-face ((t (:family ,variable-font :height 80))))
+     `(mu4e-header-value-face ((t (:family ,variable-font :height 80))))
+     `(mu4e-contact-face ((t (:family ,variable-font :height 80))))
      `(mu4e-highlight-face ((t (:background ,(modus-themes-get-color-value 'bg-active)
                                             :foreground ,(modus-themes-get-color-value 'fg-main)))))
      `(mu4e-header-highlight-face ((t (:background ,(modus-themes-get-color-value 'bg-hl-alt)
