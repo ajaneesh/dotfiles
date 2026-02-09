@@ -44,6 +44,17 @@ let
     fi
   '';
 
+  # Helper to save and restore the original default route
+  restoreDefaultRoute = ''
+    # Restore original default route if it was lost
+    if ! ip route show default | grep -qv "192.168.127.1"; then
+      if [ -n "$ORIG_DEFAULT_GW" ] && [ -n "$ORIG_DEFAULT_DEV" ]; then
+        echo "Restoring original default route via $ORIG_DEFAULT_GW dev $ORIG_DEFAULT_DEV..."
+        sudo ip route add default via "$ORIG_DEFAULT_GW" dev "$ORIG_DEFAULT_DEV" 2>/dev/null || true
+      fi
+    fi
+  '';
+
   # Main vpn-start script
   vpnStartScript = pkgs.writeShellScriptBin "vpn-start" ''
     #!/bin/bash
@@ -70,6 +81,14 @@ let
       exit 1
     fi
 
+    # Save the original default route before wsl-vpnkit can replace it
+    ORIG_DEFAULT_GW=$(ip route show default | grep -v "192.168.127.1" | head -1 | awk '{print $3}')
+    ORIG_DEFAULT_DEV=$(ip route show default | grep -v "192.168.127.1" | head -1 | awk '{print $5}')
+    echo "Saved original default route: via $ORIG_DEFAULT_GW dev $ORIG_DEFAULT_DEV"
+
+    # Persist for vpn-stop to use
+    echo "$ORIG_DEFAULT_GW $ORIG_DEFAULT_DEV" > /tmp/wsl-vpnkit-orig-default-route
+
     # Start wsl-vpnkit in the background with output logged
     echo "Starting wsl-vpnkit..."
     sudo VMEXEC_PATH="$WSL_VPNKIT_DIR/lib/wsl-vpnkit/wsl-vm" \
@@ -88,6 +107,7 @@ let
 
     # Remove any default route wsl-vpnkit added during startup
     sudo ip route del default via 192.168.127.1 2>/dev/null || true
+    ${restoreDefaultRoute}
 
     # Configure VPN routes (whitelist only)
     echo ""
@@ -99,6 +119,7 @@ let
       echo "Cleaning up wsl-vpnkit default route (added after init)..."
       sudo ip route del default via 192.168.127.1 2>/dev/null || true
     fi
+    ${restoreDefaultRoute}
 
     echo ""
     echo "========================================"
@@ -118,6 +139,13 @@ let
 
     echo "Stopping wsl-vpnkit..."
 
+    # Load saved default route
+    ORIG_DEFAULT_GW=""
+    ORIG_DEFAULT_DEV=""
+    if [ -f /tmp/wsl-vpnkit-orig-default-route ]; then
+      read ORIG_DEFAULT_GW ORIG_DEFAULT_DEV < /tmp/wsl-vpnkit-orig-default-route
+    fi
+
     # Remove our VPN exception routes
     sudo ${vpnRoutesScript} del 2>/dev/null || true
 
@@ -125,6 +153,9 @@ let
     sudo pkill -f "wsl-gvproxy" 2>/dev/null || true
     sudo pkill -f "wsl-vm" 2>/dev/null || true
     sudo pkill -f "wsl-vpnkit" 2>/dev/null || true
+
+    # Wait for processes to fully die and finish their own cleanup
+    sleep 3
 
     # Clean up any remaining routes via 192.168.127.1
     echo ""
@@ -134,10 +165,32 @@ let
       echo "  - Removed: $route"
     done
 
+    # Restore default route if it was lost (must be after processes are fully dead)
+    if ! ip route show default | grep -q .; then
+      if [ -n "$ORIG_DEFAULT_GW" ] && [ -n "$ORIG_DEFAULT_DEV" ]; then
+        echo ""
+        echo "Restoring default route via $ORIG_DEFAULT_GW dev $ORIG_DEFAULT_DEV..."
+        sudo ip route add default via "$ORIG_DEFAULT_GW" dev "$ORIG_DEFAULT_DEV" 2>/dev/null || true
+      else
+        echo ""
+        echo "WARNING: No default route found and no saved route to restore."
+        echo "You may need to manually add one, e.g.:"
+        echo "  sudo ip route add default via 192.168.1.1 dev eth4"
+      fi
+    fi
+
+    rm -f /tmp/wsl-vpnkit-orig-default-route
+
     echo ""
     echo "Verifying original routes are intact..."
     ORIGINAL=$(ip route show | grep "172.27.241.1" | wc -l)
     echo "  $ORIGINAL mirrored routes via eth2 still active."
+    DEFAULT=$(ip route show default)
+    if [ -n "$DEFAULT" ]; then
+      echo "  Default route: $DEFAULT"
+    else
+      echo "  WARNING: No default route!"
+    fi
     echo ""
     echo "wsl-vpnkit stopped. Normal routing restored."
   '';
