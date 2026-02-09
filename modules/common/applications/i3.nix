@@ -50,14 +50,14 @@
       rofi
       xdotool          # For window manipulation
       # X11 fonts
-      xorg.fontmiscmisc
-      xorg.fontutil
+      font-misc-misc
+      font-util
       i3-resurrect
-      xorg.xrdb
-      xorg.xkill
-      xorg.xrandr
-      xorg.xset
-      xorg.xprop       # For WM debugging
+      xrdb
+      xkill
+      xrandr
+      xset
+      xprop       # For WM debugging
       feh
       picom
       # Simple lock script using system i3lock (has proper setuid permissions)

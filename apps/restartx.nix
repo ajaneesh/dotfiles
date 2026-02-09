@@ -49,7 +49,7 @@ pkgs.writeShellScriptBin "restartx" ''
   # Start new Xephyr
   NEW_DISPLAY=":''${DISPLAY_NUM}"
   echo "Starting new Xephyr on display $NEW_DISPLAY..."
-  ${pkgs.xorg.xorgserver}/bin/Xephyr -br -ac -noreset -screen 1920x1080 "$NEW_DISPLAY" &
+  ${pkgs.xorg-server}/bin/Xephyr -br -ac -noreset -screen 1920x1080 "$NEW_DISPLAY" &
   XEPHYR_PID=$!
 
   # Wait for Xephyr to start

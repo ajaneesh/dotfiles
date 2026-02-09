@@ -1,9 +1,9 @@
 { config, pkgs, lib, ... }:
 
 let
-  google-chrome-with-flags = pkgs.writeShellScriptBin "google-chrome" ''
+  google-chrome-with-flags = pkgs.writeShellScriptBin "chrome" ''
     #!${pkgs.runtimeShell}
-    exec ${pkgs.google-chrome}/bin/google-chrome-stable --ozone-platform=x11 --disable-gpu --disable-software-rasterizer --disable-features=VizDisplayCompositor "$@"
+    exec ${pkgs.google-chrome}/bin/google-chrome-stable --ozone-platform=x11 --disable-gpu --disable-software-rasterizer --disable-features=VizDisplayCompositor --disable-dev-shm-usage "$@"
   '';
 in
 {

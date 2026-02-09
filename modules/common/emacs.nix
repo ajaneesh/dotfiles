@@ -72,8 +72,6 @@
       olivetti
       orderless
       org-superstar
-      org-msg
-      org-mime
       org-roam
       org-roam-ui
       paredit

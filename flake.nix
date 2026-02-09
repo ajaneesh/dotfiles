@@ -286,6 +286,7 @@
         (import ./overlays/volnoti.nix)
         (import ./overlays/emacs-packages.nix)
         (import ./overlays/aws-overlay.nix)
+        (import ./overlays/wsl-vpnkit.nix)
       ];
 
       # System types to support.

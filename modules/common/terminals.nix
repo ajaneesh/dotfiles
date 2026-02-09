@@ -17,7 +17,7 @@
     '')
     
     (writeShellScriptBin "term-urxvt" ''
-      ${xorg.xrdb}/bin/xrdb -merge ~/.Xresources 2>/dev/null || true
+      ${xrdb}/bin/xrdb -merge ~/.Xresources 2>/dev/null || true
       exec ${rxvt-unicode}/bin/urxvt "$@"
     '')
     
