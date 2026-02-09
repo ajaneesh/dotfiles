@@ -29,8 +29,8 @@
         xclip
         i3-resurrect
 
-        xorg.xrdb
-        xorg.xkill
+        xrdb
+        xkill
         
         # terminfo
         ncurses
@@ -44,7 +44,7 @@
         rofi
         
         (pkgs.writeShellScriptBin "xterm" ''
-          ${xorg.xrdb}/bin/xrdb -merge ~/.Xresources
+          ${xrdb}/bin/xrdb -merge ~/.Xresources
           exec ${pkgs.rxvt-unicode}/bin/urxvt "$@"
         '')
 

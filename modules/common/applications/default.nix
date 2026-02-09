@@ -2,7 +2,6 @@
 {
 
   imports = [
-    ./email.nix
     ./1password.nix
     ./alacritty.nix
     ./discord.nix

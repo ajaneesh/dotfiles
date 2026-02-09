@@ -16,7 +16,7 @@
       xclip
       xsel
       autocutsel
-      xorg.xorgserver
+      xorg-server
       procps # For pkill in startx
       dbus # For notification daemon
 
@@ -47,11 +47,11 @@
         
         # Test X11 connection
         export DISPLAY=:0
-        if ${pkgs.xorg.xrandr}/bin/xrandr -q > /dev/null 2>&1; then
+        if ${pkgs.xrandr}/bin/xrandr -q > /dev/null 2>&1; then
             echo "X11 connection on :0 is working"
         else
             export DISPLAY=:1
-            if ${pkgs.xorg.xrandr}/bin/xrandr -q > /dev/null 2>&1; then
+            if ${pkgs.xrandr}/bin/xrandr -q > /dev/null 2>&1; then
                 echo "X11 connection on :1 is working"
             else
                 echo "X11 connection failed on both :0 and :1"
@@ -78,9 +78,9 @@
 
         # Test basic X11 connection
         export DISPLAY=:0
-        if ! ${pkgs.xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
+        if ! ${pkgs.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
             export DISPLAY=:1  
-            if ! ${pkgs.xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
+            if ! ${pkgs.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
                 echo "ERROR: Cannot connect to X11 server on :0 or :1"
                 echo "WSLg X server may be crashed. Try restarting WSL."
                 exit 1
@@ -145,7 +145,7 @@
             export WAYLAND_DISPLAY=""  # Force X11 mode, disable Wayland
 
             # Verify the display is accessible
-            if ! ${pkgs.xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
+            if ! ${pkgs.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
                 echo "ERROR: Cannot connect to display $DIRECT_DISPLAY"
                 echo "Make sure your X server (e.g., MobaXterm) is running and DISPLAY is correct"
                 exit 1
@@ -250,7 +250,7 @@
         XEPHYR_DISPLAY=":$DISPLAY_NUM"
 
         # Get display information
-        DISPLAY_INFO=$(${pkgs.xorg.xrandr}/bin/xrandr | grep -E ' connected primary|^[^ ].*connected' | head -1)
+        DISPLAY_INFO=$(${pkgs.xrandr}/bin/xrandr | grep -E ' connected primary|^[^ ].*connected' | head -1)
         echo "DEBUG: DISPLAY_INFO=$DISPLAY_INFO"
 
         if [ -n "$DISPLAY_INFO" ]; then
@@ -303,7 +303,7 @@
         ${pkgs.procps}/bin/pkill -f "Xephyr.*:$DISPLAY_NUM"
 
         # Start Xephyr with calculated DPI and enhanced options
-        ${pkgs.xorg.xorgserver}/bin/Xephyr "$XEPHYR_DISPLAY" \
+        ${pkgs.xorg-server}/bin/Xephyr "$XEPHYR_DISPLAY" \
             -ac \
             -reset \
             -dpi "$DPI" \
@@ -325,7 +325,7 @@
         export NESTED_DISPLAY="$XEPHYR_DISPLAY"
 
         # Set cursor theme to fix invisible cursor issue
-        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xrdb}/bin/xrdb -merge << 'EOF'
+        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xrdb}/bin/xrdb -merge << 'EOF'
         Xcursor.theme: DMZ-White
         Xcursor.size: 16
         *cursorColor: white
@@ -432,9 +432,9 @@
         sleep 2
 
         # Disable power management features that could kill Xephyr
-        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset -dpms 2>/dev/null || true
-        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s off 2>/dev/null || true
-        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s noblank 2>/dev/null || true
+        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xset}/bin/xset -dpms 2>/dev/null || true
+        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xset}/bin/xset s off 2>/dev/null || true
+        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xset}/bin/xset s noblank 2>/dev/null || true
 
         # Create a PID file for systemd service to track
         PIDFILE="/tmp/xephyr-$DISPLAY_NUM.pid"
@@ -483,7 +483,7 @@
                     fi
 
                     # Check if we can still communicate with X server
-                    if ! DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
+                    if ! DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xrandr}/bin/xrandr -q >/dev/null 2>&1; then
                         echo "X11 connection lost (attempt $((RECOVERY_ATTEMPTS+1)))/$MAX_RECOVERY_ATTEMPTS, checking WSLg status..."
 
                         # Check if WSLg sockets still exist
@@ -509,9 +509,9 @@
                         sleep 3
 
                         # Try to re-establish connection by reapplying settings
-                        if DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset -dpms 2>/dev/null; then
-                            DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s off 2>/dev/null || true
-                            DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s noblank 2>/dev/null || true
+                        if DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xset}/bin/xset -dpms 2>/dev/null; then
+                            DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xset}/bin/xset s off 2>/dev/null || true
+                            DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xset}/bin/xset s noblank 2>/dev/null || true
                             echo "Recovery successful!"
                             RECOVERY_ATTEMPTS=0
                         else
@@ -524,13 +524,13 @@
 
                         # Keepalive: Actively ping Xephyr to prevent idle timeout
                         # Re-apply power management settings to keep Xephyr active
-                        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset -dpms 2>/dev/null || true
-                        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s off 2>/dev/null || true
-                        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xset}/bin/xset s noblank 2>/dev/null || true
+                        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xset}/bin/xset -dpms 2>/dev/null || true
+                        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xset}/bin/xset s off 2>/dev/null || true
+                        DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xset}/bin/xset s noblank 2>/dev/null || true
                     fi
 
                     # Refresh the display to fix canvas expansion issues and keep it active
-                    DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xorg.xrandr}/bin/xrandr -q >/dev/null 2>&1 || true
+                    DISPLAY="$XEPHYR_DISPLAY" ${pkgs.xrandr}/bin/xrandr -q >/dev/null 2>&1 || true
                 done
 
                 # Cleanup PID file when Xephyr exits

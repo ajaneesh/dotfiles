@@ -8,7 +8,6 @@
 
   imports = [
     ./applications
-    ./mail
     ./emacs
     ./programming
     ./repositories
