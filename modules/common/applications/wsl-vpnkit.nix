@@ -90,9 +90,14 @@ let
     echo "$ORIG_DEFAULT_GW $ORIG_DEFAULT_DEV" > /tmp/wsl-vpnkit-orig-default-route
 
     # Start wsl-vpnkit in the background with output logged
+    # Pass WSL2_TAP_NAME and WSL2_GATEWAY_IP so wsl-vpnkit restores the
+    # correct default route when it shuts down (it defaults to eth0 which
+    # doesn't exist in mirrored networking mode)
     echo "Starting wsl-vpnkit..."
     sudo VMEXEC_PATH="$WSL_VPNKIT_DIR/lib/wsl-vpnkit/wsl-vm" \
          GVPROXY_PATH="$WSL_VPNKIT_DIR/lib/wsl-vpnkit/wsl-gvproxy.exe" \
+         WSL2_TAP_NAME="$ORIG_DEFAULT_DEV" \
+         WSL2_GATEWAY_IP="$ORIG_DEFAULT_GW" \
          "$WSL_VPNKIT_DIR/bin/wsl-vpnkit" > /tmp/wsl-vpnkit.log 2>&1 &
 
     # Wait for wsl-vpnkit to initialize
@@ -165,13 +170,13 @@ let
       echo "  - Removed: $route"
     done
 
-    # Restore default route if it was lost (must be after processes are fully dead)
-    if ! ip route show default | grep -q .; then
-      if [ -n "$ORIG_DEFAULT_GW" ] && [ -n "$ORIG_DEFAULT_DEV" ]; then
-        echo ""
-        echo "Restoring default route via $ORIG_DEFAULT_GW dev $ORIG_DEFAULT_DEV..."
+    # Ensure default route exists (wsl-vpnkit's cleanup may have restored it
+    # on the wrong interface, or failed to restore it at all)
+    if [ -n "$ORIG_DEFAULT_GW" ] && [ -n "$ORIG_DEFAULT_DEV" ]; then
+      sudo ip route replace default via "$ORIG_DEFAULT_GW" dev "$ORIG_DEFAULT_DEV" 2>/dev/null || \
         sudo ip route add default via "$ORIG_DEFAULT_GW" dev "$ORIG_DEFAULT_DEV" 2>/dev/null || true
-      else
+    else
+      if ! ip route show default | grep -q .; then
         echo ""
         echo "WARNING: No default route found and no saved route to restore."
         echo "You may need to manually add one, e.g.:"
