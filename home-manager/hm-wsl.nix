@@ -19,6 +19,7 @@
     enable = true;
     vpnNetworks = [
       "172.19.4.0/24"
+      "10.0.23.28/32"
       # Add more networks as needed
     ];
   };
