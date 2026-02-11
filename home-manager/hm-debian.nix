@@ -15,15 +15,7 @@
   screenshots.enable = true;
 
   # Enable WSL VPN routing through Windows
-  wsl-vpnkit = {
-    enable = true;
-    # VPN networks that need to be routed through wsl-vpnkit
-    # Add your corporate/VPN network CIDRs here
-    vpnNetworks = [
-      "172.19.4.0/24" 
-      # Add more networks as needed
-    ];
-  };
+  wsl-vpnkit.enable = true;
 
   # Required Debian system packages for reproducible setup:
   # Run this once to set up the system:
