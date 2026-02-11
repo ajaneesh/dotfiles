@@ -3,44 +3,53 @@
 let
   cfg = config.wsl-vpnkit;
 
-  # Script to configure VPN routes - only touches specified networks
-  # Uses metric-based priority: our routes (no metric = 0) override
-  # the mirrored routes (metric 102) without deleting them.
-  # On removal, the original routes seamlessly take over.
+  # Script to configure VPN routes dynamically.
+  # Detects all WSL-mirrored VPN routes (metric 102 via a shared gateway)
+  # and reroutes them through wsl-vpnkit.
   vpnRoutesScript = pkgs.writeShellScript "vpn-routes" ''
     #!/bin/bash
     set -e
 
     ACTION="$1"  # "add" or "del"
 
-    # VPN networks to route through wsl-vpnkit (whitelist only)
-    VPN_NETWORKS=(${lib.concatStringsSep " " (map (n: "\"${n}\"") cfg.vpnNetworks)})
-
     if [ "$ACTION" = "add" ]; then
-      echo "Adding VPN routes (whitelist only)..."
-      for network in "''${VPN_NETWORKS[@]}"; do
-        # Add higher-priority route through wsl-vpnkit (metric 0 beats existing metric 102)
-        # The original mirrored route via eth2 is preserved as fallback
-        ip route add "$network" via 192.168.127.1 2>/dev/null || \
-          ip route replace "$network" via 192.168.127.1 2>/dev/null || true
-        echo "  + $network -> wsl-vpnkit"
+      # Detect the mirrored VPN gateway (shared by all metric 102 routes)
+      MIRROR_GW=$(ip route show | grep "metric 102" | grep "via" | head -1 | awk '{print $3}')
+      if [ -z "$MIRROR_GW" ]; then
+        echo "No mirrored VPN routes detected (no metric 102 routes with a gateway)."
+        echo "Is the VPN connected on Windows?"
+        exit 1
+      fi
+
+      MIRROR_DEV=$(ip route show | grep "metric 102" | grep "via" | head -1 | awk '{print $5}')
+      echo "Detected mirrored VPN gateway: $MIRROR_GW dev $MIRROR_DEV"
+      echo ""
+
+      # Save gateway info for status/stop
+      echo "$MIRROR_GW $MIRROR_DEV" > /tmp/wsl-vpnkit-mirror-gw
+
+      echo "Adding VPN routes for all mirrored destinations..."
+      COUNT=0
+      ip route show | grep "via $MIRROR_GW" | grep "metric 102" | awk '{print $1}' | while read dest; do
+        ip route add "$dest" via 192.168.127.1 2>/dev/null || true
+        echo "  + $dest -> wsl-vpnkit"
+        COUNT=$((COUNT + 1))
       done
 
       # Remove any default route wsl-vpnkit may have added
-      # This prevents ALL traffic from going through VPN (SSL inspection issues)
       if ip route show default | grep -q "192.168.127.1"; then
         echo ""
         echo "Removing wsl-vpnkit default route (prevents SSL interception)..."
         ip route del default via 192.168.127.1 2>/dev/null || true
-        echo "  + Default route cleaned up"
       fi
 
     elif [ "$ACTION" = "del" ]; then
-      echo "Removing VPN routes..."
-      for network in "''${VPN_NETWORKS[@]}"; do
-        ip route del "$network" via 192.168.127.1 2>/dev/null || true
-        echo "  - Removed $network (original route still active)"
+      echo "Removing all wsl-vpnkit routes..."
+      ip route show | grep "via 192.168.127.1" | grep -v "192.168.127.0" | awk '{print $1}' | while read dest; do
+        ip route del "$dest" via 192.168.127.1 2>/dev/null || true
+        echo "  - $dest"
       done
+      rm -f /tmp/wsl-vpnkit-mirror-gw
     fi
   '';
 
@@ -63,12 +72,10 @@ let
     WSL_VPNKIT_DIR="${pkgs.wsl-vpnkit}"
 
     echo "========================================"
-    echo "  WSL VPN Router (Exception-based)"
+    echo "  WSL VPN Router (Auto-detect)"
     echo "========================================"
     echo ""
-    echo "This routes ONLY these networks through VPN:"
-    ${lib.concatMapStringsSep "\n" (n: "echo \"  - ${n}\"") cfg.vpnNetworks}
-    echo ""
+    echo "Routes all mirrored VPN destinations through wsl-vpnkit."
     echo "All other traffic uses normal internet."
     echo ""
     echo "Make sure VPN is connected on Windows first!"
@@ -114,7 +121,7 @@ let
     sudo ip route del default via 192.168.127.1 2>/dev/null || true
     ${restoreDefaultRoute}
 
-    # Configure VPN routes (whitelist only)
+    # Configure VPN routes (auto-detect all mirrored VPN destinations)
     echo ""
     sudo ${vpnRoutesScript} add
 
@@ -151,7 +158,7 @@ let
       read ORIG_DEFAULT_GW ORIG_DEFAULT_DEV < /tmp/wsl-vpnkit-orig-default-route
     fi
 
-    # Remove our VPN exception routes
+    # Remove all wsl-vpnkit routes
     sudo ${vpnRoutesScript} del 2>/dev/null || true
 
     # Kill wsl-vpnkit processes
@@ -188,8 +195,8 @@ let
 
     echo ""
     echo "Verifying original routes are intact..."
-    ORIGINAL=$(ip route show | grep "172.27.241.1" | wc -l)
-    echo "  $ORIGINAL mirrored routes via eth2 still active."
+    MIRROR_ROUTES=$(ip route show | grep "metric 102" | wc -l)
+    echo "  $MIRROR_ROUTES mirrored VPN routes still active."
     DEFAULT=$(ip route show default)
     if [ -n "$DEFAULT" ]; then
       echo "  Default route: $DEFAULT"
@@ -216,8 +223,8 @@ let
     fi
 
     echo ""
-    echo "VPN Routes (via 192.168.127.1):"
-    ROUTES=$(ip route show | grep "192.168.127.1" || true)
+    echo "VPN Routes (via wsl-vpnkit):"
+    ROUTES=$(ip route show | grep "via 192.168.127.1" | grep -v "192.168.127.0" || true)
     if [ -n "$ROUTES" ]; then
       echo "$ROUTES" | while read line; do
         echo "  ✓ $line"
@@ -227,8 +234,13 @@ let
     fi
 
     echo ""
-    echo "Configured VPN Networks:"
-    ${lib.concatMapStringsSep "\n" (n: "echo \"  - ${n}\"") cfg.vpnNetworks}
+    echo "Mirrored VPN routes (via Windows):"
+    MIRROR=$(ip route show | grep "metric 102" | grep "via" || true)
+    if [ -n "$MIRROR" ]; then
+      echo "$MIRROR" | wc -l | xargs -I{} echo "  {} routes detected"
+    else
+      echo "  (none - is the VPN connected on Windows?)"
+    fi
   '';
 
   # Test script
@@ -248,14 +260,20 @@ let
 
     echo ""
     echo "2. Testing VPN routes..."
-    ${lib.concatMapStringsSep "\n" (n: ''
-    echo "   Testing route to ${n}..."
-    if ip route get ${lib.head (lib.splitString "/" n)} 2>/dev/null | grep -q "192.168.127.1"; then
-      echo "   ✓ ${n} -> via wsl-vpnkit"
+    # Check a sample of vpnkit routes
+    VPNKIT_DESTS=$(ip route show | grep "via 192.168.127.1" | grep -v "192.168.127.0" | awk '{print $1}' || true)
+    if [ -n "$VPNKIT_DESTS" ]; then
+      TOTAL=$(echo "$VPNKIT_DESTS" | wc -l)
+      echo "   $TOTAL destinations routed through wsl-vpnkit"
+      echo "$VPNKIT_DESTS" | head -5 | while read dest; do
+        echo "   ✓ $dest -> via wsl-vpnkit"
+      done
+      if [ "$TOTAL" -gt 5 ]; then
+        echo "   ... and $((TOTAL - 5)) more"
+      fi
     else
-      echo "   ✗ ${n} -> NOT via wsl-vpnkit"
+      echo "   ✗ No routes via wsl-vpnkit"
     fi
-    '') cfg.vpnNetworks}
 
     echo ""
     echo "3. To test actual VPN resource, run:"
@@ -266,17 +284,6 @@ in
 {
   options.wsl-vpnkit = {
     enable = lib.mkEnableOption "WSL VPN routing through Windows";
-
-    vpnNetworks = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-      example = [ "172.19.4.0/24" "172.19.14.0/24" ];
-      description = ''
-        List of VPN network CIDRs to route through wsl-vpnkit.
-        ONLY these networks will be routed through VPN.
-        All other traffic uses normal internet routing.
-      '';
-    };
   };
 
   config = lib.mkIf cfg.enable {
