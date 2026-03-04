@@ -1,0 +1,190 @@
+﻿Diagnose log at 2026-03-04T06:03:02Z
+
+AppPath: /home/nixos/.nix-profile/bin/git-credential-manager
+InstallDir: /nix/store/phkfgcdg07yiqj1ijjh82g5xgzk47qk5-git-credential-manager-2.6.1/lib/git-credential-manager/
+Version: 2.6.1
+
+------------
+Diagnostic: Environment
+Skipped: False
+Success: True
+Exception: None
+Log:
+OSType: Linux
+OSVersion: Debian GNU/Linux 12 (bookworm)
+Reading environment variables... OK
+ Variables:
+FONTCONFIG_FILE=/nix/store/q9lw7mrvhc2d14nrzwvm2fszz6861xvc-fontconfig-2.17.1/etc/fonts/fonts.conf
+WSLENV=
+HOSTTYPE=x86_64
+COLORTERM=rxvt-xpm
+WAYLAND_DISPLAY=
+__HM_SESS_VARS_SOURCED=1
+FONTCONFIG_PATH=/nix/store/q9lw7mrvhc2d14nrzwvm2fszz6861xvc-fontconfig-2.17.1/etc/fonts
+CLAUDECODE=1
+LOGNAME=nixos
+NAME=LAPTOP-CSDU03A5
+LSCOLORS=Gxfxcxdxbxegedabagacad
+XDG_RUNTIME_DIR=/run/user/1000/
+FZF_CTRL_T_OPTS=--preview 'bat --color=always {}' --preview-window=right:50%
+COLORFGBG=15;default
+__HM_ZSH_SESS_VARS_SOURCED=1
+LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.swp=00;90:*.tmp=00;90:*.dpkg-dist=00;90:*.dpkg-old=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:
+COREPACK_ENABLE_AUTO_PIN=0
+GIT_EDITOR=true
+DISABLE_INSTALLATION_CHECKS=1
+TERM=rxvt-unicode-256color
+WSL_INTEROP=/run/WSL/415_interop
+DISPLAY=:3.0
+DOTNET_ROOT=/nix/store/x6rfzd23mn1dyyzc0zvg89zk08hxx8s3-dotnet-runtime-wrapped-8.0.23/share/dotnet
+FZF_ALT_C_COMMAND=fd --type d
+I3SOCK=/run/user/1000//i3/ipc-socket.22015
+SHELL=/home/nixos/.nix-profile/bin/zsh
+USER=nixos
+WSL2_GUI_APPS_ENABLED=1
+NoDefaultCurrentDirectoryInExePath=1
+XDG_CONFIG_HOME=/home/nixos/.config
+DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/dbus-session-direct-30
+__ETC_PROFILE_NIX_SOURCED=1
+FZF_DEFAULT_COMMAND=fd --type f
+LANG=en_US.UTF-8
+TERMINAL=xterm
+OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta
+PWD=/home/nixos/dotfiles
+TERMINFO=/nix/store/p3cfr0kvjaiil8dpsww3ylk3h9licj71-rxvt-unicode-unwrapped-9.31-terminfo/share/terminfo
+NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+FZF_CTRL_T_COMMAND=fd --type f
+LOCALE_ARCHIVE_2_27=/nix/store/9whrn8kh4r39pf52zlbn7vim0s74qi19-glibc-locales-2.42-47/lib/locale/locale-archive
+DISABLE_AUTOUPDATER=1
+URXVT_PERL_LIB=/nix/store/zjbrzpk5kjg99zb4d6203zwa7d6qnqps-rxvt-unicode-9.31/lib/urxvt/perl
+FZF_DEFAULT_OPTS=--height=40% --layout=reverse --border
+PULSE_SERVER=unix:/mnt/wslg/PulseServer
+GIT_TRACE2_PARENT_SID=b1f893f4-66d4-4d06-b8ad-5212b8ce0527
+FZF_ALT_C_OPTS=--preview 'ls -la {}' --preview-window=right:50%
+DOCKER_CONFIG=/home/nixos/.docker
+PAGER=less
+OLDPWD=/home/nixos/dotfiles
+WSL_DISTRO_NAME=Debian
+HOME=/home/nixos
+WINDOWID=9437191
+XDG_DATA_DIRS=/usr/local/share:/usr/share:/home/nixos/.nix-profile/share:/nix/var/nix/profiles/default/share
+LD_LIBRARY_PATH=/nix/store/q34rjcffjcmhbnsx8nd6w0i2xamz66i3-icu4c-76.1/lib:/nix/store/zhbp6ijywh9knjz94l1w61f6k9wp9hnh-libice-1.1.2/lib:/nix/store/vn9s6c5x1glcsf7mc6jyigbv1yyc18hw-libsm-1.2.6/lib:/nix/store/0iwk3dvbzgdhd05zxys60n0ba413kcxn-libx11-1.8.12/lib:/nix/store/zrc3x0hnm1ncc7jxhy6i2xa4xm0mj15c-libsecret-0.21.7/lib
+FZF_CTRL_R_OPTS=--height=60% --layout=reverse --border
+LESS=-R
+NIX_PROFILES=/nix/var/nix/profiles/default /home/nixos/.nix-profile
+PERL5LIB=/nix/store/yw6w9kf753dbrmwd99wjbyi5vs89nw3x-perl5.42.0-urxvt-bidi-2.15/lib/perl5/site_perl
+PATH=/nix/store/ipwndaag56mm8g8gn8j98z0jvn8x4mk1-git-2.52.0/bin:/nix/store/hafxwi09djh8aknfm7lkii9qdnslv4hn-gnupg-2.4.8/bin:/nix/store/gl1i05wj33m0mici8v6nfl7n436lrb6h-password-store-1.7.4/bin:/nix/store/x6rfzd23mn1dyyzc0zvg89zk08hxx8s3-dotnet-runtime-wrapped-8.0.23/bin:/nix/store/lsr86qpxgwisc7wapnrybzqwsafhb2wl-procps-4.0.4/bin:/nix/store/dqzmpjz70l4lzg7lmc3x8wih74nh5bpc-bubblewrap-0.11.0/bin:/nix/store/rsvw7mnsbhn4jcsylyw9rvz933zvqi06-socat-1.8.0.3/bin:/home/nixos/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/home/nixos/.npm-global/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/glzr.io/GlazeWM/cli:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files/Docker/Docker/resources/bin:/mnt/c/Program Files (x86)/Google/Cloud SDK/google-cloud-sdk/bin:/mnt/c/Program Files/WezTerm:/mnt/c/Users/AjaneeshRajashekhara/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/AjaneeshRajashekhara/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/tools/PortableGit/bin:/mnt/c/tools/node-v21.1.0-win-x64
+CLAUDE_CODE_ENTRYPOINT=cli
+SHLVL=3
+
+
+------------
+Diagnostic: File system
+Skipped: False
+Success: True
+Exception: None
+Log:
+Temporary directory is '/tmp/'...
+Checking basic file I/O...
+Writing to temporary file '/tmp/8b8c44c194aab7f537814fe7'... OK
+Reading from temporary file '/tmp/8b8c44c194aab7f537814fe7'... OK
+Deleting temporary file '/tmp/8b8c44c194aab7f537814fe7'... OK
+Testing IFileSystem instance...
+UserHomePath: /home/nixos
+UserDataDirectoryPath: /home/nixos/.gcm
+GetCurrentDirectory(): /home/nixos/dotfiles
+
+------------
+Diagnostic: Networking
+Skipped: False
+Success: True
+Exception: None
+Log:
+Checking networking and HTTP stack...
+Creating HTTP client... OK
+IsNetworkAvailable: True
+Sending HEAD request to http://example.com...Sending HEAD request to https://example.com... OK
+ OK
+Acquiring free TCP port... OK
+Testing local HTTP loopback connections...
+Creating new HTTP listener for http://localhost:54163/... OK
+Waiting for loopback connection... OK
+Writing response... OK
+Waiting for response data... OK
+Loopback connection data OK
+
+------------
+Diagnostic: Git
+Skipped: False
+Success: True
+Exception: None
+Log:
+Getting Git version... OK
+Git version is '2.52.0'
+Locating current repository...Git repository at '/home/nixos/dotfiles/.git'
+ OK
+Listing all Git configuration... OK
+Git configuration:
+file:/home/nixos/.config/git/config	credential.credentialstore=secretservice
+file:/home/nixos/.config/git/config	credential.helper=/nix/store/phkfgcdg07yiqj1ijjh82g5xgzk47qk5-git-credential-manager-2.6.1/bin/git-credential-manager
+file:/home/nixos/.config/git/config	gpg.format=openpgp
+file:/home/nixos/.config/git/config	gpg.openpgp.program=/nix/store/hafxwi09djh8aknfm7lkii9qdnslv4hn-gnupg-2.4.8/bin/gpg
+file:/home/nixos/.config/git/config	user.email=your.email@example.com
+file:/home/nixos/.config/git/config	user.name=Your Name
+file:/home/nixos/.config/git/config	include.path=~/.config/git/secrets
+file:.git/config	core.repositoryformatversion=0
+file:.git/config	core.filemode=true
+file:.git/config	core.bare=false
+file:.git/config	core.logallrefupdates=true
+file:.git/config	remote.origin.url=git@github.com-ajaneesh:ajaneesh/dotfiles.git
+file:.git/config	remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
+file:.git/config	branch.master.remote=origin
+file:.git/config	branch.master.merge=refs/heads/master
+file:.git/config	pull.rebase=false
+
+
+------------
+Diagnostic: Credential storage
+Skipped: False
+Success: False
+Exception:
+GitCredentialManager.Interop.InteropException: Failed to open secret service session
+ ---> System.Exception: The name org.freedesktop.secrets was not provided by any .service files
+   --- End of inner exception stack trace ---
+   at GitCredentialManager.Interop.Linux.SecretServiceCollection.GetSecretService() in /build/source/src/shared/Core/Interop/Linux/SecretServiceCollection.cs:line 340
+   at GitCredentialManager.Interop.Linux.SecretServiceCollection.Remove(String service, String account) in /build/source/src/shared/Core/Interop/Linux/SecretServiceCollection.cs:line 208
+   at GitCredentialManager.CredentialStore.Remove(String service, String account) in /build/source/src/shared/Core/CredentialStore.cs:line 49
+   at GitCredentialManager.Diagnostics.CredentialStoreDiagnostic.RunInternalAsync(StringBuilder log, IList`1 additionalFiles) in /build/source/src/shared/Core/Diagnostics/CredentialStoreDiagnostic.cs:line 59
+   at GitCredentialManager.Diagnostics.Diagnostic.RunAsync() in /build/source/src/shared/Core/Diagnostics/Diagnostic.cs:line 43
+Log:
+ICredentialStore instance is of type: CredentialStore
+Writing test credential...Deleting test credential...
+------------
+Diagnostic: Microsoft authentication (AAD/MSA)
+Skipped: False
+Success: True
+Exception: None
+Log:
+Broker is not enabled.
+Flow type is: Auto
+Gathering MSAL token cache data... OK
+CacheDirectory: /home/nixos/.local/.IdentityService
+CacheFileName: msal.cache
+CacheFilePath: /home/nixos/.local/.IdentityService/msal.cache
+KeyringCollection: 
+KeyringSchemaName: 
+KeyringSecretLabel: 
+KeyringAttribute1: (,)
+KeyringAttribute2: (,)
+Creating cache helper... OK
+Verifying MSAL token cache persistence... OK
+
+------------
+Diagnostic: GitHub API
+Skipped: False
+Success: True
+Exception: None
+Log:
+Using 'https://github.com/' as API target.
+Querying '/meta' endpoint... OK
+

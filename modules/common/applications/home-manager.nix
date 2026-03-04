@@ -12,13 +12,5 @@
   home.packages = [
     # ... (all your other packages)
     pkgs.dante
-    pkgs.libsecret
-  ] ++ (lib.optional (pkgs ? git-credential-libsecret) pkgs.git-credential-libsecret);
-
-  programs.git = {
-    enable = true;
-    extraConfig = lib.mkIf (pkgs ? git-credential-libsecret) {
-      credential.helper = "${pkgs.git-credential-libsecret}/bin/git-credential-libsecret";
-    };
-  };
+  ];
 }
