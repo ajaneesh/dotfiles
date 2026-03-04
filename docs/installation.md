@@ -14,7 +14,7 @@ installer disk:
 ```bash
 lsblk # Choose the disk you want to wipe
 nix-shell -p nixVersions.stable
-nix run github:nmasur/dotfiles#installer -- nvme0n1 tempest
+nix run github:ajaneesh/dotfiles#installer -- nvme0n1 tempest
 ```
 
 ## NixOS - From Existing System
@@ -24,7 +24,7 @@ following command:
 
 ```bash
 nix-shell -p nixVersions.stable
-sudo nixos-rebuild switch --flake github:nmasur/dotfiles#tempest
+sudo nixos-rebuild switch --flake github:ajaneesh/dotfiles#tempest
 ```
 
 ## Windows - From NixOS WSL
@@ -35,7 +35,7 @@ the WSL configuration:
 
 ```
 nix-shell -p nixVersions.stable
-sudo nixos-rebuild switch --flake github:nmasur/dotfiles#hydra
+sudo nixos-rebuild switch --flake github:ajaneesh/dotfiles#hydra
 ```
 
 You should also download the
@@ -62,7 +62,7 @@ nix \
     --extra-experimental-features flakes \
     --extra-experimental-features nix-command \
     run nix-darwin -- switch \
-    --flake github:nmasur/dotfiles#lookingglass
+    --flake github:ajaneesh/dotfiles#lookingglass
 ```
 
 Once installed, you can continue to update the macOS configuration:

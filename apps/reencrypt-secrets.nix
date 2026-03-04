@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
 
-  # nix run github:nmasur/dotfiles#reencrypt-secrets ./private
+  # nix run github:ajaneesh/dotfiles#reencrypt-secrets ./private
 
   type = "app";
 

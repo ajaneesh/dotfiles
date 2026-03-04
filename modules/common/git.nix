@@ -17,7 +17,6 @@
   programs.git.settings = {
     credential.helper = "${pkgs.git-credential-manager}/bin/git-credential-manager";
     credential.credentialStore = "gpg";
-    "credential.https://emu.hinagro.com".provider = "generic";
   };
 
   # GPG

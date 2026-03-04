@@ -78,7 +78,7 @@ in
       xdg.configFile."git/personal".text = ''
         [user]
             name = "${config.fullName}"
-            email = "7386960+nmasur@users.noreply.github.com"
+            email = "PLACEHOLDER@users.noreply.github.com"
             signingkey = ~/.ssh/id_ed25519
         [commit]
             gpgsign = true
@@ -87,7 +87,7 @@ in
       '';
 
       xdg.configFile."git/allowed-signers".text = ''
-        7386960+nmasur@users.noreply.github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB+AbmjGEwITk5CK9y7+Rg27Fokgj9QEjgc9wST6MA3s
+        PLACEHOLDER@users.noreply.github.com ssh-ed25519 PLACEHOLDER_KEY
       '';
 
       home.packages = with pkgs; [

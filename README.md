@@ -43,7 +43,7 @@ configuration may be difficult to translate to a non-Nix system.
 
 # Diagram
 
-![Diagram](https://github.com/nmasur/dotfiles/assets/7386960/4cc22285-cea1-4831-b387-a82241184381)
+![Diagram](https://github.com/ajaneesh/dotfiles/assets/diagram.png)
 
 ---
 
@@ -72,13 +72,13 @@ Click [here](./docs/installation.md) for detailed installation instructions.
 Try out my Neovim config with nix:
 
 ```bash
-nix run github:nmasur/dotfiles#neovim
+nix run github:ajaneesh/dotfiles#neovim
 ```
 
 Or build it as a package:
 
 ```bash
-nix build github:nmasur/dotfiles#neovim
+nix build github:ajaneesh/dotfiles#neovim
 ```
 
 If you already have a Neovim configuration, you may need to move it out of
@@ -91,5 +91,5 @@ You can also use the [templates](./templates/) as flakes for starting new
 projects:
 
 ```bash
-nix flake init --template github:nmasur/dotfiles#poetry
+nix flake init --template github:ajaneesh/dotfiles#poetry
 ```

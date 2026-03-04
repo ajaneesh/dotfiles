@@ -416,7 +416,7 @@ colors:
 shell:
   program: "C:\\Windows\\System32\\wsl.exe"
   args:
-    - --cd "/home/noah"
+    - --cd "/home/nixos"
 # Startup directory
 #
 # Directory the shell is started in. If this is unset, or `None`, the working

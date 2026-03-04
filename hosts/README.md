@@ -4,11 +4,11 @@ These are the individual machines managed by this flake.
 
 | Host                                       | Purpose             |
 | ---                                        | ---                 |
-| [aws](./aws/default.nix)                   | AWS AMI             |
+| [aws](./aws/default.nix)                   | Cloud AMI           |
 | [staff](./staff/default.nix)               | Live USB stick      |
-| [flame](./flame/default.nix)               | Oracle cloud server |
+| [flame](./flame/default.nix)               | Cloud server        |
 | [hydra](./hydra/default.nix)               | WSL config          |
-| [lookingglass](./lookingglass/default.nix) | Work MacBook        |
+| [lookingglass](./lookingglass/default.nix) | macOS config        |
 | [swan](./swan/default.nix)                 | Home server         |
 | [tempest](./tempest/default.nix)           | Linux desktop       |
 

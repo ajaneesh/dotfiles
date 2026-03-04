@@ -112,7 +112,7 @@
       # shell.args = [
       #   "--login"
       #   "--init-command"
-      #   "tmux attach-session -t noah || tmux new-session -s noah"
+      #   "tmux attach-session -t main || tmux new-session -s main"
       # ];
       key_bindings = [
         {

@@ -16,7 +16,7 @@
               --foreground "#fb4934" \
               "Missing required parameter." \
               "Usage: format-root -- <disk>" \
-              "Flake example: nix run github:nmasur/dotfiles#format-root -- nvme0n1"
+              "Flake example: nix run github:ajaneesh/dotfiles#format-root -- nvme0n1"
           echo "(exiting)"
           exit 1
       fi

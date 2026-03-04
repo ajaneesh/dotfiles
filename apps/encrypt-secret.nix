@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
 
-  # nix run github:nmasur/dotfiles#encrypt-secret > private/mysecret.age
+  # nix run github:ajaneesh/dotfiles#encrypt-secret > private/mysecret.age
 
   type = "app";
 

@@ -28,7 +28,7 @@
           rpc-username = config.user;
           # This is a salted hash of the real password
           # https://github.com/tomwijnroks/transmission-pwgen
-          rpc-password = "{c4c5145f6e18bcd3c7429214a832440a45285ce26jDOBGVW";
+          rpc-password = "CHANGEME";
           rpc-host-whitelist = config.hostnames.transmission;
           rpc-host-whitelist-enabled = true;
           rpc-whitelist = lib.mkDefault "127.0.0.1"; # Overwritten by Cloudflare

@@ -14,7 +14,7 @@
 # nix-shell -p cloudflared
 # cloudflared tunnel login
 # cloudflared tunnel create <host>
-# nix run github:nmasur/dotfiles#encrypt-secret > private/cloudflared-<host>.age
+# nix run github:ajaneesh/dotfiles#encrypt-secret > private/cloudflared-<host>.age
 # Paste ~/.cloudflared/<id>.json
 # Set tunnel.id = "<id>"
 # Remove ~/.cloudflared/
@@ -53,7 +53,7 @@
           default = "http_status:404";
           # Match from ingress of any valid server name to SSH access
           ingress = {
-            "*.masu.rs" = "ssh://localhost:22";
+            "*.example.com" = "ssh://localhost:22";
           };
         };
       };

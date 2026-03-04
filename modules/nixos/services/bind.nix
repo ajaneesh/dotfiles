@@ -14,7 +14,7 @@
 
 let
 
-  localIp = "192.168.1.218";
+  localIp = "192.168.1.1";
   localServices = [
     config.hostnames.stream
     config.hostnames.content

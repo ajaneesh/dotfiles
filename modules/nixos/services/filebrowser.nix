@@ -17,7 +17,7 @@ let
     "auth.method" = "json";
     username = config.user;
     # Generate password: htpasswd -nBC 10 "" | tr -d ':\n'
-    password = "$2y$10$ze1cMob0k6pnXRjLowYfZOVZWg4G.dsPtH3TohbUeEbI0sdkG9.za";
+    password = "CHANGEME";
   };
 
 in

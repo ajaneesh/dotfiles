@@ -6,7 +6,7 @@
   program = builtins.toString (
     pkgs.writeShellScript "default" ''
       ${pkgs.gum}/bin/gum style --margin "1 2" --padding "0 2" --foreground "15" --background "55" "Options"
-      ${pkgs.gum}/bin/gum format --type=template -- '  {{ Italic "Run with" }} {{ Color "15" "69" " nix run github:nmasur/dotfiles#" }}{{ Color "15" "62" "someoption" }}{{ Color "15" "69" " " }}.'
+      ${pkgs.gum}/bin/gum format --type=template -- '  {{ Italic "Run with" }} {{ Color "15" "69" " nix run github:ajaneesh/dotfiles#" }}{{ Color "15" "62" "someoption" }}{{ Color "15" "69" " " }}.'
       echo ""
       echo ""
       ${pkgs.gum}/bin/gum format --type=template -- \

@@ -218,7 +218,6 @@
       # https://github.com/the-djmaze/snappymail/releases
       # https://snappymail.eu/repository/nextcloud
       url = "https://snappymail.eu/repository/nextcloud/snappymail-2.38.2-nextcloud.tar.gz";
-      # url = "https://github.com/nmasur/snappymail-nextcloud/releases/download/v2.36.3/snappymail-2.36.3-nextcloud.tar.gz";
       flake = false;
     };
     agenix = {
@@ -245,7 +244,7 @@
           mail.server = "";
           mail.imapHost = "";
           mail.smtpHost = "";
-          dotfilesRepo = "https://github.com/ajaneeshihx/dotfiles";
+          dotfilesRepo = "https://github.com/ajaneesh/dotfiles";
           hostnames = {
             audiobooks = "read.${baseName}";
             budget = "money.${baseName}";
