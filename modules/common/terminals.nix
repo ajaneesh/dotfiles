@@ -110,7 +110,7 @@
     URxvt.urgentOnBell: true
     URxvt.depth: 24
     URxvt.iso14755: false
-    URxvt.font: xft:JetBrains Mono:size=8
+    URxvt.font: xft:Hack Nerd Font:size=8
     URxvt.keysym.M-c: perl:clipboard:copy
     URxvt.keysym.M-v: perl:clipboard:paste
     URxvt.keysym.M-C-v: perl:clipboard:paste_escaped
@@ -130,7 +130,7 @@
     local config = {}
 
     -- Font configuration
-    config.font = wezterm.font('JetBrains Mono')
+    config.font = wezterm.font('Hack Nerd Font')
     config.font_size = 8.0
 
     -- Color scheme
