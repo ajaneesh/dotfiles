@@ -11,10 +11,18 @@
 
   # Common applications for all machines
   home.packages = with pkgs; [
-    hypnotix
-    vlc
-    (pkgs.writeShellScriptBin "kodi" ''
-      exec ${pkgs.nixgl.nixGLIntel}/bin/nixGLIntel ${pkgs.kodi}/bin/kodi "$@"
+    (pkgs.writeShellScriptBin "hypnotix" ''
+      exec ${pkgs.nixgl.nixGLIntel}/bin/nixGLIntel ${pkgs.hypnotix}/bin/hypnotix "$@"
+    '')
+    (pkgs.writeShellScriptBin "vlc" ''
+      exec ${pkgs.vlc}/bin/vlc --avcodec-hw=none --vout=x11 "$@"
+    '')
+    (let
+      kodi-with-addons = pkgs.kodi.withPackages (p: with p; [
+        pvr-iptvsimple
+      ]);
+    in pkgs.writeShellScriptBin "kodi" ''
+      exec ${pkgs.nixgl.nixGLIntel}/bin/nixGLIntel ${kodi-with-addons}/bin/kodi "$@"
     '')
   ];
 }
