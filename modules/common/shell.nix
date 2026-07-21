@@ -205,21 +205,21 @@
       "--border"
     ];
     # File widget (Ctrl+T) with preview
-    fileWidgetCommand = "fd --type f";  
-    fileWidgetOptions = [
+    fileWidget.command = "fd --type f";
+    fileWidget.options = [
       "--preview 'bat --color=always {}'"
       "--preview-window=right:50%"
     ];
     # Directory widget (Alt+C) with simple preview
-    changeDirWidgetCommand = "fd --type d";
-    changeDirWidgetOptions = [
+    changeDirWidget.command = "fd --type d";
+    changeDirWidget.options = [
       "--preview 'ls -la {}'"
       "--preview-window=right:50%"
     ];
     # History widget (Ctrl+R) - no preview
-    historyWidgetOptions = [
+    historyWidget.options = [
       "--height=60%"
-      "--layout=reverse" 
+      "--layout=reverse"
       "--border"
     ];
   };

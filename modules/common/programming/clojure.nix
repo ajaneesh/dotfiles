@@ -11,7 +11,6 @@
         leiningen
         babashka
         clojure-lsp
-        cider
         clj-kondo
        #emacsPackages.ob-clojurescript
        #emacsPackages.flycheck-clojure

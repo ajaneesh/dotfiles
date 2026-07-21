@@ -10,9 +10,6 @@
     # Used for specific stable packages
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
 
-    # Used for caddy plugins
-    nixpkgs-caddy.url = "github:jpds/nixpkgs/caddy-external-plugins";
-
     # Used for MacOS system config
     darwin = {
       url = "github:lnl7/nix-darwin/master";
@@ -198,32 +195,6 @@
       flake = false;
     };
 
-    # Nextcloud Apps
-    nextcloud-news = {
-      # https://github.com/nextcloud/news/releases
-      url = "https://github.com/nextcloud/news/releases/download/25.0.0-alpha12/news.tar.gz";
-      flake = false;
-    };
-    nextcloud-external = {
-      # https://github.com/nextcloud-releases/external/releases
-      url = "https://github.com/nextcloud-releases/external/releases/download/v5.5.2/external-v5.5.2.tar.gz";
-      flake = false;
-    };
-    nextcloud-cookbook = {
-      # https://github.com/christianlupus-nextcloud/cookbook-releases/releases/
-      url = "https://github.com/christianlupus-nextcloud/cookbook-releases/releases/download/v0.11.2/cookbook-0.11.2.tar.gz";
-      flake = false;
-    };
-    nextcloud-snappymail = {
-      # https://github.com/the-djmaze/snappymail/releases
-      # https://snappymail.eu/repository/nextcloud
-      url = "https://snappymail.eu/repository/nextcloud/snappymail-2.38.2-nextcloud.tar.gz";
-      flake = false;
-    };
-    agenix = {
-      url = "github:ryantm/agenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
@@ -232,11 +203,7 @@
     let
 
       # Global configuration for my systems
-      globals =
-        let
-          baseName = "nixos";
-        in
-        rec {
+      globals = rec {
           user = "nixos";
           fullName = "NixOS";
           gitName = fullName;
@@ -245,28 +212,6 @@
           mail.imapHost = "";
           mail.smtpHost = "";
           dotfilesRepo = "https://github.com/ajaneesh/dotfiles";
-          hostnames = {
-            audiobooks = "read.${baseName}";
-            budget = "money.${baseName}";
-            files = "files.${baseName}";
-            git = "git.${baseName}";
-            influxdb = "influxdb.${baseName}";
-            irc = "irc.${baseName}";
-            metrics = "metrics.${baseName}";
-            minecraft = "minecraft.${baseName}";
-            n8n = "n8n.${baseName}";
-            notifications = "ntfy.${baseName}";
-            prometheus = "prom.${baseName}";
-            paperless = "paper.${baseName}";
-            photos = "photos.${baseName}";
-            secrets = "vault.${baseName}";
-            stream = "stream.${baseName}";
-            content = "cloud.${baseName}";
-            books = "books.${baseName}";
-            download = "download.${baseName}";
-            status = "status.${baseName}";
-            transmission = "transmission.${baseName}";
-          };
         };
 
       # Common overlays to always use
@@ -276,7 +221,7 @@
         inputs.jujutsu.overlays.default # Fix: https://github.com/martinvonz/jj/issues/4784
         (import ./overlays/tree-sitter.nix inputs)
         (import ./overlays/mpv-scripts.nix inputs)
-        (import ./overlays/nextcloud-apps.nix inputs)
+
         (import ./overlays/betterlockscreen.nix)
         (import ./overlays/fix-xss-lock.nix)
         (import ./overlays/gh-collaborators.nix inputs)
