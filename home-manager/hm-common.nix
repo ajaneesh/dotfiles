@@ -51,7 +51,9 @@
   # Common applications for all machines
   home.packages = with pkgs; [
     gh
+    glab
     google-cloud-sdk
+    awscli
     postgresql
     gemini-cli
     firefox

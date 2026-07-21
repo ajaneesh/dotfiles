@@ -16,4 +16,11 @@
 
   # Enable WSL VPN routing through Windows
   wsl-vpnkit.enable = true;
+
+  # WSL-specific directory shortcuts
+  programs.zsh.shellAliases = {
+    proj = "cd ~/projects";
+    parakeet = "cd ~/projects/parakeet";
+    dots = "cd ~/dotfiles";
+  };
 }
