@@ -17,6 +17,9 @@
   # Enable WSL VPN routing through Windows
   wsl-vpnkit.enable = true;
 
+  # WSLg has no proper GPU passthrough; run Chrome with software rendering
+  chrome.softwareRendering = true;
+
   # WSL-specific directory shortcuts
   programs.zsh.shellAliases = {
     proj = "cd ~/projects";

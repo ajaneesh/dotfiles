@@ -1,95 +1,81 @@
-# System Configurations
+# Dotfiles
 
-This repository contains configuration files for my NixOS, macOS, and WSL
-hosts.
+Personal development environment managed with [Nix](https://nixos.org) and
+[Home Manager](https://github.com/nix-community/home-manager), shared across
+three machines:
 
-They are organized and managed by [Nix](https://nixos.org), so some of the
-configuration may be difficult to translate to a non-Nix system.
+| Profile       | Machine                        | Extras on top of the common base                     |
+|---------------|--------------------------------|------------------------------------------------------|
+| `hm-wsl`      | Windows laptop (NixOS on WSL2) | i3 in Xephyr, screenshots, wsl-vpnkit VPN routing    |
+| `hm-crostini` | Chromebook (Crostini)          | i3 in Xephyr, nixGL-wrapped media apps (VLC, Kodi)   |
+| `hm-debian`   | Debian workstation             | Native i3 via `startx`/`.xinitrc`, screenshots       |
 
-## System Features
+All three import [`home-manager/hm-common.nix`](./home-manager/hm-common.nix):
+zsh (fzf, zoxide, bat, eza, and friends), git with per-directory identities,
+Emacs, terminals (xterm/urxvt/wezterm), fonts, and language tooling for
+Clojure, Node.js, Rust, Docker, devcontainers, AWS, and Claude Code.
 
-| Feature        | Program                                             | Configuration                                 |
-|----------------|-----------------------------------------------------|-----------------------------------------------|
-| OS             | [NixOS](https://nixos.org)                          | [Link](./modules/nixos)                       |
-| Display Server | [X11](https://www.x.org/wiki/)                      | [Link](./modules/nixos/graphical/xorg.nix)    |
-| Compositor     | [Picom](https://github.com/yshui/picom)             | [Link](./modules/nixos/graphical/picom.nix)   |
-| Window Manager | [i3](https://i3wm.org/)                             | [Link](./modules/nixos/graphical/i3.nix)      |
-| Panel          | [Polybar](https://polybar.github.io/)               | [Link](./modules/nixos/graphical/polybar.nix) |
-| Font           | [Victor Mono](https://rubjo.github.io/victor-mono/) | [Link](./modules/nixos/graphical/fonts.nix)   |
-| Launcher       | [Rofi](https://github.com/davatorium/rofi)          | [Link](./modules/nixos/graphical/rofi.nix)    |
+## Applying a configuration
 
-## User Features
-
-| Feature      | Program                                                                          | Configuration                                      |
-|--------------|----------------------------------------------------------------------------------|----------------------------------------------------|
-| Dotfiles     | [Home-Manager](https://github.com/nix-community/home-manager)                    | [Link](./modules/common)                           |
-| Terminal     | [Kitty](https://sw.kovidgoyal.net/kitty/)                                        | [Link](./modules/common/applications/kitty.nix)    |
-| Shell        | [Fish](https://fishshell.com/)                                                   | [Link](./modules/common/shell/fish)                |
-| Shell Prompt | [Starship](https://starship.rs/)                                                 | [Link](./modules/common/shell/starship.nix)        |
-| Colorscheme  | [Gruvbox](https://github.com/morhetz/gruvbox)                                    | [Link](./colorscheme/gruvbox/default.nix)          |
-| Wallpaper    | [Road](https://gitlab.com/exorcist365/wallpapers/-/blob/master/gruvbox/road.jpg) | [Link](./hosts/tempest/default.nix)                |
-| Text Editor  | [Neovim](https://neovim.io/)                                                     | [Link](./modules/common/neovim/config)             |
-| Browser      | [Firefox](https://www.mozilla.org/en-US/firefox/new/)                            | [Link](./modules/common/applications/firefox.nix)  |
-| E-Mail       | [Aerc](https://aerc-mail.org/)                                                   | [Link](./modules/common/mail/aerc.nix)             |
-| File Manager | [Nautilus](https://wiki.gnome.org/action/show/Apps/Files)                        | [Link](./modules/common/applications/nautilus.nix) |
-| PDF Reader   | [Zathura](https://pwmt.org/projects/zathura/)                                    | [Link](./modules/common/applications/media.nix)    |
-| Video Player | [mpv](https://mpv.io/)                                                           | [Link](./modules/common/applications/media.nix)    |
-
-## macOS Features
-
-| Feature  | Program                                     | Configuration                        |
-|----------|---------------------------------------------|--------------------------------------|
-| Keybinds | [Hammerspoon](https://www.hammerspoon.org/) | [Link](./modules/darwin/hammerspoon) |
-
-# Diagram
-
-![Diagram](https://github.com/ajaneesh/dotfiles/assets/diagram.png)
-
----
-
-# Unique Configurations
-
-This repo contains a few more elaborate elements of configuration.
-
-- [Neovim config](./modules/common/neovim/default.nix) generated with Nix2Vim
-and source-controlled plugins, differing based on installed LSPs, for example.
-- [Caddy JSON](./modules/nixos/services/caddy.nix) file (routes, etc.) based
-dynamically on enabled services rendered with Nix.
-- [Grafana config](./modules/nixos/services/grafana.nix) rendered with Nix.
-- Custom [secrets deployment](./modules/nixos/services/secrets.nix) similar to
-agenix.
-- Base16 [colorschemes](./colorscheme/) applied to multiple applications,
-including Firefox userChrome.
-
----
-
-# Installation
-
-Click [here](./docs/installation.md) for detailed installation instructions.
-
-# Neovim
-
-Try out my Neovim config with nix:
-
-```bash
-nix run github:ajaneesh/dotfiles#neovim
+```sh
+home-manager switch --flake ~/dotfiles#hm-wsl      # or #hm-crostini / #hm-debian
 ```
 
-Or build it as a package:
+There is also a full NixOS system build for the WSL host:
 
-```bash
-nix build github:ajaneesh/dotfiles#neovim
+```sh
+sudo nixos-rebuild switch --flake ~/dotfiles#nixos-wsl
 ```
 
-If you already have a Neovim configuration, you may need to move it out of
-`~/.config/nvim` or set `XDG_CONFIG_HOME` to another value; otherwise both
-configs might conflict with each other.
+## New machine bootstrap
 
-# Flake Templates
+1. Install Nix (with flakes enabled) and clone this repo to `~/dotfiles`.
+2. `nix run home-manager -- switch --flake ~/dotfiles#<profile>`
+3. `git-identity-setup` — provisions per-machine git identities (see below).
+4. `gcm-setup` — GPG key + password store for Git Credential Manager.
+5. Debian only: `debian-setup` installs the system packages Nix can't
+   provide (xorg, xinit, i3lock with setuid).
 
-You can also use the [templates](./templates/) as flakes for starting new
-projects:
+## Git identities
 
-```bash
-nix flake init --template github:ajaneesh/dotfiles#poetry
+No identity is set globally (`user.useConfigOnly`); git refuses to commit
+unless a directory rule matches:
+
+| Directory     | Identity file (untracked, per-machine) |
+|---------------|----------------------------------------|
+| `~/dotfiles/` | `~/.config/git/identity-personal`      |
+| `~/projects/` | `~/.config/git/identity-work`          |
+
+Run `git-identity-setup` once per machine to create them. Email addresses
+never appear in this repository; use your GitHub noreply address for the
+personal identity.
+
+## Layout
+
 ```
+flake.nix              Inputs, the three HM profiles, nixos-wsl host, checks
+home-manager/          Per-machine profiles + hm-common.nix shared base
+modules/common/        Modules imported by the profiles
+  applications/        age secrets, chrome, i3/Xephyr, screenshots, vpnkit...
+  programming/         clojure, nodejs, rust, docker, claudecode...
+  shell.nix, git.nix, emacs.nix, terminals.nix, fonts.nix
+hosts/nixos-wsl/       Full NixOS system config for the WSL host
+overlays/              emacs packages, awscli fix, wsl-vpnkit
+apps/restartx.nix      Xephyr restart helper used by the i3 setup
+templates/             `nix flake init -t` project starters
+```
+
+## Maintenance
+
+```sh
+nix flake check --no-build   # verify every profile still evaluates
+nix flake check              # additionally build all three profiles
+nix flake update             # bump inputs
+nix fmt                      # format nix files
+```
+
+History note: this repo started as a fork of
+[nmasur/dotfiles](https://github.com/nmasur/dotfiles) and was later slimmed
+down to the Home Manager-only setup described above. Removed machinery
+(NixOS homelab services, macOS support, neovim config, ...) is recoverable
+from git history (`pre-cleanup` tag).

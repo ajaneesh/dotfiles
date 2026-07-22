@@ -1,13 +1,22 @@
 { config, pkgs, lib, ... }:
 
 let
+  # Workaround flags for environments without proper GPU passthrough
+  # (WSLg, Crostini); on native hosts `chrome` runs fully accelerated
+  chromeFlags =
+    if config.chrome.softwareRendering then
+      " --ozone-platform=x11 --disable-gpu --disable-software-rasterizer --disable-features=VizDisplayCompositor --disable-dev-shm-usage"
+    else
+      "";
   google-chrome-with-flags = pkgs.writeShellScriptBin "chrome" ''
     #!${pkgs.runtimeShell}
-    exec ${pkgs.google-chrome}/bin/google-chrome-stable --ozone-platform=x11 --disable-gpu --disable-software-rasterizer --disable-features=VizDisplayCompositor --disable-dev-shm-usage "$@"
+    exec ${pkgs.google-chrome}/bin/google-chrome-stable${chromeFlags} "$@"
   '';
 in
 {
   options.chrome.enable = lib.mkEnableOption "Google Chrome browser";
+  options.chrome.softwareRendering =
+    lib.mkEnableOption "software rendering workarounds for virtualized X11 (WSL, Crostini)";
 
   config = lib.mkIf config.chrome.enable {
     home.packages = [ pkgs.google-chrome google-chrome-with-flags ];
