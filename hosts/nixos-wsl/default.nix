@@ -25,7 +25,13 @@
     isNormalUser = true;
     shell = pkgs.zsh;
     extraGroups = [ "wheel" "docker" ];
-    hashedPassword = inputs.nixpkgs.lib.fileContents ../../misc/password.sha512;
+    # Optional per-machine password hash; without it the user has no
+    # password (normal for the WSL default user)
+    hashedPassword =
+      let
+        passwordFile = ../../misc/password.sha512;
+      in
+      if builtins.pathExists passwordFile then inputs.nixpkgs.lib.fileContents passwordFile else null;
   };
   
   # Time zone configuration

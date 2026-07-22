@@ -4,7 +4,6 @@
   imports = [
     ../modules/common/applications/i3.nix
     ../modules/common/applications/screenshots.nix
-    ../modules/common/applications/wsl-vpnkit.nix
     ./hm-common.nix
   ];
 
@@ -13,9 +12,6 @@
 
   # Enable screenshot tools
   screenshots.enable = true;
-
-  # Enable WSL VPN routing through Windows
-  wsl-vpnkit.enable = true;
 
   # Required Debian system packages for reproducible setup:
   # Run this once to set up the system:

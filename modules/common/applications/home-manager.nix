@@ -6,11 +6,4 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  # This file contains common Home Manager packages and configurations
-  # that are shared across all hosts.
-
-  home.packages = [
-    # ... (all your other packages)
-    pkgs.dante
-  ];
 }

@@ -57,8 +57,6 @@
     postgresql
     gemini-cli
     firefox
-
-    firefox
     gnugrep
     vim
 

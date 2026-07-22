@@ -9,7 +9,7 @@
   # Enable i3 with Xephyr for Crostini
   xephyr.enable = true;
 
-  # Common applications for all machines
+  # Crostini-specific media apps, wrapped with nixGL for GPU access
   home.packages = with pkgs; [
     (pkgs.writeShellScriptBin "hypnotix" ''
       exec ${pkgs.nixgl.nixGLIntel}/bin/nixGLIntel ${pkgs.hypnotix}/bin/hypnotix "$@"
