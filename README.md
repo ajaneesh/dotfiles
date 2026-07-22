@@ -36,6 +36,31 @@ sudo nixos-rebuild switch --flake ~/dotfiles#nixos-wsl
 5. Debian only: `debian-setup` installs the system packages Nix can't
    provide (xorg, xinit, i3lock with setuid).
 
+## Updating the other machines
+
+Normal flow after pushing changes from one machine:
+
+```sh
+cd ~/dotfiles
+git pull
+home-manager switch --flake .#<profile>
+```
+
+After a **history rewrite** (force push), `git pull` will refuse or produce
+merge conflicts because the histories have diverged. Reset the clone to the
+rewritten remote instead — local identity files under `~/.config/git/` are
+untouched by this:
+
+```sh
+cd ~/dotfiles
+git fetch origin
+git reset --hard origin/master
+home-manager switch --flake .#<profile>
+```
+
+If `git-identity-setup` has not been run on the machine yet, run it after
+switching — commits are refused until the identity files exist.
+
 ## Git identities
 
 No identity is set globally (`user.useConfigOnly`); git refuses to commit
