@@ -47,6 +47,7 @@
       # Common overlays to always use
       overlays = [
         (import ./overlays/emacs-packages.nix)
+        (import ./overlays/tree-sitter-tsx.nix)
         (import ./overlays/aws-overlay.nix)
         (import ./overlays/wsl-vpnkit.nix)
       ];
