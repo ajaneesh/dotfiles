@@ -207,12 +207,4 @@ in
       age-cat = "age-decrypt";
     };
   };
-
-  # Configure git to include the secrets file if it exists
-  programs.git.includes = [
-    {
-      path = "~/.config/git/secrets";
-      condition = null;
-    }
-  ];
 }

@@ -3,20 +3,30 @@
 {
   programs.git = {
     enable = true;
-    settings.user.name = "Your Name"; # Will be overridden by age secrets
-    settings.user.email = "your.email@example.com"; # Will be overridden by age secrets
-  };
 
-  programs.zsh.shellAliases = {
-    # Git aliases with age secrets
-    git-commit = ''git -c user.name="$(age-get-secret git-name 2>/dev/null || echo 'Your Name')" -c user.email="$(age-get-secret git-email 2>/dev/null || echo 'your.email@example.com')" commit'';
-    git-commit-signed = ''git -c user.name="$(age-get-secret git-name 2>/dev/null || echo 'Your Name')" -c user.email="$(age-get-secret git-email 2>/dev/null || echo 'your.email@example.com')" commit -S'';
-  };
+    settings = {
+      # No global identity. Refuse to commit unless one of the includes
+      # below matches, so a wrong/placeholder identity can never leak
+      # into history.
+      user.useConfigOnly = true;
 
-  # Git Credential Manager with GPG credential store
-  programs.git.settings = {
-    credential.helper = "${pkgs.git-credential-manager}/bin/git-credential-manager";
-    credential.credentialStore = "gpg";
+      # Git Credential Manager with GPG credential store
+      credential.helper = "${pkgs.git-credential-manager}/bin/git-credential-manager";
+      credential.credentialStore = "gpg";
+    };
+
+    # Identity files live outside this repo (untracked, per-machine).
+    # Provision them with `git-identity-setup`.
+    includes = [
+      {
+        condition = "gitdir:~/dotfiles/";
+        path = "~/.config/git/identity-personal";
+      }
+      {
+        condition = "gitdir:~/projects/";
+        path = "~/.config/git/identity-work";
+      }
+    ];
   };
 
   # GPG
@@ -38,11 +48,60 @@
     };
   };
 
-  # One-time setup script for GCM prerequisites
   home.packages = with pkgs; [
     git
     git-credential-manager
     openssh
+
+    # One-time setup for the per-machine git identity files
+    (writeShellScriptBin "git-identity-setup" ''
+      set -e
+      CONFIG_DIR="$HOME/.config/git"
+      mkdir -p "$CONFIG_DIR"
+
+      write_identity() {
+        file="$1"
+        label="$2"
+        echo ""
+        echo "=== $label ==="
+        if [ -f "$file" ]; then
+          echo "Current identity:"
+          sed 's/^/  /' "$file"
+          printf "Overwrite? [y/N] "
+          read -r reply
+          case "$reply" in
+            [Yy]*) ;;
+            *) echo "Keeping existing identity."; return 0 ;;
+          esac
+        fi
+        printf "Name: "
+        read -r name
+        printf "Email: "
+        read -r email
+        printf '[user]\n\tname = %s\n\temail = %s\n' "$name" "$email" > "$file"
+        chmod 600 "$file"
+        echo "Wrote $file"
+      }
+
+      echo "=== Git Identity Setup ==="
+      echo ""
+      echo "Identities are stored locally under ~/.config/git/ and are"
+      echo "never tracked by the dotfiles repo."
+      echo ""
+      echo "Tip: for the personal identity, use your GitHub noreply address"
+      echo "(GitHub -> Settings -> Emails -> 'Keep my email addresses private',"
+      echo "it looks like 12345678+username@users.noreply.github.com)."
+
+      write_identity "$CONFIG_DIR/identity-personal" "Personal identity (~/dotfiles)"
+      write_identity "$CONFIG_DIR/identity-work" "Work identity (~/projects)"
+
+      echo ""
+      echo "Done. Verify with:"
+      echo "  cd ~/dotfiles && git config user.email"
+      echo "  cd ~/projects/<repo> && git config user.email"
+    '')
+
+    # One-time setup script for GCM prerequisites
     (writeShellScriptBin "gcm-setup" ''
       set -e
       echo "=== Git Credential Manager Setup ==="
