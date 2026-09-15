@@ -41,7 +41,6 @@
       # Global configuration for my systems
       globals = {
         user = "nixos";
-        fullName = "Ajaneesh Rajashekharaiah";
       };
 
       # Common overlays to always use

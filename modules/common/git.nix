@@ -36,7 +36,7 @@
     enable = true;
     defaultCacheTtl = 86400;
     maxCacheTtl = 34560000;
-    pinentry.package = pkgs.pinentry-tty;
+    pinentry.package = pkgs.pinentry-curses;
     enableZshIntegration = true;
   };
 
@@ -107,46 +107,64 @@
       echo "=== Git Credential Manager Setup ==="
       echo ""
 
-      # Ensure GPG_TTY is set
-      export GPG_TTY=$(tty)
+      export GPG_TTY=$(tty || true)
+      MATCH="git-credential-store@localhost"
 
-      # Step 1: GPG key
-      KEY_ID=$(${pkgs.gnupg}/bin/gpg --list-keys --with-colons 2>/dev/null \
-        | ${pkgs.gawk}/bin/awk -F: '/^pub/{getline; print $10; exit}')
+      # Step 1: find or create a dedicated PASSPHRASELESS gpg key for the
+      # credential store. Passphraseless is intentional: this key only ever
+      # encrypts the locally-cached git token. A key that prompts on every
+      # push is what breaks unattended credential caching -- and is painful
+      # to recover if the passphrase is ever lost. It is NOT a signing key
+      # (commit signing uses SSH), so there is nothing to protect here that
+      # isn't already sitting in plaintext on the same disk.
+      FPR=$(${pkgs.gnupg}/bin/gpg --list-secret-keys --with-colons "$MATCH" 2>/dev/null \
+        | ${pkgs.gawk}/bin/awk -F: '/^fpr:/{print $10; exit}')
 
-      if [ -z "$KEY_ID" ]; then
-        echo "No GPG key found. Generating one now..."
-        echo ""
-        ${pkgs.gnupg}/bin/gpg --gen-key
-        KEY_ID=$(${pkgs.gnupg}/bin/gpg --list-keys --with-colons 2>/dev/null \
-          | ${pkgs.gawk}/bin/awk -F: '/^pub/{getline; print $10; exit}')
+      if [ -z "$FPR" ]; then
+        echo "Generating a passphraseless GPG key for the credential store..."
+        printf '%s\n' \
+          "%no-protection" \
+          "Key-Type: eddsa" \
+          "Key-Curve: ed25519" \
+          "Subkey-Type: ecdh" \
+          "Subkey-Curve: cv25519" \
+          "Name-Real: Git Credential Store" \
+          "Name-Comment: no passphrase" \
+          "Name-Email: $MATCH" \
+          "Expire-Date: 0" \
+          "%commit" \
+          | ${pkgs.gnupg}/bin/gpg --batch --generate-key
+        FPR=$(${pkgs.gnupg}/bin/gpg --list-secret-keys --with-colons "$MATCH" 2>/dev/null \
+          | ${pkgs.gawk}/bin/awk -F: '/^fpr:/{print $10; exit}')
       else
-        echo "GPG key found: $KEY_ID"
+        echo "Credential-store GPG key found: $FPR"
       fi
 
-      if [ -z "$KEY_ID" ]; then
+      if [ -z "$FPR" ]; then
         echo "ERROR: GPG key generation failed."
         exit 1
       fi
 
-      # Step 2: Initialize password store
-      if [ ! -f "$HOME/.password-store/.gpg-id" ]; then
-        echo ""
-        echo "Initializing password store..."
-        ${pkgs.pass}/bin/pass init "$KEY_ID"
+      # Step 2: point the password store at that key
+      if [ ! -f "$HOME/.password-store/.gpg-id" ] \
+         || [ "$(cat "$HOME/.password-store/.gpg-id")" != "$FPR" ]; then
+        echo "Initializing password store for $FPR..."
+        ${pkgs.pass}/bin/pass init "$FPR"
       else
-        echo "Password store already initialized."
+        echo "Password store already initialized for $FPR."
       fi
 
       # Step 3: Verify
       echo ""
       echo "=== Verification ==="
-      echo "GPG key:          $KEY_ID"
-      echo "Password store:   $HOME/.password-store"
-      echo "Credential store: gpg"
-      echo "Credential helper: git-credential-manager"
+      echo "GPG key (passphraseless): $FPR"
+      echo "Password store:           $HOME/.password-store"
+      echo "Credential store:         gpg"
+      echo "Credential helper:        git-credential-manager"
       echo ""
-      echo "Setup complete. Git credentials will be stored securely via GPG."
+      echo "Setup complete. On your first 'git push' you'll enter your"
+      echo "username + token once; it is cached (encrypted, no passphrase)"
+      echo "and every push after that is silent."
     '')
   ];
 }

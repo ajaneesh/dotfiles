@@ -9,7 +9,6 @@
   imports = [
     # Core applications and configurations
     ../modules/common/applications/home-manager.nix
-    ../modules/common/applications/age.nix
     ../modules/common/applications/google-chrome.nix
     ../modules/common/shell.nix
     ../modules/common/git.nix
