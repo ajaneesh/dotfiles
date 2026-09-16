@@ -105,6 +105,14 @@
           extraSpecialArgs = { inherit inputs overlays globals; };
           modules = [ ./home-manager/hm-crostini.nix ];
         };
+        hm-ubuntu = inputs.home-manager.lib.homeManagerConfiguration {
+          pkgs = import nixpkgs {
+            system = "x86_64-linux";
+            overlays = overlays ++ [ inputs.rust-overlay.overlays.default ];
+          };
+          extraSpecialArgs = { inherit inputs overlays globals; };
+          modules = [ ./home-manager/hm-ubuntu.nix ];
+        };
       };
 
       # Development environments
@@ -134,6 +142,7 @@
         hm-wsl = homeConfigurations.hm-wsl.activationPackage;
         hm-crostini = homeConfigurations.hm-crostini.activationPackage;
         hm-debian = homeConfigurations.hm-debian.activationPackage;
+        hm-ubuntu = homeConfigurations.hm-ubuntu.activationPackage;
       };
 
       formatter = forAllSystems (

@@ -12,6 +12,7 @@
     ../modules/common/applications/google-chrome.nix
     ../modules/common/shell.nix
     ../modules/common/git.nix
+    ../modules/common/setup-status.nix
     ../modules/common/emacs.nix
     ../modules/common/terminals.nix
     ../modules/common/fonts.nix
