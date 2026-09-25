@@ -92,7 +92,11 @@
       alias top='btm'           # Better top
       alias ps='procs'          # Better ps
       alias du='dust'           # Better du
-      alias man='tldr'          # Better man pages
+      # `man`: show tldr's concise examples when available, else the full
+      # manual. tldr exits non-zero and prints only to stderr when it has no
+      # page, so this keeps quick examples for common commands (e.g. `man ls`)
+      # while leaving real man pages -- including `man dotfiles` -- reachable.
+      man() { command tldr "$@" 2>/dev/null || command man "$@"; }
       
       # FZF alternatives for when preview doesn't work in Xephyr
       alias fzf-simple='fzf --no-preview --height 40% --layout=reverse --border'

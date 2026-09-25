@@ -2,10 +2,19 @@
 
 # Native X11 session bootstrap for apt-based, non-NixOS hosts (Debian, Ubuntu).
 #
-# Provides the pieces that let `startx` bring up i3 on a distro where Nix does
-# NOT manage the system: an `.xinitrc`, an optional login autostart service,
-# and a one-time helper that installs the handful of system packages that must
-# come from apt rather than Nix.
+# Lets the Nix/home-manager-managed i3 be launched two ways on a distro where
+# Nix does NOT manage the system:
+#   1. From a display manager (SDDM): the `x11-setup` helper installs a session
+#      .desktop into /usr/local/share/xsessions pointing at the `i3-session`
+#      launcher below, so the DM lists "i3 (home-manager)" and runs the *Nix*
+#      i3 (not an apt one).
+#   2. Via `startx`: an `.xinitrc` is provided; the auto-start service is left
+#      installed but disabled by default so it does not fight the DM.
+#
+# Reproducibility note: this is home-manager *standalone* on Debian, so HM can
+# only write under $HOME. The one unavoidable root-owned artifact (the system
+# xsessions .desktop) is created by the repo-defined `x11-setup` script rather
+# than by hand, keeping the whole setup rebuildable from this config.
 #
 # Why apt (not Nix) for xorg/xinit/i3lock?
 #   - i3lock needs the setuid bit to read /etc/shadow for PAM password auth.
@@ -20,14 +29,28 @@
     lib.mkEnableOption "native X11 session (startx + i3) for apt-based non-NixOS hosts";
 
   config = lib.mkIf config.nativeXSession.enable {
-    # One-time system dependency installer. Run `x11-setup` once per machine.
     home.packages = [
+      # Session launcher the display manager (SDDM) invokes to start the
+      # home-manager-managed i3 with the correct Nix environment. Installed at a
+      # stable path (~/.nix-profile/bin/i3-session) so the system .desktop file
+      # created by x11-setup never points at a garbage-collectable /nix/store
+      # path. Mirrors the PATH/XDG setup in the .xinitrc below.
+      (pkgs.writeShellScriptBin "i3-session" ''
+        export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
+        export XDG_DATA_DIRS="$HOME/.nix-profile/share:''${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+        exec ${pkgs.i3}/bin/i3
+      '')
+
+      # One-time system setup. Run `x11-setup` once per machine. Idempotent:
+      # safe to re-run after a config change (e.g. to refresh the session file).
       (pkgs.writeShellScriptBin "x11-setup" ''
         echo "Setting up system dependencies for a native i3 X session..."
         echo ""
-        echo "This will install (via apt):"
-        echo "  - xorg, xinit (X11 server)"
-        echo "  - i3lock (screen locker with PAM auth)"
+        echo "This will (via apt / sudo):"
+        echo "  - install xorg, xinit (X11 server) and i3lock (PAM screen lock)"
+        echo "  - register an 'i3 (home-manager)' session with the display manager"
+        echo "  - remove the apt-installed i3 (so its duplicate session entry,"
+        echo "    which launches the wrong binary, goes away)"
         echo ""
         read -p "Continue? (y/n) " -n 1 -r
         echo
@@ -46,8 +69,35 @@ session include common-session
 EOF
           fi
 
+          # Register the home-manager i3 session with the display manager.
+          # SDDM (like most DMs) only scans /usr/local/share/xsessions and
+          # /usr/share/xsessions as root -- it never reads ~/.local/share/
+          # xsessions, which is why the HM-written entry never appeared. We
+          # install into /usr/local/share/xsessions (the local-admin dir) and
+          # point Exec at the stable i3-session launcher above.
+          echo "Registering the home-manager i3 session with the display manager..."
+          sudo install -d /usr/local/share/xsessions
+          sudo tee /usr/local/share/xsessions/i3-hm.desktop > /dev/null <<EOF
+[Desktop Entry]
+Name=i3 (home-manager)
+Comment=i3 window manager launched from the Nix/home-manager profile
+Exec=${config.home.homeDirectory}/.nix-profile/bin/i3-session
+Type=Application
+DesktopNames=i3
+EOF
+
+          # Drop the apt i3: its /usr/share/xsessions/*.desktop entries run
+          # /usr/bin/i3 (the apt binary), shadowing the Nix one. Removing it
+          # leaves "i3 (home-manager)" as the session to pick at login.
+          if dpkg -s i3 >/dev/null 2>&1 || dpkg -s i3-wm >/dev/null 2>&1; then
+            echo "Removing the apt-installed i3 (i3, i3-wm)..."
+            sudo apt remove -y i3 i3-wm || true
+          fi
+
           echo ""
-          echo "Setup complete! You can now use Alt+Shift+Z to lock your screen."
+          echo "Setup complete!"
+          echo "  - Log out, then pick 'i3 (home-manager)' at the SDDM session menu."
+          echo "  - Alt+Shift+Z locks the screen."
         fi
       '')
     ];
@@ -75,10 +125,13 @@ EOF
       '';
     };
 
-    # Optional: auto-start X11 with i3 on login.
+    # Manual `startx` fallback unit. Deliberately NOT WantedBy any target: we
+    # now log in through the display manager (SDDM), and auto-starting startx
+    # here would race/fight the DM-managed X server. Start it by hand with
+    # `systemctl --user start startx` only if you want the old startx flow.
     systemd.user.services.startx = {
       Unit = {
-        Description = "Start X11 with i3 window manager";
+        Description = "Start X11 with i3 window manager (manual startx fallback)";
         After = [ "graphical-session-pre.target" ];
       };
 
@@ -90,10 +143,6 @@ EOF
         Environment = [
           "PATH=${pkgs.lib.makeBinPath [ pkgs.coreutils pkgs.bash ]}:$HOME/.nix-profile/bin:/usr/bin"
         ];
-      };
-
-      Install = {
-        WantedBy = [ "default.target" ];
       };
     };
   };

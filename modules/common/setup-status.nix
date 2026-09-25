@@ -19,8 +19,10 @@ let
   # is restricted.)
   checkGitIdentity = ''[ -f "$HOME/.config/git/identity-personal" ] && [ -f "$HOME/.config/git/identity-work" ]'';
   checkCredStore = ''[ -f "$HOME/.password-store/.gpg-id" ]'';
-  # Native-X steps only matter on profiles that manage ~/.xinitrc.
-  checkNativeX = ''! { [ -f "$HOME/.xinitrc" ] && [ ! -x /usr/bin/i3lock ]; }'';
+  # Native-X steps only matter on profiles that manage ~/.xinitrc. Considered
+  # done when i3lock is present AND the home-manager i3 login session has been
+  # registered with the display manager (both handled by `x11-setup`).
+  checkNativeX = ''! [ -f "$HOME/.xinitrc" ] || { [ -x /usr/bin/i3lock ] && [ -e /usr/local/share/xsessions/i3-hm.desktop ]; }'';
 
   setup-status = pkgs.writeShellScriptBin "setup-status" ''
     pending=0
@@ -47,12 +49,15 @@ let
       todo "Git credential store    (passphraseless gpg key + pass)" "gcm-setup"
     fi
 
-    # 3. Native X + screen lock (only shown on native-X profiles)
+    # 3. Native X login + screen lock (only shown on native-X profiles).
+    #    x11-setup installs xorg/i3lock+PAM AND registers the "i3 (home-manager)"
+    #    session with the display manager, so we check for both.
     if [ -f "$HOME/.xinitrc" ]; then
-      if [ -x /usr/bin/i3lock ] && [ -f /etc/pam.d/i3lock ]; then
-        ok "Native X + screen lock  (xorg, i3lock, PAM)"
+      if [ -x /usr/bin/i3lock ] && [ -f /etc/pam.d/i3lock ] \
+         && [ -e /usr/local/share/xsessions/i3-hm.desktop ]; then
+        ok "Native X login          (i3lock+PAM, i3 session registered)"
       else
-        todo "Native X + screen lock  (xorg/xinit/i3lock via apt)" "x11-setup"
+        todo "Native X login          (i3lock+PAM + i3 login session)" "x11-setup"
       fi
     fi
 
@@ -62,6 +67,20 @@ let
     else
       echo "  $pending step(s) pending - run the command(s) above."
     fi
+
+    # Reference: the discoverable entry points into this machine's config. This
+    # is the "what commands do I have?" list for when you've been away a while.
+    echo
+    echo "Reference"
+    echo "========="
+    ref() { printf '  %-20s %s\n' "$1" "$2"; }
+    ref "setup-status"       "this screen (setup state + command list)"
+    ${lib.optionalString (config.i3.enable or false)
+      ''ref "i3-keys"            "list your i3 keybindings"''}
+    ref "git-identity-setup" "per-directory git name/email"
+    ref "gcm-setup"          "git credential store (gpg + pass)"
+    ${lib.optionalString (config.nativeXSession.enable or false)
+      ''ref "x11-setup"          "install X/i3lock + register i3 login session"''}
     echo
   '';
 in

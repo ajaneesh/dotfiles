@@ -15,13 +15,10 @@
 
     xsession.enable = true;
 
-    home.file.".local/share/xsessions/i3.desktop".text = ''
-      [Desktop Entry]
-      Name=i3
-      Comment=improved dynamic tiling window manager
-      Exec=i3
-      Type=Application
-    '';
+    # NB: display-manager session registration is NOT done here. SDDM only
+    # scans /usr/{local/,}share/xsessions (root dirs), never ~/.local/share/
+    # xsessions, so a home.file there is dead weight. The "i3 (home-manager)"
+    # session is installed by the `x11-setup` helper in native-x-session.nix.
 
     # Advanced i3 configuration with Emacs integration and terminal switching
 
@@ -68,6 +65,47 @@
         # Use system i3lock (installed via apt) which has proper PAM permissions
         /usr/bin/i3lock -n -c 000000
       '')
+
+      # Cheat-sheet for when you've been away from this machine: list every
+      # keybinding, parsed from the *live* generated config so it can never drift
+      # from what's actually bound. Mod1 is shown as Alt. Discoverable via
+      # `setup-status`.
+      (pkgs.writeShellScriptBin "i3-keys" ''
+        cfg="$HOME/.config/i3/config"
+        if [ ! -f "$cfg" ]; then
+          echo "No i3 config found at $cfg" >&2
+          exit 1
+        fi
+        echo
+        echo "i3 keybindings   (Mod = Alt)"
+        echo "============================"
+        echo
+        echo "Default mode"
+        ${pkgs.gawk}/bin/awk '
+          function clean(s) {
+            gsub(/^[ \t]*bindsym[ \t]+/, "", s)
+            gsub(/--release[ \t]+/, "", s)
+            gsub(/Mod1/, "Alt", s)
+            gsub(/exec[ \t]+(--no-startup-id[ \t]+)?/, "", s)
+            return s
+          }
+          /^mode[ \t]/ {
+            name = $0
+            sub(/^mode[ \t]+/, "", name)
+            sub(/[ \t]*\{[ \t]*$/, "", name)
+            gsub(/^"|"$/, "", name)
+            printf "\nMode: %s\n", name
+            next
+          }
+          /^[ \t]*bindsym/ {
+            line = clean($0)
+            key = line; sub(/[ \t].*/, "", key)
+            act = line; sub(/^[^ \t]+[ \t]+/, "", act)
+            printf "  %-26s %s\n", key, act
+          }
+        ' "$cfg"
+        echo
+      '')
     ];
 
     # Advanced i3 configuration using Home Manager's native module
@@ -78,8 +116,12 @@
         
         # Basic startup applications
         startup = [
-          # Set wallpaper if available
-          { command = "feh --bg-fill ~/.config/wallpaper.jpg 2>/dev/null || true"; always = true; notification = false; }
+          # Paint the root window on every (re)start. i3 never draws the root
+          # itself, so without this the uncovered desktop keeps showing leftover
+          # framebuffer pixels (e.g. the SDDM greeter you logged in from). Try a
+          # wallpaper image; fall back to a solid colour so a missing image can
+          # never leave the greeter "ghost" behind.
+          { command = "${pkgs.feh}/bin/feh --bg-fill ~/.config/wallpaper.jpg 2>/dev/null || ${pkgs.xsetroot}/bin/xsetroot -solid '#1d1f21'"; always = true; notification = false; }
         ];
         
         # Simple default layout
@@ -137,6 +179,9 @@
           "${modifier}+Shift+k" = "resize shrink height 5 px or 5 ppt";
           "${modifier}+Shift+l" = "resize grow width 5 px or 5 ppt";
 
+          # Enter resize mode (arrows / hjkl to resize, Esc or Return to exit)
+          "${modifier}+r" = "mode resize";
+
           # Workspace management
           "${modifier}+1" = "workspace 1";
           "${modifier}+2" = "workspace 2";
@@ -189,8 +234,9 @@
           "${modifier}+Shift+equal" = "exec --no-startup-id screenshot-clip";
           "${modifier}+Shift+plus" = "exec --no-startup-id screenshot-clip";
 
-          # Exit
-          "${modifier}+Shift+e" = "exec i3-nagbar -t warning -m 'Exit i3?' -B 'Yes' 'i3-msg exit'";
+          # Exit -- enter a keyboard-driven confirmation mode (no mouse-only
+          # i3-nagbar). The mode name below doubles as the on-screen prompt.
+          "${modifier}+Shift+e" = ''mode "(e) exit i3   (Esc) cancel"'';
 
           # Xephyr-specific: Refresh display after window resize
           "${modifier}+Shift+F5" = "exec --no-startup-id xrandr -q";
@@ -245,8 +291,18 @@
             "Escape" = "mode default";
             "Return" = "mode default";
           };
+
+          # Keyboard-driven exit confirmation (replaces the mouse-only
+          # i3-nagbar). Name must match the "mode ..." string in the Alt+Shift+e
+          # binding above; it is shown as the prompt in the status bar.
+          "(e) exit i3   (Esc) cancel" = {
+            "e" = "exit";
+            "Escape" = "mode default";
+            "Return" = "mode default";
+            "q" = "mode default";
+          };
         };
-        
+
         # Status bar configuration
         bars = [{
           position = "bottom";
