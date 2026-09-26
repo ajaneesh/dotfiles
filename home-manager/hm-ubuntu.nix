@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -25,6 +25,34 @@
 
   # Unlike WSL/Crostini, Ubuntu has a real GPU, so Chrome uses hardware
   # rendering (we deliberately do NOT set chrome.softwareRendering here).
+
+  # Sizing: one knob, relative to each display's real DPI (see display.nix).
+  # 1.0 = physically correct; lower for a denser desktop. Starting default here;
+  # override at runtime with `display-scale set N`.
+  display.scale = 0.75;
+
+  # Multi-monitor. Native Ubuntu drives real outputs (no Xephyr container), so
+  # i3 spans them automatically. To PIN workspaces to specific monitors, fill in
+  # your real output names (run `xrandr --query | grep ' connected'` on the box)
+  # and uncomment. Names are host-specific, which is why this lives here, not in
+  # the shared i3 module. `primary` is a portable fallback.
+  #
+  # xsession.windowManager.i3.config.workspaceOutputAssign = [
+  #   { workspace = "1"; output = "DP-1"; }
+  #   { workspace = "2"; output = "DP-1"; }
+  #   { workspace = "3"; output = "HDMI-1"; }
+  #   { workspace = "4"; output = "HDMI-1"; }
+  # ];
+  #
+  # Arrange the outputs at session start (adjust names/positions), or use
+  # autorandr (installed below) to save/restore per-setup layouts automatically:
+  # xsession.windowManager.i3.config.startup = [
+  #   { command = "xrandr --output DP-1 --primary --auto --output HDMI-1 --auto --right-of DP-1"; always = true; notification = false; }
+  # ];
+  home.packages = with pkgs; [
+    autorandr   # save/restore monitor layouts per physical setup
+    arandr      # GUI to arrange outputs and generate the xrandr command
+  ];
 
   # Work directory shortcuts (this is the work box).
   programs.zsh.shellAliases = {

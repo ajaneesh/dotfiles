@@ -49,6 +49,9 @@
         (import ./overlays/tree-sitter-tsx.nix)
         (import ./overlays/aws-overlay.nix)
         (import ./overlays/wsl-vpnkit.nix)
+        # nixGL: lets nixpkgs GL apps (wezterm, media players) find the host's
+        # OpenGL/EGL drivers on non-NixOS hosts. Consumed via pkgs.nixgl.
+        inputs.nixgl.overlay
       ];
 
       # System types to support.
@@ -97,10 +100,7 @@
         hm-crostini = inputs.home-manager.lib.homeManagerConfiguration {
           pkgs = import nixpkgs {
             system = "x86_64-linux";
-            overlays = overlays ++ [
-              inputs.rust-overlay.overlays.default
-              inputs.nixgl.overlay
-            ];
+            overlays = overlays ++ [ inputs.rust-overlay.overlays.default ];
           };
           extraSpecialArgs = { inherit inputs overlays globals; };
           modules = [ ./home-manager/hm-crostini.nix ];

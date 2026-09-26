@@ -20,6 +20,10 @@
   # WSLg has no proper GPU passthrough; run Chrome with software rendering
   chrome.softwareRendering = true;
 
+  # Xephyr/MobaXterm report no real panel size, so DPI auto-detection can't work
+  # here. Pin the base DPI; tune sizing with display.scale (default 1.0).
+  display.dpiOverride = 96;
+
   # WSL-specific directory shortcuts
   programs.zsh.shellAliases = {
     proj = "cd ~/projects";

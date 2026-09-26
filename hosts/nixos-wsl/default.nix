@@ -147,6 +147,11 @@
     useGlobalPkgs = false;  # Allow home-manager to handle its own nixpkgs config
     useUserPackages = true;
     extraSpecialArgs = { inherit inputs overlays globals; };
-    users.${globals.user} = import ../../home-manager/hm-common.nix;
+    users.${globals.user} = {
+      imports = [ ../../home-manager/hm-common.nix ];
+      # This is NixOS: OpenGL/EGL drivers are found natively, so wezterm must
+      # NOT be nixGL-wrapped (that's only needed on non-NixOS hosts).
+      terminals.wrapGL = false;
+    };
   };
 }

@@ -10,7 +10,11 @@ let
       "";
   google-chrome-with-flags = pkgs.writeShellScriptBin "chrome" ''
     #!${pkgs.runtimeShell}
-    exec ${pkgs.google-chrome}/bin/google-chrome-stable${chromeFlags} "$@"
+    # Scale the whole browser UI (not just fonts) from the shared display.scale
+    # knob. --force-device-scale-factor overrides Chrome's own DPI detection, so
+    # there is no double-scaling with Xft.dpi. screen-scale = effective DPI / 96.
+    scale=$(screen-scale 2>/dev/null || echo 1.0)
+    exec ${pkgs.google-chrome}/bin/google-chrome-stable${chromeFlags} --force-device-scale-factor="$scale" "$@"
   '';
 in
 {

@@ -68,6 +68,24 @@ let
       echo "  $pending step(s) pending - run the command(s) above."
     fi
 
+    # Display scaling status (graphical profiles). One knob for all apps; the
+    # `display` command manages it. Shows the persistent default if one is set,
+    # else prompts you to set it once.
+    ${lib.optionalString (config.i3.enable or false) ''
+    echo
+    echo "Display scaling"
+    echo "==============="
+    _st="''${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/display"
+    if [ -f "$_st/scale" ]; then
+      printf '  [ ok ]  per-machine scale set (%s)\n' "$(cat "$_st/scale")"
+    else
+      printf '  [TODO]  no per-machine scale yet - set it once: display-scale set 0.8\n'
+    fi
+    printf '          effective %s DPI (device-scale %s)\n' \
+      "$(screen-dpi 2>/dev/null || echo '?')" "$(screen-scale 2>/dev/null || echo '?')"
+    printf '          change size: display-scale bigger | smaller | set N | reset\n'
+    ''}
+
     # Reference: the discoverable entry points into this machine's config. This
     # is the "what commands do I have?" list for when you've been away a while.
     echo
@@ -75,6 +93,9 @@ let
     echo "========="
     ref() { printf '  %-20s %s\n' "$1" "$2"; }
     ref "setup-status"       "this screen (setup state + command list)"
+    ref "man dotfiles"       "full manual for this machine's config"
+    ${lib.optionalString (config.i3.enable or false)
+      ''ref "display-scale"      "show/change UI scale (bigger/smaller/set/reset)"''}
     ${lib.optionalString (config.i3.enable or false)
       ''ref "i3-keys"            "list your i3 keybindings"''}
     ref "git-identity-setup" "per-directory git name/email"

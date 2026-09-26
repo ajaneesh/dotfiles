@@ -14,6 +14,7 @@
     ../modules/common/git.nix
     ../modules/common/setup-status.nix
     ../modules/common/dotfiles-man.nix
+    ../modules/common/display.nix
     ../modules/common/emacs.nix
     ../modules/common/terminals.nix
     ../modules/common/fonts.nix

@@ -116,6 +116,11 @@
         
         # Basic startup applications
         startup = [
+          # Set the session-wide DPI (Xft.dpi) from display.scale before anything
+          # else, so every Xft app (urxvt, xterm, rofi, dmenu, Emacs, GTK) scales
+          # from the one knob. See modules/common/display.nix.
+          { command = "display-apply"; always = true; notification = false; }
+
           # Paint the root window on every (re)start. i3 never draws the root
           # itself, so without this the uncovered desktop keeps showing leftover
           # framebuffer pixels (e.g. the SDDM greeter you logged in from). Try a
@@ -141,10 +146,11 @@
         
         # Advanced key bindings with Emacs integration and terminal switching
         keybindings = let modifier = "Mod1"; in {
-          # Terminal launcher with logical progression
-          "${modifier}+Return" = "exec --no-startup-id term-urxvt";
-          "${modifier}+Shift+Return" = "exec --no-startup-id term-xterm";
-          "${modifier}+Ctrl+Return" = "exec --no-startup-id term-wezterm";
+          # Terminal launchers. Primary is wezterm (rich; GPU on native, software
+          # rendering on WSL/Xephyr/Crostini); urxvt/xterm remain as fallbacks.
+          "${modifier}+Return" = "exec --no-startup-id term-wezterm";
+          "${modifier}+Shift+Return" = "exec --no-startup-id term-urxvt";
+          "${modifier}+Ctrl+Return" = "exec --no-startup-id term-xterm";
 
           # Application launcher - Linux binaries only, no Windows executables
           "${modifier}+d" = "exec --no-startup-id env GDK_BACKEND=x11 PATH=\"$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin\" ${pkgs.rofi}/bin/rofi -modes run -show run";

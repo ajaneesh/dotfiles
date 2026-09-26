@@ -12,6 +12,10 @@
   # Crostini's virtualized GPU is unreliable; run Chrome with software rendering
   chrome.softwareRendering = true;
 
+  # Crostini runs i3 in Xephyr, which reports no real panel size, so DPI
+  # auto-detection can't work. Pin the base DPI; tune with display.scale.
+  display.dpiOverride = 96;
+
   # Crostini-specific media apps, wrapped with nixGL for GPU access
   home.packages = with pkgs; [
     (pkgs.writeShellScriptBin "hypnotix" ''

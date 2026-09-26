@@ -8,7 +8,7 @@ dotfiles - overview of this machine's Nix / home-manager configuration
 
 **man dotfiles**
 
-**setup-status** | **i3-keys** | **git-identity-setup** | **gcm-setup** | **x11-setup**
+**setup-status** | **display-scale** | **i3-keys** | **git-identity-setup** | **gcm-setup** | **x11-setup**
 
 # DESCRIPTION
 
@@ -64,6 +64,54 @@ Credential Manager.
 : (native-X profiles) Install apt xorg/xinit and i3lock+PAM, register the
 "i3 (home-manager)" session with the display manager, and remove any apt i3.
 Run once per machine.
+
+# DISPLAY SCALING
+
+Sizing across terminals, browser, Emacs and everything else is governed by
+**one knob** and managed by **one command: `display-scale`**. It stays consistent
+on any display and portable between machines. (Model: effective DPI = the
+display's real DPI x a scale, pushed into Xft.dpi - honored by urxvt, xterm,
+rofi, dmenu, GTK and Emacs - and handed to wezterm and Chrome, which ignore
+Xft.dpi.) You do not need to remember individual settings: run **`display-scale`**
+and it prints the current scale plus everything below.
+
+## The display-scale command
+
+*display-scale*
+: Show the current scale, effective DPI, and the sub-commands.
+
+*display-scale set N*
+: Set this machine's persistent default scale, e.g. `display-scale set 0.8`.
+Survives reboots and rebuilds (stored under XDG state), no rebuild needed. This
+is the one-time per-machine setup - lower is denser, higher is bigger.
+
+*display-scale bigger* / *display-scale smaller*
+: Nudge the scale +/-0.1 temporarily - the handy pair for **screen sharing in an
+online meeting**. When done, `display-scale reset`.
+
+*display-scale temp N*
+: Set an explicit temporary scale for this session.
+
+*display-scale reset*
+: Drop the temporary scale, back to the machine/default.
+
+New app launches pick up the change immediately; an already-open wezterm also
+zooms with Ctrl-+ / Ctrl-- / Ctrl-0.
+
+## One-time setup per machine
+
+Run `display-scale set N` once (e.g. `display-scale set 0.8` on a HiDPI laptop
+for a denser desktop). `setup-status` shows whether a per-machine scale has been
+set and prompts you if not.
+
+## Nix-level knobs (optional)
+
+*display.scale* (in your profile)
+: The Nix fallback default when no `display set` has been run. Same meaning.
+
+*display.dpiOverride* (in your profile)
+: Force the base DPI where the panel size is unknowable (Xephyr, MobaXterm).
+Already set to 96 on the WSL and Crostini profiles.
 
 # I3 WINDOW MANAGER
 
