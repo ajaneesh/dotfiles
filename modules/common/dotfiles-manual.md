@@ -98,6 +98,22 @@ online meeting**. When done, `display-scale reset`.
 New app launches pick up the change immediately; an already-open wezterm also
 zooms with Ctrl-+ / Ctrl-- / Ctrl-0.
 
+## Magnifying the whole screen live (display-zoom)
+
+*display-scale* is crisp but only affects newly launched windows. To magnify the
+**entire** display right now - including windows already open, e.g. when
+screen-sharing your whole desktop - use *display-zoom*, which drives xrandr's
+output scaling (slightly blurry, since it is non-native scaling):
+
+*display-zoom N*
+: Zoom the whole primary output; N greater than 1 is bigger (e.g. 1.25).
+
+*display-zoom reset*
+: Back to native 1:1.
+
+For sharing a single window (a browser tab, a terminal), prefer that app's own
+zoom - Chrome/wezterm Ctrl-+ / Ctrl-- - which stays crisp.
+
 ## One-time setup per machine
 
 Run `display-scale set N` once (e.g. `display-scale set 0.8` on a HiDPI laptop

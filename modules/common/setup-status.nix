@@ -97,6 +97,8 @@ let
     ${lib.optionalString (config.i3.enable or false)
       ''ref "display-scale"      "show/change UI scale (bigger/smaller/set/reset)"''}
     ${lib.optionalString (config.i3.enable or false)
+      ''ref "display-zoom"       "live whole-screen magnify (presentations)"''}
+    ${lib.optionalString (config.i3.enable or false)
       ''ref "i3-keys"            "list your i3 keybindings"''}
     ref "git-identity-setup" "per-directory git name/email"
     ref "gcm-setup"          "git credential store (gpg + pass)"

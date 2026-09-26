@@ -21,7 +21,7 @@
         "command-not-found"
         "history-substring-search"
       ];
-      theme = "robbyrussell"; # Clean theme, we'll override with custom prompt
+      theme = ""; # No oh-my-zsh theme: Starship owns the prompt (see below).
     };
     
     # Enhanced ZSH configuration with git integration
@@ -29,21 +29,21 @@
       # Disable bracketed paste mode to prevent paste warnings
       unset zle_bracketed_paste
 
-      # Git prompt integration
-      autoload -Uz vcs_info
-      precmd() { vcs_info }
-      
-      # Git branch info formatting
-      zstyle ':vcs_info:git:*' formats ' (%b)'
-      zstyle ':vcs_info:*' enable git
-      
-      # Custom prompt with git branch, current dir, and colors
-      setopt PROMPT_SUBST
-      PROMPT='%F{cyan}%n@%m%f:%F{blue}%~%f%F{yellow}''${vcs_info_msg_0_}%f$ '
-      
-      # Right prompt with timestamp
-      RPROMPT='%F{240}[%D{%H:%M:%S}]%f'
-      
+      # The prompt itself is Starship (see programs.starship below): minimal,
+      # two-line, shows dir + git + nix-shell, and no right-side timestamp.
+
+      # Autosuggestion colour: the default (fg=8) is too dark to read on a dark
+      # background - the suggested text merged into the background. Use a mid grey
+      # that stays legible in dark mode.
+      ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=245'
+
+      # Keep zsh (not bash/sh) inside nix-shell / nix develop, and surface the
+      # nix indicator. any-nix-shell drops you into zsh; Starship's nix_shell
+      # module renders the "❄️ " tag in the prompt.
+      if command -v any-nix-shell >/dev/null 2>&1; then
+        eval "$(any-nix-shell zsh)"
+      fi
+
       # Enhanced history configuration
       setopt HIST_VERIFY
       setopt SHARE_HISTORY
@@ -194,6 +194,49 @@
     };
   };
   
+  # Starship prompt: minimalist, two-line (info on top, cursor below so long
+  # info never wraps the command), git + host + dir + nix-shell, no timestamp.
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+    settings = {
+      add_newline = true;   # blank line before each prompt for breathing room
+      format = lib.concatStrings [
+        "$hostname" "$directory" "$git_branch" "$git_status"
+        "$nix_shell" "$cmd_duration" "$line_break" "$character"
+      ];
+      # Hostname always shown (useful across your many machines); username only
+      # when it matters (ssh/root). Both stay on line 1, so the command below
+      # never wraps.
+      username.show_always = false;
+      hostname = {
+        ssh_only = false;
+        format = "[$hostname]($style) ";
+        style = "bold green";
+      };
+      directory = {
+        truncation_length = 4;
+        truncate_to_repo = true;
+        style = "bold blue";
+      };
+      git_branch = { symbol = " "; style = "bold purple"; };
+      git_status.style = "bold red";
+      # Short nix indicator so you always know you're in a nix-shell.
+      nix_shell = {
+        symbol = "❄️ ";
+        format = "[$symbol$name]($style) ";
+        style = "bold cyan";
+      };
+      # Duration of the last command (only if slow) - not a wall clock, and on
+      # the left, so it never interferes with copy/paste like an RPROMPT does.
+      cmd_duration = { min_time = 2000; format = "[$duration]($style) "; style = "yellow"; };
+      character = {
+        success_symbol = "[❯](bold green)";
+        error_symbol = "[❯](bold red)";
+      };
+    };
+  };
+
   # FZF - Fuzzy finder with ZSH integration - SIMPLIFIED TO WORK
   programs.fzf = {
     enable = true;
@@ -253,5 +296,6 @@
     procs            # Modern ps replacement
     bandwhich        # Network bandwidth monitor
     hyperfine        # Command-line benchmarking tool
+    any-nix-shell    # keep zsh (not bash) inside nix-shell / nix develop
   ];
 }

@@ -97,6 +97,9 @@ let
       echo "  Lower = denser (more screen); higher = bigger. New app launches pick"
       echo "  it up; already-open wezterm zooms with Ctrl +/-. For meetings:"
       echo "  'display-scale bigger' a few times, then 'display-scale reset' after."
+      echo
+      echo "  To magnify the WHOLE screen live (all open windows, slight blur):"
+      echo "    display-zoom N        N>1 bigger (e.g. 1.25);  display-zoom reset"
     }
     nudge() {
       local cur new
@@ -114,6 +117,36 @@ let
       smaller) nudge -0.1 ;;
       reset) rm -f "$_session"; apply; echo "temporary scale cleared -> back to $(resolve_scale)" ;;
       *) echo "unknown: $1" >&2; show >&2; exit 1 ;;
+    esac
+  '';
+
+  # Live whole-screen magnification via xrandr --scale. Unlike display-scale
+  # (crisp, new windows only), this rescales the ENTIRE output immediately -
+  # including already-open windows - at the cost of slight blur (non-native
+  # scaling). Handy when screen-sharing your whole desktop in a meeting.
+  # Argument is intuitive: N>1 = bigger (xrandr's own --scale is inverted, so we
+  # translate N -> 1/N under the hood).
+  displayZoom = pkgs.writeShellScriptBin "display-zoom" ''
+    out=$(${pkgs.xrandr}/bin/xrandr --query 2>/dev/null | grep " connected primary" | head -1 | cut -d' ' -f1)
+    [ -z "$out" ] && out=$(${pkgs.xrandr}/bin/xrandr --query 2>/dev/null | grep " connected" | head -1 | cut -d' ' -f1)
+    if [ -z "$out" ]; then echo "display-zoom: no connected output found" >&2; exit 1; fi
+    case "''${1:-status}" in
+      status|"")
+        echo "display-zoom: live whole-screen magnification on output $out (blurs slightly)"
+        echo "  display-zoom N       zoom the whole display; N>1 = bigger (e.g. 1.25)"
+        echo "  display-zoom reset   back to native 1:1"
+        echo "  (For crisp per-window sizing prefer display-scale, or the app's own"
+        echo "   Ctrl +/- zoom - e.g. Chrome during a presentation.)"
+        ;;
+      reset|1|1.0)
+        ${pkgs.xrandr}/bin/xrandr --output "$out" --scale 1x1 && echo "display-zoom: $out reset to native 1:1"
+        ;;
+      *)
+        s=$(${pkgs.gawk}/bin/awk -v f="$1" 'BEGIN { if (f+0 <= 0) { print "ERR"; exit } printf "%.4f", 1.0 / f }')
+        [ "$s" = "ERR" ] && { echo "usage: display-zoom N   (N>0, N>1 = bigger)" >&2; exit 1; }
+        ${pkgs.xrandr}/bin/xrandr --output "$out" --scale ''${s}x''${s} \
+          && echo "display-zoom: $out at ''${1}x (xrandr --scale $s)"
+        ;;
     esac
   '';
 in
@@ -142,6 +175,6 @@ in
   };
 
   config = {
-    home.packages = [ screenDpi screenScale displayApply displayCmd ];
+    home.packages = [ screenDpi screenScale displayApply displayCmd displayZoom ];
   };
 }

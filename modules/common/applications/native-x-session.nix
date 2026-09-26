@@ -48,6 +48,8 @@
         echo ""
         echo "This will (via apt / sudo):"
         echo "  - install xorg, xinit (X11 server) and i3lock (PAM screen lock)"
+        echo "  - install zsh from apt and make /usr/bin/zsh your login shell"
+        echo "    (so a broken Nix profile can never lock you out of a shell)"
         echo "  - register an 'i3 (home-manager)' session with the display manager"
         echo "  - remove the apt-installed i3 (so its duplicate session entry,"
         echo "    which launches the wrong binary, goes away)"
@@ -55,7 +57,7 @@
         read -p "Continue? (y/n) " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-          sudo apt install -y xorg xinit i3lock
+          sudo apt install -y xorg xinit i3lock zsh
 
           # Ensure the PAM config exists so i3lock can authenticate.
           if [ ! -f /etc/pam.d/i3lock ]; then
@@ -94,10 +96,23 @@ EOF
             sudo apt remove -y i3 i3-wm || true
           fi
 
+          # Make the apt zsh the login shell. home-manager still writes ~/.zshrc
+          # (which any zsh reads), but the SHELL binary is the distro's, so a
+          # broken/rolled-back Nix profile can't leave you without a usable login
+          # shell. chsh requires the shell to be listed in /etc/shells.
+          if [ -x /usr/bin/zsh ]; then
+            grep -qx /usr/bin/zsh /etc/shells || echo /usr/bin/zsh | sudo tee -a /etc/shells >/dev/null
+            if [ "$(getent passwd "$USER" | cut -d: -f7)" != "/usr/bin/zsh" ]; then
+              echo "Setting /usr/bin/zsh as your login shell..."
+              sudo chsh -s /usr/bin/zsh "$USER"
+            fi
+          fi
+
           echo ""
           echo "Setup complete!"
           echo "  - Log out, then pick 'i3 (home-manager)' at the SDDM session menu."
           echo "  - Alt+Shift+Z locks the screen."
+          echo "  - Your login shell is now /usr/bin/zsh (config still from home-manager)."
         fi
       '')
     ];

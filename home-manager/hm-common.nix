@@ -4,7 +4,15 @@
   home.username = globals.user;
   home.homeDirectory = "/home/${globals.user}";
   home.stateVersion = "24.05";
-  
+
+  # Don't build home-manager's own options manpage (home-configuration.nix(5)).
+  # Under flakes its options.json references the flake -source path without string
+  # context, which emits a "builtins.derivation ... without a proper context"
+  # warning; and we have our own `man dotfiles`. Disabling it removes both the
+  # warning and the doc build.
+  manual.manpages.enable = false;
+
+
   # Import common modules
   imports = [
     # Core applications and configurations

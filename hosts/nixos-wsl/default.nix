@@ -110,7 +110,7 @@
   # WSL-specific system packages
   environment.systemPackages = with pkgs; [
     # WSL utilities
-    wslu               # WSL utilities
+    # wslu removed from nixpkgs (project discontinued / repo archived).
     wsl-open           # Open Windows applications
     
     # X11 clipboard support

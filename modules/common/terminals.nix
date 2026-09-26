@@ -197,9 +197,21 @@ in
       config.font = wezterm.font('Hack Nerd Font')
       config.font_size = tonumber(os.getenv('WEZTERM_FONT_SIZE')) or 11.0
 
-      -- wezterm does not read Xft.dpi; term-wezterm hands it the session's
-      -- effective DPI so it scales consistently with every other app.
-      do local d = tonumber(os.getenv('WEZTERM_DPI')); if d then config.dpi = d end end
+      -- wezterm does not read Xft.dpi, so left alone it auto-detects the raw
+      -- panel DPI and renders LARGER than every Xft app (the "different scale"
+      -- effect). Match the session's effective DPI: prefer WEZTERM_DPI (set by
+      -- term-wezterm), else ask screen-dpi directly so it is correct even when
+      -- wezterm is launched some other way.
+      local dpi = tonumber(os.getenv('WEZTERM_DPI'))
+      if not dpi then
+        local ok, out = pcall(function()
+          local success, stdout = wezterm.run_child_process({ 'screen-dpi' })
+          if success then return stdout end
+          return nil
+        end)
+        if ok and out then dpi = tonumber(out:match('%d+')) end
+      end
+      if dpi then config.dpi = dpi end
 
       -- Color scheme
       config.color_scheme = 'Tomorrow Night'
