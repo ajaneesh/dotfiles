@@ -220,6 +220,10 @@ in
       config.initial_rows = 24
       config.initial_cols = 80
 
+      -- No tab bar: on i3 we open a new window (Alt+Return) instead of wezterm
+      -- tabs, so the bar is just wasted vertical space.
+      config.enable_tab_bar = false
+
       -- Disable ligatures for compatibility
       config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
 

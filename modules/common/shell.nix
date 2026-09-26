@@ -202,21 +202,27 @@
     settings = {
       add_newline = true;   # blank line before each prompt for breathing room
       format = lib.concatStrings [
-        "$hostname" "$directory" "$git_branch" "$git_status"
+        "$username" "$hostname" "$directory" "$git_branch" "$git_status"
         "$nix_shell" "$cmd_duration" "$line_break" "$character"
       ];
-      # Hostname always shown (useful across your many machines); username only
-      # when it matters (ssh/root). Both stay on line 1, so the command below
-      # never wraps.
-      username.show_always = false;
+      # Always show user@host (useful across your many machines). Both stay on
+      # line 1, so the command below never wraps.
+      username = {
+        show_always = true;
+        format = "[$user]($style)@";
+        style_user = "bold green";
+        style_root = "bold red";
+      };
       hostname = {
         ssh_only = false;
         format = "[$hostname]($style) ";
         style = "bold green";
       };
       directory = {
-        truncation_length = 4;
-        truncate_to_repo = true;
+        # Show the real filesystem path (not just the repo/leaf name) so it
+        # always starts with ~ or / and reads unmistakably as a folder.
+        truncate_to_repo = false;
+        truncation_length = 0;   # 0 = no truncation
         style = "bold blue";
       };
       git_branch = { symbol = " "; style = "bold purple"; };
