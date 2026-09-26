@@ -22,8 +22,8 @@ let
   # Base terminal font point size. Physical scaling is handled session-wide by
   # Xft.dpi (urxvt/xterm) and by wezterm's own dpi (see display.nix), so this is
   # a fixed point size, not a per-display calculation. $TERM_FONT_SIZE overrides
-  # it for a one-off launch.
-  baseFontSize = "11";
+  # it for a one-off launch; the display-scale knob scales everything together.
+  baseFontSize = "9";
   termFontSize = pkgs.writeShellScriptBin "term-fontsize" ''
     echo "''${TERM_FONT_SIZE:-${baseFontSize}}"
   '';
@@ -195,7 +195,7 @@ in
       -- Font. Size is chosen per-display by the term-wezterm launcher (see
       -- term-fontsize) and passed via WEZTERM_FONT_SIZE; fall back otherwise.
       config.font = wezterm.font('Hack Nerd Font')
-      config.font_size = tonumber(os.getenv('WEZTERM_FONT_SIZE')) or 11.0
+      config.font_size = tonumber(os.getenv('WEZTERM_FONT_SIZE')) or 9.0
 
       -- wezterm does not read Xft.dpi, so left alone it auto-detects the raw
       -- panel DPI and renders LARGER than every Xft app (the "different scale"
