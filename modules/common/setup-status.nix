@@ -6,7 +6,7 @@
 # distro (apt) packages with setuid that Nix can't provide on non-NixOS:
 #   - git-identity-setup : your per-directory name/email (~/.config/git/identity-*)
 #   - gcm-setup          : the passphraseless gpg key + pass credential store
-#   - x11-setup          : apt xorg/xinit/i3lock + PAM (native-X profiles only)
+#   - x11-setup          : apt xorg/xinit/i3lock + register i3 DM session (native-X)
 #
 # Rather than expect you to remember these, this module gives you:
 #   1. `setup-status`  — run anytime to see what's done and what's left.
@@ -19,10 +19,10 @@ let
   # is restricted.)
   checkGitIdentity = ''[ -f "$HOME/.config/git/identity-personal" ] && [ -f "$HOME/.config/git/identity-work" ]'';
   checkCredStore = ''[ -f "$HOME/.password-store/.gpg-id" ]'';
-  # Native-X steps only matter on profiles that manage ~/.xinitrc. Considered
-  # done when i3lock is present AND the home-manager i3 login session has been
-  # registered with the display manager (both handled by `x11-setup`).
-  checkNativeX = ''! [ -f "$HOME/.xinitrc" ] || { [ -x /usr/bin/i3lock ] && [ -e /usr/local/share/xsessions/i3-hm.desktop ]; }'';
+  # Native-X steps only matter on profiles that manage ~/.xinitrc. Done once the
+  # i3lock PAM service exists (so the Nix i3lock-color locker can authenticate)
+  # AND the home-manager i3 login session is registered (both via x11-setup).
+  checkNativeX = ''! [ -f "$HOME/.xinitrc" ] || { [ -f /etc/pam.d/i3lock ] && [ -e /usr/local/share/xsessions/i3-hm.desktop ]; }'';
 
   setup-status = pkgs.writeShellScriptBin "setup-status" ''
     pending=0
@@ -49,15 +49,14 @@ let
       todo "Git credential store    (passphraseless gpg key + pass)" "gcm-setup"
     fi
 
-    # 3. Native X login + screen lock (only shown on native-X profiles).
-    #    x11-setup installs xorg/i3lock+PAM AND registers the "i3 (home-manager)"
-    #    session with the display manager, so we check for both.
+    # 3. Native X login + locker (only shown on native-X profiles). x11-setup
+    #    installs the setuid i3lock (driven by xss-lock) and registers the
+    #    "i3 (home-manager)" session with the display manager.
     if [ -f "$HOME/.xinitrc" ]; then
-      if [ -x /usr/bin/i3lock ] && [ -f /etc/pam.d/i3lock ] \
-         && [ -e /usr/local/share/xsessions/i3-hm.desktop ]; then
-        ok "Native X login          (i3lock+PAM, i3 session registered)"
+      if [ -f /etc/pam.d/i3lock ] && [ -e /usr/local/share/xsessions/i3-hm.desktop ]; then
+        ok "Native X login + lock   (i3lock PAM, i3 session registered)"
       else
-        todo "Native X login          (i3lock+PAM + i3 login session)" "x11-setup"
+        todo "Native X login + lock   (i3lock PAM + i3 login session)" "x11-setup"
       fi
     fi
 
@@ -103,7 +102,7 @@ let
     ref "git-identity-setup" "per-directory git name/email"
     ref "gcm-setup"          "git credential store (gpg + pass)"
     ${lib.optionalString (config.nativeXSession.enable or false)
-      ''ref "x11-setup"          "install X/i3lock + register i3 login session"''}
+      ''ref "x11-setup"          "install X + register i3 login session"''}
     echo
   '';
 in

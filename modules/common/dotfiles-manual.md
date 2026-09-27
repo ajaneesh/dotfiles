@@ -61,9 +61,9 @@ is still pending.
 Credential Manager.
 
 *x11-setup*
-: (native-X profiles) Install apt xorg/xinit and i3lock+PAM, register the
-"i3 (home-manager)" session with the display manager, and remove any apt i3.
-Run once per machine.
+: (native-X profiles) Install apt xorg/xinit and the setuid i3lock (+PAM),
+register the "i3 (home-manager)" session with the display manager, remove any apt
+i3, and set /usr/bin/zsh as the login shell. Run once per machine.
 
 # DISPLAY SCALING
 

@@ -17,12 +17,15 @@
 # than by hand, keeping the whole setup rebuildable from this config.
 #
 # Why apt (not Nix) for xorg/xinit/i3lock?
-#   - i3lock needs the setuid bit to read /etc/shadow for PAM password auth.
-#   - Nix packages can't be setuid on non-NixOS systems.
-#   - So the distro's own xorg/xinit/i3lock give consistent, working auth.
+#   - The locker MUST be the distro's i3lock: a Nix-built PAM app links Nix's
+#     libpam, which looks for PAM modules inside the Nix store (absent on a
+#     non-NixOS host) and can't parse Debian's @include PAM files - so it can
+#     never authenticate. The apt i3lock uses system libpam + modules and works.
+#     (It needs no setuid; pam_unix's setgid unix_chkpwd reads /etc/shadow.)
+#   - xorg/xinit come from apt to integrate with the apt SDDM + PAM stack.
 #
-# The i3 config itself (and the Alt+Shift+Z lock-screen binding) lives in
-# i3.nix; this module only handles getting X up and the apt prerequisites in.
+# This module installs those apt bits and writes /etc/pam.d/i3lock (common-auth).
+# xss-lock (Nix) drives i3lock on logind lock; bindings live in i3.nix.
 
 {
   options.nativeXSession.enable =
@@ -47,7 +50,10 @@
         echo "Setting up system dependencies for a native i3 X session..."
         echo ""
         echo "This will (via apt / sudo):"
-        echo "  - install xorg, xinit (X11 server) and i3lock (PAM screen lock)"
+        echo "  - install xorg, xinit (X11 server)"
+        echo "  - install i3lock (the SYSTEM screen locker; the i3 config drives it"
+        echo "    via xss-lock. A Nix locker can't do PAM auth on non-NixOS, so the"
+        echo "    locker must come from apt) + write its common-auth PAM config"
         echo "  - install zsh from apt and make /usr/bin/zsh your login shell"
         echo "    (so a broken Nix profile can never lock you out of a shell)"
         echo "  - register an 'i3 (home-manager)' session with the display manager"
@@ -59,17 +65,20 @@
         if [[ $REPLY =~ ^[Yy]$ ]]; then
           sudo apt install -y xorg xinit i3lock zsh
 
-          # Ensure the PAM config exists so i3lock can authenticate.
-          if [ ! -f /etc/pam.d/i3lock ]; then
-            echo "Creating /etc/pam.d/i3lock..."
-            sudo tee /etc/pam.d/i3lock > /dev/null <<'EOF'
-# PAM configuration file for the i3lock screen locker
+          # i3lock-color authenticates via the "i3lock" PAM service (pam_unix ->
+          # the setgid unix_chkpwd reads /etc/shadow; no setuid locker needed).
+          # ALWAYS overwrite this file: the apt i3lock ships one with
+          # `auth include login`, whose login stack (pam_securetty/pam_nologin/...)
+          # REJECTS the locker's password. common-auth is what actually works.
+          echo "Writing /etc/pam.d/i3lock (common-auth)..."
+          sudo tee /etc/pam.d/i3lock > /dev/null <<'EOF'
+# PAM configuration for the i3lock / i3lock-color screen locker.
+# Must be common-auth, NOT 'login' - the login stack rejects the locker.
 auth include common-auth
 account include common-account
 password include common-password
 session include common-session
 EOF
-          fi
 
           # Register the home-manager i3 session with the display manager.
           # SDDM (like most DMs) only scans /usr/local/share/xsessions and
@@ -111,7 +120,7 @@ EOF
           echo ""
           echo "Setup complete!"
           echo "  - Log out, then pick 'i3 (home-manager)' at the SDDM session menu."
-          echo "  - Alt+Shift+Z locks the screen."
+          echo "  - Super/Win+L switches user (drops to the login screen)."
           echo "  - Your login shell is now /usr/bin/zsh (config still from home-manager)."
         fi
       '')

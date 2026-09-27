@@ -34,7 +34,7 @@ sudo nixos-rebuild switch --flake ~/dotfiles#nixos-wsl
 3. `git-identity-setup` — provisions per-machine git identities (see below).
 4. `gcm-setup` — GPG key + password store for Git Credential Manager.
 5. Debian only: `debian-setup` installs the system packages Nix can't
-   provide (xorg, xinit, i3lock with setuid).
+   provide (xorg, xinit, i3lock with setuid) and registers the i3 login session.
 
 ## Updating the other machines
 

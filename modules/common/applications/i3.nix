@@ -7,6 +7,11 @@
 
   options = {
     i3.enable = lib.mkEnableOption "i3 window manager";
+    # Bind Super/Win+L to "lock + switch user" (via the SDDM greeter). Only for
+    # NATIVE hosts (Debian/Ubuntu) where i3 is the top layer and there is no host
+    # OS to hand Win+L to. On WSL/Crostini leave this off so Win+L cascades to
+    # the host (Windows/ChromeOS), which locks the whole thing.
+    i3.superLock = lib.mkEnableOption "bind Super+L to lock-and-switch-user (native SDDM hosts)";
   };
 
   config = lib.mkIf config.i3.enable {
@@ -58,13 +63,40 @@
       xprop       # For WM debugging
       feh
       picom
-      # Simple lock script using system i3lock (has proper setuid permissions)
-      (pkgs.writeShellScriptBin "lock-screen" ''
-        # Show a message before locking
-        ${pkgs.libnotify}/bin/notify-send "Locking screen..." "Type your password and press Enter to unlock" -t 2000 || true
+      xss-lock         # logind-integrated locker driver (runs the locker on lock)
+      # NB: the locker itself is the SYSTEM /usr/bin/i3lock (apt) - a Nix locker
+      # can't authenticate via PAM on non-NixOS. imagemagick blurs the backdrop.
+      imagemagick
+      # The lock screen. IMPORTANT: it locks with the SYSTEM i3lock (/usr/bin/
+      # i3lock, from apt), NOT a Nix locker - a Nix-built PAM app links Nix's
+      # libpam, which can't find the distro's PAM modules on non-NixOS, so it can
+      # never authenticate. To avoid a blank screen we freeze the current display,
+      # blur+darken it, and label it, then feed that image to i3lock -i. --nofork
+      # so xss-lock can track it.
+      (pkgs.writeShellScriptBin "screen-lock" ''
+        img="$(mktemp --suffix=.png)"
+        ${pkgs.imagemagick}/bin/import -window root "$img" 2>/dev/null || true
+        if [ -s "$img" ]; then
+          ${pkgs.imagemagick}/bin/convert "$img" -blur 0x8 -brightness-contrast -12x0 \
+            -gravity center -pointsize 42 -font DejaVu-Sans -fill '#eceff4' \
+            -annotate +0+0 'Locked — type your password to unlock' "$img"
+          /usr/bin/i3lock --nofork -i "$img"
+        else
+          /usr/bin/i3lock --nofork -c 1d1f21
+        fi
+        rm -f "$img"
+      '')
 
-        # Use system i3lock (installed via apt) which has proper PAM permissions
-        /usr/bin/i3lock -n -c 000000
+      # Switch user (shared/family machine): LOCK this session (logind ->
+      # xss-lock -> i3lock), then drop to the SDDM greeter so another account can
+      # log in on its own VT. Because the session is locked, switching to its VT
+      # shows i3lock - no bypass. Uses SDDM's DisplayManager seat interface.
+      (pkgs.writeShellScriptBin "switch-user" ''
+        ${pkgs.systemd}/bin/loginctl lock-session
+        seat="''${XDG_SEAT_PATH:-/org/freedesktop/DisplayManager/Seat0}"
+        exec ${pkgs.systemd}/bin/busctl --system call \
+          org.freedesktop.DisplayManager "$seat" \
+          org.freedesktop.DisplayManager.Seat SwitchToGreeter
       '')
 
       # Cheat-sheet for when you've been away from this machine: list every
@@ -164,6 +196,13 @@
           # jgmenu leaves behind when killed (otherwise it fatally refuses to
           # start, thinking an instance is already running).
           { command = "pgrep jgmenu >/dev/null || { rm -f ~/.jgmenu-lockfile; jgmenu; }"; always = true; notification = false; }
+        ] ++ lib.optionals config.i3.superLock [
+          # Logind-integrated screen locker (native hosts). xss-lock runs the
+          # setuid apt i3lock whenever the session is locked (loginctl
+          # lock-session, idle, suspend, or switch-user), so the session is held
+          # like a full desktop and a VT switch to it hits the lock - no bypass.
+          # Guarded so an i3 reload doesn't spawn a second xss-lock.
+          { command = "pgrep -x xss-lock >/dev/null || xss-lock -- screen-lock"; always = true; notification = false; }
         ];
         
         # Simple default layout
@@ -280,9 +319,6 @@
           "${modifier}+Escape" = "mode default";
           "${modifier}+ctrl+0" = "mode emacs";
 
-          # Lock screen
-          "${modifier}+Shift+z" = "exec --no-startup-id lock-screen";
-
           # Screenshot to clipboard
           "${modifier}+Shift+equal" = "exec --no-startup-id screenshot-clip";
           "${modifier}+Shift+plus" = "exec --no-startup-id screenshot-clip";
@@ -293,6 +329,17 @@
 
           # Xephyr-specific: Refresh display after window resize
           "${modifier}+Shift+F5" = "exec --no-startup-id xrandr -q";
+        } // lib.optionalAttrs config.i3.superLock {
+          # Super/Win+L -> lock this session AND drop to the SDDM greeter so a
+          # family member can log into another account (native hosts only; set by
+          # i3.superLock). Left unbound on WSL/Crostini so Win+L cascades to the
+          # host OS instead. The session is genuinely locked (xss-lock + i3lock),
+          # so switching to its VT shows the lock - no bypass.
+          "Mod4+l" = "exec --no-startup-id switch-user";
+
+          # Plain lock (no user switch): logind lock -> xss-lock -> i3lock.
+          # Single password to unlock; secure against VT switching.
+          "${modifier}+Shift+z" = "exec --no-startup-id loginctl lock-session";
         };
 
         # Advanced mode system for Emacs integration

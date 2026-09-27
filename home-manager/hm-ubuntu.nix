@@ -19,8 +19,12 @@
   i3.enable = true;
   screenshots.enable = true;
 
+  # Native host: bind Super/Win+L to lock + switch user (SDDM greeter). On
+  # WSL/Crostini Win+L is left to the host OS instead.
+  i3.superLock = true;
+
   # Native X bootstrap: .xinitrc, startx service, and the `x11-setup` helper
-  # (run `x11-setup` once to `apt install xorg xinit i3lock` + PAM config).
+  # (run `x11-setup` once: `apt install xorg xinit i3lock zsh`, PAM, register i3 session).
   nativeXSession.enable = true;
 
   # Unlike WSL/Crostini, Ubuntu has a real GPU, so Chrome uses hardware
