@@ -1,5 +1,19 @@
 { config, pkgs, lib, ... }:
 
+let
+  # Strip WOFF/WOFF2 web fonts that some upstreams (jetbrains-mono,
+  # source-sans-pro) ship alongside their ttf/otf. Left in place, fontconfig
+  # resolves real families to a .woff2 - which Xft/cairo cannot rasterize, so
+  # text renders blank (this is what left jgmenu showing icons with no labels).
+  # They can't be rejected reliably (fontconfig globs are path-anchored, and
+  # woff2 mislabels its fontformat as "TrueType"), so removing them is the fix.
+  stripWebFonts = pkg: pkg.overrideAttrs (old: {
+    postInstall = (old.postInstall or "") + ''
+      find "$out" -type f \( -iname '*.woff' -o -iname '*.woff2' \) -delete || true
+      find "$out" -type d -empty -delete || true
+    '';
+  });
+in
 {
   options.fonts.enable = lib.mkEnableOption "Font configuration";
 
@@ -54,13 +68,13 @@
     home.packages = with pkgs; [
       meslo-lgs-nf
       emacs-all-the-icons-fonts
-      jetbrains-mono
+      (stripWebFonts jetbrains-mono)
       hack-font
       nerd-fonts.hack
       dejavu_fonts
       noto-fonts
       noto-fonts-color-emoji
-      source-sans-pro
+      (stripWebFonts source-sans-pro)
     ];
   };
 }

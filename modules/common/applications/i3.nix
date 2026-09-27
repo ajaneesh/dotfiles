@@ -45,6 +45,7 @@
       i3status
       dmenu
       rofi
+      jgmenu           # cascading, categorized XDG app menu (Alt+a)
       xdotool          # For window manipulation
       # X11 fonts
       font-misc-misc
@@ -108,6 +109,35 @@
       '')
     ];
 
+    # Appearance for the jgmenu app menu (Alt+a): a compact dark overlay at the
+    # pointer. Colours match the Tomorrow Night palette used elsewhere. Unknown
+    # keys are ignored by jgmenu, so this is safe across versions.
+    xdg.configFile."jgmenu/jgmenurc".text = ''
+      # Resident daemon: start hidden, stay alive after closing, and un-hide on a
+      # USR1 signal (Alt+a). This avoids jgmenu's grab-on-launch race under i3
+      # (where launching it from the keybinding made it close instantly).
+      stay_alive      = 1
+      hide_on_startup = 1
+      # Build the menu from XDG .desktop files (nix + apt apps), categorized.
+      csv_cmd         = ${pkgs.jgmenu}/lib/jgmenu/jgmenu-apps
+      menu_width     = 240
+      menu_border    = 1
+      menu_radius    = 4
+      item_height    = 26
+      item_padding_x = 8
+      font           = Source Sans Pro 10
+      icon_size      = 22
+      position_mode  = pointer
+      # jgmenu colours use the format "#rrggbb aaa" where aaa is alpha as a
+      # PERCENT (0-100). An 8-digit #rrggbbaa is NOT parsed - it silently yields
+      # invisible text (menu showed icons only).
+      color_menu_bg  = #1d1f21 100
+      color_norm_fg  = #c5c8c6 100
+      color_sel_bg   = #373b41 100
+      color_sel_fg   = #ffffff 100
+      color_border   = #373b41 100
+    '';
+
     # Advanced i3 configuration using Home Manager's native module
     xsession.windowManager.i3 = {
       enable = true;
@@ -127,6 +157,13 @@
           # wallpaper image; fall back to a solid colour so a missing image can
           # never leave the greeter "ghost" behind.
           { command = "${pkgs.feh}/bin/feh --bg-fill ~/.config/wallpaper.jpg 2>/dev/null || ${pkgs.xsetroot}/bin/xsetroot -solid '#1d1f21'"; always = true; notification = false; }
+
+          # Resident (hidden) jgmenu app menu; Alt+a un-hides it via USR1. Guarded
+          # so an i3 reload (Alt+Shift+r) starts it if it isn't running, without
+          # ever spawning a duplicate. Also clears a stale ~/.jgmenu-lockfile that
+          # jgmenu leaves behind when killed (otherwise it fatally refuses to
+          # start, thinking an instance is already running).
+          { command = "pgrep jgmenu >/dev/null || { rm -f ~/.jgmenu-lockfile; jgmenu; }"; always = true; notification = false; }
         ];
         
         # Simple default layout
@@ -155,9 +192,19 @@
           # Application launcher - Linux binaries only, no Windows executables
           "${modifier}+d" = "exec --no-startup-id env GDK_BACKEND=x11 PATH=\"$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin\" ${pkgs.rofi}/bin/rofi -modes run -show run";
 
+          # Cascading, categorized app menu. A resident jgmenu daemon (started
+          # hidden at login, see startup) is un-hidden by a USR1 signal - which
+          # avoids the grab-on-launch race that made a direct launch close
+          # instantly under i3. Esc/selection hides it again.
+          # (substring match, not -x: the nix-wrapped process is '.jgmenu-wrapped')
+          "${modifier}+a" = "exec --no-startup-id pkill -USR1 jgmenu";
+
           # Window management
           "${modifier}+Shift+x" = "kill";
           "${modifier}+Shift+q" = "kill"; # Alternative for muscle memory
+          # Force-kill a frozen window: turns the cursor into an X, click the
+          # window to kill its client. Use when a graceful `kill` won't work.
+          "${modifier}+Ctrl+Shift+q" = "exec --no-startup-id xkill";
           "${modifier}+Shift+f" = "fullscreen toggle global";
           "${modifier}+f" = "fullscreen toggle";
 
