@@ -224,6 +224,13 @@ in
       -- tabs, so the bar is just wasted vertical space.
       config.enable_tab_bar = false
 
+      -- Don't let wezterm resize its own window to keep a fixed row/col count.
+      -- On a tiling WM (i3) that fights the WM: after i3 tiles the window,
+      -- wezterm applies the dpi/font and shrinks itself back toward initial_rows,
+      -- which on MobaXterm's remote X left the window at ~40% height. Off = let
+      -- i3 own the geometry (wezterm's own recommendation for tiling WMs).
+      config.adjust_window_size_when_changing_font_size = false
+
       -- Disable ligatures for compatibility
       config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
 
