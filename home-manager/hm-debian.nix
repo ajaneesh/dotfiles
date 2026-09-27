@@ -12,7 +12,7 @@
   i3.enable = true;
   screenshots.enable = true;
 
-  # Native host: bind Super/Win+L to lock + switch user (SDDM greeter), so family
+  # Native host: bind Super/Win+L to lock + switch user (LightDM greeter), so family
   # members can log into their own accounts. (On WSL/Crostini Win+L is left to
   # the host OS instead.)
   i3.superLock = true;

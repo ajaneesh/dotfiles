@@ -16,16 +16,13 @@
 # xsessions .desktop) is created by the repo-defined `x11-setup` script rather
 # than by hand, keeping the whole setup rebuildable from this config.
 #
-# Why apt (not Nix) for xorg/xinit/i3lock?
-#   - The locker MUST be the distro's i3lock: a Nix-built PAM app links Nix's
-#     libpam, which looks for PAM modules inside the Nix store (absent on a
-#     non-NixOS host) and can't parse Debian's @include PAM files - so it can
-#     never authenticate. The apt i3lock uses system libpam + modules and works.
-#     (It needs no setuid; pam_unix's setgid unix_chkpwd reads /etc/shadow.)
-#   - xorg/xinit come from apt to integrate with the apt SDDM + PAM stack.
+# Why apt (not Nix) for xorg/xinit?
+#   - The distro's xorg/xinit integrate with the apt SDDM + PAM stack.
 #
-# This module installs those apt bits and writes /etc/pam.d/i3lock (common-auth).
-# xss-lock (Nix) drives i3lock on logind lock; bindings live in i3.nix.
+# There is no screen-locker binary to install: locking is done by light-locker
+# (Nix, in i3.nix), which uses the SDDM greeter as the lock screen - the greeter
+# performs the PAM auth, so no locker needs PAM (which a Nix locker can't do on a
+# non-NixOS host anyway). This module only gets X up + the apt prerequisites in.
 
 {
   options.nativeXSession.enable =
@@ -51,11 +48,10 @@
         echo ""
         echo "This will (via apt / sudo):"
         echo "  - install xorg, xinit (X11 server)"
-        echo "  - install i3lock (the SYSTEM screen locker; the i3 config drives it"
-        echo "    via xss-lock. A Nix locker can't do PAM auth on non-NixOS, so the"
-        echo "    locker must come from apt) + write its common-auth PAM config"
         echo "  - install zsh from apt and make /usr/bin/zsh your login shell"
         echo "    (so a broken Nix profile can never lock you out of a shell)"
+        echo "  - install LightDM + greeter and make it the default display"
+        echo "    manager (replacing SDDM), so light-locker can lock via the greeter"
         echo "  - register an 'i3 (home-manager)' session with the display manager"
         echo "  - remove the apt-installed i3 (so its duplicate session entry,"
         echo "    which launches the wrong binary, goes away)"
@@ -63,22 +59,23 @@
         read -p "Continue? (y/n) " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-          sudo apt install -y xorg xinit i3lock zsh
+          sudo apt install -y xorg xinit zsh
 
-          # i3lock-color authenticates via the "i3lock" PAM service (pam_unix ->
-          # the setgid unix_chkpwd reads /etc/shadow; no setuid locker needed).
-          # ALWAYS overwrite this file: the apt i3lock ships one with
-          # `auth include login`, whose login stack (pam_securetty/pam_nologin/...)
-          # REJECTS the locker's password. common-auth is what actually works.
-          echo "Writing /etc/pam.d/i3lock (common-auth)..."
-          sudo tee /etc/pam.d/i3lock > /dev/null <<'EOF'
-# PAM configuration for the i3lock / i3lock-color screen locker.
-# Must be common-auth, NOT 'login' - the login stack rejects the locker.
-auth include common-auth
-account include common-account
-password include common-password
-session include common-session
-EOF
+          # Display manager: LightDM (not SDDM). light-locker uses the DM greeter
+          # as the lock screen (single sign-in, family can log in, no VT bypass),
+          # but it needs LightDM's per-session DisplayManager D-Bus objects - SDDM
+          # doesn't provide them. Preseed the "default DM" debconf prompt so the
+          # install is non-interactive, then make LightDM the active DM.
+          echo "Installing LightDM + greeter and making it the default DM..."
+          echo "lightdm shared/default-x-display-manager select lightdm" | sudo debconf-set-selections
+          echo "sddm shared/default-x-display-manager select lightdm" | sudo debconf-set-selections || true
+          sudo DEBIAN_FRONTEND=noninteractive apt install -y lightdm lightdm-gtk-greeter
+          echo "/usr/sbin/lightdm" | sudo tee /etc/X11/default-display-manager >/dev/null
+          sudo systemctl disable sddm.service 2>/dev/null || true
+          sudo systemctl enable lightdm.service 2>/dev/null || true
+
+          # Locking itself is light-locker (Nix) + the LightDM greeter - no locker
+          # binary or PAM file to install (the greeter authenticates).
 
           # Register the home-manager i3 session with the display manager.
           # SDDM (like most DMs) only scans /usr/local/share/xsessions and
@@ -119,8 +116,10 @@ EOF
 
           echo ""
           echo "Setup complete!"
-          echo "  - Log out, then pick 'i3 (home-manager)' at the SDDM session menu."
-          echo "  - Super/Win+L switches user (drops to the login screen)."
+          echo "  - REBOOT to switch from SDDM to LightDM, then pick"
+          echo "    'i3 (home-manager)' at the LightDM login."
+          echo "  - Super/Win+L locks the screen (LightDM greeter); sign back in to"
+          echo "    return, or another user can log into their own account there."
           echo "  - Your login shell is now /usr/bin/zsh (config still from home-manager)."
         fi
       '')

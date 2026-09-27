@@ -5,6 +5,18 @@
   home.homeDirectory = "/home/${globals.user}";
   home.stateVersion = "24.05";
 
+  # Put the Nix profile on PATH for GRAPHICAL sessions. On a non-NixOS host the
+  # nix-profile bin dir is only added to PATH by the login-shell nix hook
+  # (~/.profile), which an X session started by the display manager does NOT
+  # source. Without this, i3 launched via the generic "Default Xsession"
+  # (~/.xsession) can't find Nix apps from keybindings (term-wezterm, jgmenu,
+  # light-locker, display-apply). home.sessionPath is emitted into
+  # hm-session-vars.sh, which ~/.xprofile sources at session start.
+  home.sessionPath = [
+    "${config.home.homeDirectory}/.nix-profile/bin"
+    "/nix/var/nix/profiles/default/bin"
+  ];
+
   # Don't build home-manager's own options manpage (home-configuration.nix(5)).
   # Under flakes its options.json references the flake -source path without string
   # context, which emits a "builtins.derivation ... without a proper context"

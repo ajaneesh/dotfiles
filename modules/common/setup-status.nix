@@ -20,9 +20,10 @@ let
   checkGitIdentity = ''[ -f "$HOME/.config/git/identity-personal" ] && [ -f "$HOME/.config/git/identity-work" ]'';
   checkCredStore = ''[ -f "$HOME/.password-store/.gpg-id" ]'';
   # Native-X steps only matter on profiles that manage ~/.xinitrc. Done once the
-  # i3lock PAM service exists (so the Nix i3lock-color locker can authenticate)
-  # AND the home-manager i3 login session is registered (both via x11-setup).
-  checkNativeX = ''! [ -f "$HOME/.xinitrc" ] || { [ -f /etc/pam.d/i3lock ] && [ -e /usr/local/share/xsessions/i3-hm.desktop ]; }'';
+  # home-manager i3 login session is registered with the display manager (via
+  # x11-setup). Locking is light-locker (Nix) + the LightDM greeter - nothing to
+  # install for it.
+  checkNativeX = ''! [ -f "$HOME/.xinitrc" ] || [ -e /usr/local/share/xsessions/i3-hm.desktop ]'';
 
   setup-status = pkgs.writeShellScriptBin "setup-status" ''
     pending=0
@@ -49,14 +50,14 @@ let
       todo "Git credential store    (passphraseless gpg key + pass)" "gcm-setup"
     fi
 
-    # 3. Native X login + locker (only shown on native-X profiles). x11-setup
-    #    installs the setuid i3lock (driven by xss-lock) and registers the
-    #    "i3 (home-manager)" session with the display manager.
+    # 3. Native X login (only shown on native-X profiles). x11-setup registers
+    #    the "i3 (home-manager)" session with the display manager. (Locking is
+    #    light-locker + the LightDM greeter - nothing extra to install.)
     if [ -f "$HOME/.xinitrc" ]; then
-      if [ -f /etc/pam.d/i3lock ] && [ -e /usr/local/share/xsessions/i3-hm.desktop ]; then
-        ok "Native X login + lock   (i3lock PAM, i3 session registered)"
+      if [ -e /usr/local/share/xsessions/i3-hm.desktop ]; then
+        ok "Native X login          (i3 session registered with the DM)"
       else
-        todo "Native X login + lock   (i3lock PAM + i3 login session)" "x11-setup"
+        todo "Native X login          (register i3 session with the DM)" "x11-setup"
       fi
     fi
 
