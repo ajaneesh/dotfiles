@@ -50,6 +50,8 @@
         echo "  - install xorg, xinit (X11 server)"
         echo "  - install zsh from apt and make /usr/bin/zsh your login shell"
         echo "    (so a broken Nix profile can never lock you out of a shell)"
+        echo "  - install NetworkManager + its OpenVPN plugin (nmcli-managed,"
+        echo "    no GUI applet: connect with 'nmcli connection up <profile>')"
         echo "  - install LightDM + greeter and make it the default display"
         echo "    manager (replacing SDDM), so light-locker can lock via the greeter"
         echo "  - register an 'i3 (home-manager)' session with the display manager"
@@ -60,6 +62,17 @@
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
           sudo apt install -y xorg xinit zsh
+
+          # NetworkManager + the OpenVPN service plugin, managed entirely from
+          # the CLI (nmcli) - no GUI applet, no gnome-keyring, no secret agent.
+          # MUST be apt, not Nix: the daemon and its VPN plugin have to be the
+          # same build and live in the system paths the daemon scans
+          # (/usr/lib*/NetworkManager). Store VPN passwords in the connection
+          # itself (password-flags=0) so nmcli can bring tunnels up headless:
+          #   nmcli connection modify <profile> vpn.data "password-flags=0" \
+          #                                     vpn.secrets "password=<pw>"
+          #   nmcli connection up <profile>   # / down / show --active
+          sudo apt install -y network-manager network-manager-openvpn
 
           # Display manager: LightDM (not SDDM). light-locker uses the DM greeter
           # as the lock screen (single sign-in, family can log in, no VT bypass),

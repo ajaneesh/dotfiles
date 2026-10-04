@@ -5,12 +5,18 @@
     ../modules/common/applications/i3.nix
     ../modules/common/applications/screenshots.nix
     ../modules/common/applications/native-x-session.nix
+    ../modules/common/applications/vpn-cli.nix
     ./hm-common.nix
   ];
 
   # Native i3 on apt-based Debian (home machine).
   i3.enable = true;
   screenshots.enable = true;
+
+  # nmcli wrappers (vpn-up/vpn-down/vpn-status) for the system NetworkManager
+  # OpenVPN profiles. CLI-only: no applet/keyring. Store each profile's password
+  # once with `nmcli connection modify <p> vpn.data password-flags=0 ...`.
+  vpnCli.enable = true;
 
   # Native host: bind Super/Win+L to lock + switch user (LightDM greeter), so family
   # members can log into their own accounts. (On WSL/Crostini Win+L is left to
