@@ -25,6 +25,14 @@
       #   Arg    : connect to the single profile whose name contains the string
       #            (case-insensitive); ambiguous or no match just lists options.
       #   Drops any other already-active VPN first so tunnels don't stack.
+      #
+      # Uses `nmcli --ask`: if the password is stored in the connection
+      # (password-flags=0) it's used silently; otherwise - e.g. the secret only
+      # lives in a GUI wallet (KWallet/keyring), which the CLI can't read, or
+      # isn't saved at all - nmcli prompts for it on the terminal instead of
+      # failing with "No valid secrets". To avoid the prompt, store it once:
+      #   nmcli connection modify <profile> vpn.data "password-flags=0" \
+      #                                     vpn.secrets 'password=<pw>'
       (pkgs.writeShellScriptBin "vpn-up" ''
         query="''${1:-}"
         mapfile -t vpns < <(nmcli -t -f NAME,TYPE connection show | awk -F: '$2=="vpn"{print $1}')
@@ -66,7 +74,7 @@
           done
 
         echo "Connecting $target..."
-        nmcli connection up "$target"
+        nmcli --ask connection up "$target"
       '')
 
       # vpn-down [name|substring]
