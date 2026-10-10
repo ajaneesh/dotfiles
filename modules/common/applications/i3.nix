@@ -383,6 +383,11 @@
     # Enhanced i3status configuration
     programs.i3status = {
       enable = true;
+      # Don't inject home-manager's implicit default modules (ipv6, wireless,
+      # ethernet, battery) - without this an unconfigured ipv6 address and other
+      # defaults appear in the bar. We re-declare exactly what we want below
+      # (everything the defaults gave us except ipv6).
+      enableDefault = false;
       general = {
         colors = true;
         color_good = "#8C9440";
@@ -403,22 +408,42 @@
             format = "Disk: %avail";
           };
         };
-        "memory" = {
+        "wireless _first_" = {
           position = 3;
+          settings = {
+            format_up = "W: (%quality at %essid) %ip";
+            format_down = "W: down";
+          };
+        };
+        "ethernet _first_" = {
+          position = 4;
+          settings = {
+            format_up = "E: %ip (%speed)";
+            format_down = "E: down";
+          };
+        };
+        "memory" = {
+          position = 5;
           settings = {
             format = "Mem: %used/%total";
             threshold_degraded = "1G";
             format_degraded = "Mem LOW: %available";
           };
         };
+        "battery all" = {
+          position = 6;
+          settings = {
+            format = "%status %percentage %remaining";
+          };
+        };
         "cpu_usage" = {
-          position = 4;
+          position = 7;
           settings = {
             format = "CPU: %usage";
           };
         };
         "tztime local" = {
-          position = 5;
+          position = 8;
           settings = {
             format = "%Y-%m-%d %H:%M:%S";
           };
