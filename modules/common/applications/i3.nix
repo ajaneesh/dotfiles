@@ -1,5 +1,141 @@
 { config, pkgs, lib, ... }:
 
+let
+  # ===================================================================
+  # i3blocks status bar: Nerd Font icons instead of text labels, white
+  # text (set via the bar's statusline colour), a VPN padlock that turns
+  # yellow+locked when a tunnel is up (white+unlocked otherwise), and a
+  # left-clickable Wi-Fi block that opens a rofi network picker. Replaces
+  # the old programs.i3status config. Glyphs are FontAwesome-v4 codepoints
+  # from Hack Nerd Font (installed in fonts.nix). nmcli is the system
+  # (apt) NetworkManager client. Each block prints full_text (+ short_text
+  # + colour for the VPN block, per the i3blocks 3-line protocol).
+  # ===================================================================
+
+  # Left-click the Wi-Fi block -> pick a network via rofi and connect.
+  wifiMenu = pkgs.writeShellScriptBin "wifi-menu" ''
+    nmcli device wifi rescan >/dev/null 2>&1
+    mapfile -t rows < <(nmcli -t -f IN-USE,SIGNAL,SECURITY,SSID device wifi list 2>/dev/null)
+    labels=(); ssids=()
+    for r in "''${rows[@]}"; do
+      IFS=: read -r inuse signal sec ssid <<< "$r"
+      [ -z "$ssid" ] && continue
+      mark="  "; [ "$inuse" = "*" ] && mark=" "
+      labels+=("$(printf '%s %s  %s%%  %s' "$mark" "$ssid" "$signal" "''${sec:---}")")
+      ssids+=("$ssid")
+    done
+    if [ "''${#ssids[@]}" -eq 0 ]; then
+      command -v notify-send >/dev/null 2>&1 && notify-send "Wi-Fi" "No networks found"
+      exit 0
+    fi
+    idx=$(printf '%s\n' "''${labels[@]}" | ${pkgs.rofi}/bin/rofi -dmenu -i -p "Wi-Fi" -format i)
+    [ -z "$idx" ] && exit 0
+    ssid="''${ssids[$idx]}"
+    if nmcli -t -f NAME connection show | grep -qxF "$ssid"; then
+      nmcli connection up id "$ssid" >/dev/null 2>&1
+    else
+      pass=$(${pkgs.rofi}/bin/rofi -dmenu -password -p "Password for $ssid (blank = open)" < /dev/null)
+      if [ -n "$pass" ]; then
+        nmcli device wifi connect "$ssid" password "$pass" >/dev/null 2>&1
+      else
+        nmcli device wifi connect "$ssid" >/dev/null 2>&1
+      fi
+    fi
+    command -v notify-send >/dev/null 2>&1 && notify-send "Wi-Fi" "Tried to connect to $ssid"
+  '';
+
+  # Wi-Fi block:  + SSID only (no IP). Left-click opens the picker above.
+  wifiBlock = pkgs.writeShellScript "i3blocks-wifi" ''
+    icon=$(printf '\357\207\253')
+    if [ "$BLOCK_BUTTON" = "1" ]; then ${wifiMenu}/bin/wifi-menu >/dev/null 2>&1 & fi
+    ssid=$(nmcli -t -f IN-USE,SSID device wifi list 2>/dev/null | awk -F: '$1=="*"{print $2; exit}')
+    if [ -n "$ssid" ]; then
+      printf '%s %s\n' "$icon" "$ssid"
+    else
+      printf '%s\n' "$icon"
+    fi
+  '';
+
+  # VPN block: padlock.  yellow when a VPN connection is active,  white
+  # otherwise. Left-click connects (rofi picker over VPN profiles),
+  # right-click disconnects the active one.
+  vpnBlock = pkgs.writeShellScript "i3blocks-vpn" ''
+    active=$(nmcli -t -f NAME,TYPE connection show --active 2>/dev/null | awk -F: '$2=="vpn"{print $1; exit}')
+    case "$BLOCK_BUTTON" in
+      1) if [ -z "$active" ]; then
+           sel=$(nmcli -t -f NAME,TYPE connection show | awk -F: '$2=="vpn"{print $1}' | ${pkgs.rofi}/bin/rofi -dmenu -i -p "VPN")
+           [ -n "$sel" ] && nmcli connection up "$sel" >/dev/null 2>&1
+         fi ;;
+      3) [ -n "$active" ] && nmcli connection down "$active" >/dev/null 2>&1 ;;
+    esac
+    active=$(nmcli -t -f NAME,TYPE connection show --active 2>/dev/null | awk -F: '$2=="vpn"{print $1; exit}')
+    lock=$(printf '\357\200\243'); open=$(printf '\357\202\234')
+    if [ -n "$active" ]; then
+      printf '%s\n%s\n%s\n' "$lock" "$lock" "#ffff00"
+    else
+      printf '%s\n%s\n%s\n' "$open" "$open" "#ffffff"
+    fi
+  '';
+
+  # CPU usage sampled over a short window.
+  cpuBlock = pkgs.writeShellScript "i3blocks-cpu" ''
+    read -r _ a b c id _ < /proc/stat
+    t1=$((a+b+c+id)); i1=$id
+    sleep 0.2
+    read -r _ a b c id _ < /proc/stat
+    t2=$((a+b+c+id)); i2=$id
+    dt=$((t2-t1)); di=$((i2-i1))
+    if [ "$dt" -gt 0 ]; then u=$((100*(dt-di)/dt)); else u=0; fi
+    icon=$(printf '\357\203\244')
+    printf '%s %s%%\n' "$icon" "$u"
+  '';
+
+  # Battery: only renders when a battery is present (empty -> hidden on desktops).
+  batteryBlock = pkgs.writeShellScript "i3blocks-battery" ''
+    icon=$(printf '\357\211\200')
+    for b in /sys/class/power_supply/BAT*; do
+      [ -r "$b/capacity" ] || continue
+      printf '%s %s%%\n' "$icon" "$(cat "$b/capacity")"
+      exit 0
+    done
+  '';
+
+  # Left-to-right block order (clock ends up rightmost). Simple stats are
+  # inline one-liners; stateful/clickable ones call the scripts above.
+  i3blocksConfig = pkgs.writeText "i3blocks.conf" ''
+    [wifi]
+    command=${wifiBlock}
+    interval=10
+
+    [vpn]
+    command=${vpnBlock}
+    interval=5
+
+    [cpu]
+    command=${cpuBlock}
+    interval=3
+
+    [memory]
+    command=printf '\357\213\233 %s\n' "$(free -h | awk '/^Mem:/{print $3"/"$2}')"
+    interval=10
+
+    [disk]
+    command=printf '\357\202\240 %s\n' "$(df -h --output=avail / | tail -1 | tr -d ' ')"
+    interval=60
+
+    [load]
+    command=printf '\357\202\205 %s\n' "$(cut -d' ' -f1 /proc/loadavg)"
+    interval=10
+
+    [battery]
+    command=${batteryBlock}
+    interval=30
+
+    [clock]
+    command=printf '\357\200\227 %s\n' "$(date '+%Y-%m-%d %H:%M')"
+    interval=30
+  '';
+in
 {
   imports = [
     ./dunst.nix
@@ -50,6 +186,8 @@
       i3status
       dmenu
       rofi
+      i3blocks         # status-bar engine: Nerd Font icons, clickable blocks
+      wifiMenu         # rofi Wi-Fi picker (also bound to the bar's wifi block)
       jgmenu           # cascading, categorized XDG app menu (Alt+a)
       xdotool          # For window manipulation
       # X11 fonts
@@ -178,10 +316,34 @@
         
         # Window decoration settings
         window = {
-          border = 1;
+          border = 2;
           titlebar = false;
         };
-        
+
+        # Window border colours. i3's default focused border is a faint blue
+        # that disappears on a black background; use a bright amber so the
+        # active window is unmistakable, and dim the inactive ones hard for
+        # contrast. Only border/childBorder show (titlebars are off). Prefer
+        # ivory or white? swap #f0c674 for "#fffff0" or "#ffffff".
+        colors = {
+          focused = {
+            border = "#f0c674"; childBorder = "#f0c674"; indicator = "#f0c674";
+            background = "#f0c674"; text = "#1d1f21";
+          };
+          focusedInactive = {
+            border = "#1d1f21"; childBorder = "#1d1f21"; indicator = "#1d1f21";
+            background = "#1d1f21"; text = "#888888";
+          };
+          unfocused = {
+            border = "#1d1f21"; childBorder = "#1d1f21"; indicator = "#1d1f21";
+            background = "#1d1f21"; text = "#888888";
+          };
+          urgent = {
+            border = "#a54242"; childBorder = "#a54242"; indicator = "#a54242";
+            background = "#a54242"; text = "#ffffff";
+          };
+        };
+
         # Font configuration
         fonts = {
           names = [ "pango:Source Sans Pro" ];
@@ -371,84 +533,22 @@
         # Status bar configuration
         bars = [{
           position = "bottom";
-          statusCommand = "${pkgs.i3status}/bin/i3status";
+          statusCommand = "${pkgs.i3blocks}/bin/i3blocks -c ${i3blocksConfig}";
           fonts = {
-            names = [ "JetBrains Mono" ];
+            # Hack Nerd Font Mono supplies the status-bar glyphs; JetBrains Mono
+            # stays first for normal text (pango falls back for the icons).
+            names = [ "JetBrains Mono" "Hack Nerd Font Mono" ];
             size = 9.0;
+          };
+          colors = {
+            statusline = "#ffffff";   # all block text white (VPN block overrides)
           };
         }];
       };
     };
 
-    # Enhanced i3status configuration
-    programs.i3status = {
-      enable = true;
-      # Don't inject home-manager's implicit default modules (ipv6, wireless,
-      # ethernet, battery) - without this an unconfigured ipv6 address and other
-      # defaults appear in the bar. We re-declare exactly what we want below
-      # (everything the defaults gave us except ipv6).
-      enableDefault = false;
-      general = {
-        colors = true;
-        color_good = "#8C9440";
-        color_bad = "#A54242";
-        color_degraded = "#DE935F";
-        interval = 5;
-      };
-      modules = {
-        "load" = {
-          position = 1;
-          settings = {
-            format = "Load: %1min";
-          };
-        };
-        "disk /" = {
-          position = 2;
-          settings = {
-            format = "Disk: %avail";
-          };
-        };
-        "wireless _first_" = {
-          position = 3;
-          settings = {
-            format_up = "W: (%quality at %essid) %ip";
-            format_down = "W: down";
-          };
-        };
-        "ethernet _first_" = {
-          position = 4;
-          settings = {
-            format_up = "E: %ip (%speed)";
-            format_down = "E: down";
-          };
-        };
-        "memory" = {
-          position = 5;
-          settings = {
-            format = "Mem: %used/%total";
-            threshold_degraded = "1G";
-            format_degraded = "Mem LOW: %available";
-          };
-        };
-        "battery all" = {
-          position = 6;
-          settings = {
-            format = "%status %percentage %remaining";
-          };
-        };
-        "cpu_usage" = {
-          position = 7;
-          settings = {
-            format = "CPU: %usage";
-          };
-        };
-        "tztime local" = {
-          position = 8;
-          settings = {
-            format = "%Y-%m-%d %H:%M:%S";
-          };
-        };
-      };
-    };
+    # Status bar is i3blocks (see the `let` block at the top of this file for
+    # the blocks, icons, VPN padlock, and the clickable Wi-Fi picker). The old
+    # programs.i3status config was removed when the bar moved to i3blocks.
   };
 }
