@@ -5,6 +5,7 @@
     ../modules/common/applications/i3.nix
     ../modules/common/applications/screenshots.nix
     ../modules/common/applications/native-x-session.nix
+    ../modules/common/applications/network-manager.nix
     ../modules/common/applications/vpn-cli.nix
     ./hm-common.nix
   ];
@@ -13,9 +14,15 @@
   i3.enable = true;
   screenshots.enable = true;
 
-  # nmcli wrappers (vpn-up/vpn-down/vpn-status) for the system NetworkManager
-  # OpenVPN profiles. CLI-only: no applet/keyring. Store each profile's password
-  # once with `nmcli connection modify <p> vpn.data password-flags=0 ...`.
+  # Run nm-applet as the NetworkManager secret agent so VPN/Wi-Fi passwords can
+  # be stored (encrypted) in gnome-keyring and supplied automatically - the
+  # piece a non-Plasma i3 session otherwise lacks. Manage profiles with
+  # nm-connection-editor, "store for this user".
+  networkManager.enable = true;
+
+  # Convenience nmcli wrappers (vpn-up/vpn-down/vpn-status). With the secret
+  # agent above running, vpn-up connects using the gnome-keyring-stored
+  # password (or prompts via --ask if none is saved).
   vpnCli.enable = true;
 
   # Native host: bind Super/Win+L to lock + switch user (LightDM greeter), so family
