@@ -29,6 +29,17 @@
     lib.mkEnableOption "native X11 session (startx + i3) for apt-based non-NixOS hosts";
 
   config = lib.mkIf config.nativeXSession.enable {
+    # Sibling to home.sessionPath (hm-common.nix): a DM-started X session sources
+    # ~/.xprofile (-> hm-session-vars.sh) but NOT /etc/profile, so Nix's nix.sh
+    # never runs and XDG_DATA_DIRS stays at the distro default. GUI apps launched
+    # from i3/jgmenu (e.g. KDE System Settings) then can't find Nix-installed data
+    # (KCM modules, .desktop entries, icons) and come up empty. Emit it into
+    # hm-session-vars.sh (sourced early by ~/.xprofile, before the systemctl
+    # import-environment line) so the whole graphical session inherits it. Mirrors
+    # the XDG_DATA_DIRS export in the i3-session launcher and .xinitrc below.
+    home.sessionVariables.XDG_DATA_DIRS =
+      "$HOME/.nix-profile/share:/nix/var/nix/profiles/default/share:\${XDG_DATA_DIRS:-/usr/local/share:/usr/share}";
+
     home.packages = [
       # Session launcher the display manager (SDDM) invokes to start the
       # home-manager-managed i3 with the correct Nix environment. Installed at a
