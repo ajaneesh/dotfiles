@@ -19,6 +19,21 @@ let
     then "${pkgs.nixgl.nixGLIntel}/bin/nixGLIntel ${pkgs.wezterm}/bin/wezterm"
     else "${pkgs.wezterm}/bin/wezterm";
 
+  # On WSL/Crostini i3 runs on an INDIRECT X server - a remote one (MobaXterm's
+  # X server, reached over the WSL boundary) or a nested one (Xephyr) - rather
+  # than native Xorg. On that path wezterm's render viewport freezes at the
+  # window's initial geometry: when i3 then tiles the window taller, the *pty*
+  # resizes to the full pane (tput lines is correct) but the drawn area stays at
+  # initial_rows/cols, so the rest of the window is painted permanently black -
+  # text is there but never shown. (Same surface/window desync the
+  # adjust_window_size fix below only half-addressed.) Grow-resize is the broken
+  # step; shrink-resize repaints fine. So start the window OVERSIZED (bigger than
+  # any pane): i3 immediately shrinks it, the shrink repaints, and the whole pane
+  # ends up drawn. Native X (Debian/Ubuntu) has no such bug and keeps 24x80.
+  largeInitial = config.terminals.largeInitialWindow;
+  initialRows = if largeInitial then 200 else 24;
+  initialCols = if largeInitial then 500 else 80;
+
   # Base terminal font point size. Physical scaling is handled session-wide by
   # Xft.dpi (urxvt/xterm) and by wezterm's own dpi (see display.nix), so this is
   # a fixed point size, not a per-display calculation. $TERM_FONT_SIZE overrides
@@ -69,6 +84,19 @@ in
       Render the terminal with CPU (software) instead of the GPU, for
       virtualized/indirect X hosts (WSL, Xephyr, Crostini) that lack usable
       OpenGL. Defaults to chrome.softwareRendering so it tracks the same hosts.
+    '';
+  };
+
+  options.terminals.largeInitialWindow = lib.mkOption {
+    type = lib.types.bool;
+    default = config.terminals.softwareRendering;
+    description = ''
+      Start wezterm with an oversized initial geometry (200x500) so it fills a
+      tiled i3 pane on an indirect X server - remote (MobaXterm) or nested
+      (Xephyr) - as used on WSL/Crostini, where wezterm's render viewport
+      otherwise freezes at the initial size and leaves the bottom of the window
+      painted black. Defaults to terminals.softwareRendering so it tracks the
+      same constrained hosts; native X (Debian/Ubuntu) keeps 24x80.
     '';
   };
 
@@ -216,9 +244,14 @@ in
       -- Color scheme
       config.color_scheme = 'Tomorrow Night'
 
-      -- Window configuration
-      config.initial_rows = 24
-      config.initial_cols = 80
+      -- Window configuration. On an indirect X server (MobaXterm/Xephyr, as on
+      -- WSL/Crostini) these are deliberately oversized (set from
+      -- terminals.largeInitialWindow) to work around wezterm's viewport freezing
+      -- at the initial geometry under a tiling WM, which otherwise leaves the
+      -- bottom of the pane painted black. See the let block above. Native X
+      -- keeps 24x80.
+      config.initial_rows = ${toString initialRows}
+      config.initial_cols = ${toString initialCols}
 
       -- No tab bar: on i3 we open a new window (Alt+Return) instead of wezterm
       -- tabs, so the bar is just wasted vertical space.
