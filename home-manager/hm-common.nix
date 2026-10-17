@@ -77,6 +77,7 @@
     google-cloud-sdk
     awscli
     minio-client     # MinIO/AIStor client; provides the `mc` command
+    antigravity-cli  # Google's TUI agent client; replaces the removed gemini-cli
     postgresql
     firefox
     gnugrep
