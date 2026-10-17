@@ -152,6 +152,19 @@
             fi
             echo "Display $DIRECT_DISPLAY is accessible"
 
+            # Bridge the X PRIMARY and CLIPBOARD selections. wezterm's mouse
+            # selection lands in PRIMARY while Alt+c / most apps' paste use
+            # CLIPBOARD, so without this, copy/paste between windows (e.g. from
+            # claude-code in wezterm to another terminal) silently fails. This
+            # mirrors what the Xephyr path already does; the direct/MobaXterm
+            # path previously had no selection bridge at all. MobaXterm then
+            # syncs CLIPBOARD with the Windows clipboard, so this fixes the
+            # Windows direction too. pkill first so repeated startx runs don't
+            # pile up daemons.
+            ${pkgs.procps}/bin/pkill -f "${pkgs.autocutsel}/bin/autocutsel" 2>/dev/null || true
+            DISPLAY="$DIRECT_DISPLAY" ${pkgs.autocutsel}/bin/autocutsel -fork -selection PRIMARY
+            DISPLAY="$DIRECT_DISPLAY" ${pkgs.autocutsel}/bin/autocutsel -fork -selection CLIPBOARD
+
             # Create log directory
             I3_LOG_DIR="$HOME/.local/share/i3/logs"
             mkdir -p "$I3_LOG_DIR"

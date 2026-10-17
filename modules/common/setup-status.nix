@@ -94,6 +94,7 @@ let
     ref() { printf '  %-20s %s\n' "$1" "$2"; }
     ref "setup-status"       "this screen (setup state + command list)"
     ref "man dotfiles"       "full manual for this machine's config"
+    ref "emacs-tangle"       "regenerate ~/.emacs.d/init.el from init.org"
     ${lib.optionalString (config.i3.enable or false)
       ''ref "display-scale"      "show/change UI scale (bigger/smaller/set/reset)"''}
     ${lib.optionalString (config.i3.enable or false)

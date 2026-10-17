@@ -277,8 +277,10 @@ in
 
       -- Key bindings
       config.keys = {
-        -- Copy/paste
-        { key = 'c', mods = 'ALT', action = wezterm.action.CopyTo 'Clipboard' },
+        -- Copy/paste. Copy to BOTH selections so a paste via either the
+        -- CLIPBOARD (Alt+v, Ctrl+Shift+V) or PRIMARY (middle-click) works in
+        -- any other window - the common "can't paste out of wezterm" cause.
+        { key = 'c', mods = 'ALT', action = wezterm.action.CopyTo 'ClipboardAndPrimarySelection' },
         { key = 'v', mods = 'ALT', action = wezterm.action.PasteFrom 'Clipboard' },
       }
 

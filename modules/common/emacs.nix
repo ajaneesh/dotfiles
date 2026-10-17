@@ -1,6 +1,41 @@
 { config, pkgs, lib, ... }:
 
+let
+  # emacs-tangle - regenerate ~/.emacs.d/init.el from init.org without opening
+  # Emacs interactively. The literate config (init.org) is the source of truth;
+  # its header-args already tangle to ~/.emacs.d/init.el, so a batch
+  # org-babel-tangle reproduces exactly what `M-x org-babel-tangle` would.
+  #
+  # It tangles the init.org you edit in the dotfiles working tree (so the loop is
+  # edit -> emacs-tangle -> restart Emacs, no rebuild). Source resolution, first
+  # hit wins: a path given as $1, then $DOTFILES_DIR, then ~/dotfiles.
+  emacs-tangle = pkgs.writeShellScriptBin "emacs-tangle" ''
+    set -eu
+    rel="modules/common/emacs/init.org"
+    if [ "$#" -ge 1 ]; then
+      src="$1"
+    elif [ -n "''${DOTFILES_DIR:-}" ] && [ -f "$DOTFILES_DIR/$rel" ]; then
+      src="$DOTFILES_DIR/$rel"
+    else
+      src="$HOME/dotfiles/$rel"
+    fi
+
+    if [ ! -f "$src" ]; then
+      echo "emacs-tangle: init.org not found at: $src" >&2
+      echo "  pass the path (emacs-tangle /path/to/init.org) or set DOTFILES_DIR" >&2
+      exit 1
+    fi
+
+    echo "Tangling $src -> ~/.emacs.d/init.el ..."
+    ${config.programs.emacs.finalPackage}/bin/emacs --batch -Q \
+      --eval "(require 'org)" \
+      --eval "(org-babel-tangle-file \"$src\")"
+    echo "Done. Restart Emacs to load the new init.el."
+  '';
+in
 {
+  home.packages = [ emacs-tangle ];
+
   programs.emacs = {
     enable = true;
     package = pkgs.emacs-gtk;
@@ -75,7 +110,6 @@
       org-roam
       org-roam-ui
       paredit
-      pkgs.emacsPackagesCustom.emacs-claude-code
       py-isort
       pytest
       python-black

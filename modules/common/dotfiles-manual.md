@@ -8,7 +8,7 @@ dotfiles - overview of this machine's Nix / home-manager configuration
 
 **man dotfiles**
 
-**setup-status** | **display-scale** | **i3-keys** | **git-identity-setup** | **gcm-setup** | **x11-setup**
+**setup-status** | **display-scale** | **i3-keys** | **git-identity-setup** | **gcm-setup** | **x11-setup** | **emacs-tangle**
 
 # DESCRIPTION
 
@@ -146,6 +146,17 @@ Nix PATH and break those bindings.
 Terminal launchers bound in i3: **term-urxvt** (Alt+Return), **term-xterm**
 (Alt+Shift+Return) and **term-wezterm** (Alt+Ctrl+Return).
 
+# EMACS
+
+The Emacs config is literate: **init.org** is the source of truth and tangles to
+**~/.emacs.d/init.el** (where Emacs loads from).
+
+*emacs-tangle* [*init.org*]
+: Regenerate **~/.emacs.d/init.el** from **init.org** without opening Emacs - a
+batch **org-babel-tangle**. By default it tangles the **init.org** in your repo
+working tree (**$DOTFILES_DIR**, else **~/dotfiles**); pass a path to override.
+The loop is: edit **init.org**, run **emacs-tangle**, restart Emacs.
+
 # FILES
 
 *~/dotfiles*
@@ -153,6 +164,12 @@ Terminal launchers bound in i3: **term-urxvt** (Alt+Return), **term-xterm**
 
 *~/dotfiles/modules/common*
 : Shared modules, including i3, terminals, and this manual.
+
+*~/dotfiles/modules/common/emacs/init.org*
+: The literate Emacs config (source of truth; tangled by **emacs-tangle**).
+
+*~/.emacs.d/init.el*
+: The tangled Emacs init, loaded at startup (do not edit by hand).
 
 *~/.config/i3/config*
 : The generated i3 config (read by **i3-keys**; do not edit by hand).
@@ -162,6 +179,6 @@ Terminal launchers bound in i3: **term-urxvt** (Alt+Return), **term-xterm**
 
 # SEE ALSO
 
-**i3-keys**(1), **setup-status**(1), **i3**(1), **home-manager**(1)
+**i3-keys**(1), **setup-status**(1), **emacs-tangle**(1), **i3**(1), **home-manager**(1)
 
 The repository README covers new-machine bootstrap and updating other machines.

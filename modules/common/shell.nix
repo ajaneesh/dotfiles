@@ -133,7 +133,7 @@
         pid=$(procs | fzf --header-lines=1 | awk '{print $1}')
         [[ -n "$pid" ]] && kill -TERM "$pid"
       }
-      
+
       # Enhanced history search (in addition to fzf Ctrl+R)
       bindkey '^[[A' history-substring-search-up
       bindkey '^[[B' history-substring-search-down
@@ -178,6 +178,13 @@
       # i3 Xephyr launcher (easy to remember)
       i3 = "startx";
       start-i3 = "startx";
+
+      # Override oh-my-zsh's gcmsg (git commit --message). The real logic lives
+      # in the `git-cmsg` command (see git.nix); this alias only has to exist
+      # because a zsh alias shadows a same-named PATH command, so oh-my-zsh's
+      # gcmsg can't be overridden by the executable alone - only by redefining
+      # the alias here, after oh-my-zsh is sourced.
+      gcmsg = "git cmsg";
       
       # UI scaling is managed by the single `display` command (run `display` to
       # see current scale + how to change it). See `man dotfiles`.

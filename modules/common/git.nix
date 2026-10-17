@@ -166,5 +166,19 @@
       echo "username + token once; it is cached (encrypted, no passphrase)"
       echo "and every push after that is silent."
     '')
+
+    # git-cmsg [git-commit-args...] - commit using the project-root ./commit.msg
+    # as the message, stripping any line that mentions "claude" (case-insensitive)
+    # so AI co-author / session trailers never land in history. Run from the repo
+    # root. Usable as `git cmsg` (git discovers git-* on PATH); the `gcmsg` shell
+    # alias points here. NB: this also drops any real message line containing the
+    # word "claude".
+    (writeShellScriptBin "git-cmsg" ''
+      if [ ! -f ./commit.msg ]; then
+        echo "git-cmsg: no ./commit.msg in $(pwd)" >&2
+        exit 1
+      fi
+      git commit -F <(grep -i -v claude ./commit.msg) "$@"
+    '')
   ];
 }

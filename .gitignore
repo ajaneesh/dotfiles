@@ -8,6 +8,7 @@ private/**
 templates/**/flake.lock
 !private/**.age
 modules/common/emacs/init.el
+/commit.msg
 /.venv/
 project_context.md
 generate_project_context.py

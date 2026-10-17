@@ -1754,7 +1754,13 @@ this will allow us to make changes across multiple unopened files in file system
 	("C-c t f" . treemacs-select-window)))
 
 (add-hook 'treemacs-mode-hook
-      	    (lambda() (display-line-numbers-mode -1)))
+          (lambda ()
+            (display-line-numbers-mode -1)
+            ;; The tree looked bulky with a fixed-width font and wide line gaps.
+            ;; A proportional font scans better and packs more per line;
+            ;; line-spacing 0 removes the extra leading between rows.
+            (setq-local line-spacing 0)
+            (variable-pitch-mode 1)))
 
 (with-eval-after-load 'treemacs
   (define-key treemacs-mode-map (kbd "P") #'my/treemacs-peek)
@@ -2462,15 +2468,15 @@ Place cursor at token and call C-. r for quick ripgrep using that token
 ;; knob controls how large they render on any display. Tune scale, not these.
 (set-face-attribute 'default nil
                     :family "JetBrains Mono"
-                    :height 100)
+                    :height 90)
 
 (set-face-attribute 'fixed-pitch nil
                     :family "JetBrains Mono"
-                    :height 100)
+                    :height 90)
 
 (set-face-attribute 'variable-pitch nil
                     :family "Source Sans Pro"
-                    :height 120)
+                    :height 110)
 
 ;; Ligature config - KEEP THIS
 (use-package ligature
@@ -2491,8 +2497,8 @@ Place cursor at token and call C-. r for quick ripgrep using that token
   ;; Define our font families
   (let* ((fixed-font "JetBrains Mono")
          (variable-font "Source Sans Pro")
-         (code-font-size 100)
-         (ui-font-size 120)
+         (code-font-size 90)
+         (ui-font-size 110)
          
          ;; Variable tuple for org headings
          (variable-tuple
@@ -2544,11 +2550,11 @@ Place cursor at token and call C-. r for quick ripgrep using that token
      "fallback")
     (custom-theme-set-faces
      'user
-     `(treemacs-root-face ((t (:inherit variable-pitch :height 0.9))))
-     `(treemacs-file-face ((t (:inherit variable-pitch :height 0.9))))
-     `(treemacs-directory-face ((t (:inherit variable-pitch :height 0.9))))
-     `(treemacs-git-modified-face ((t (:inherit variable-pitch :height 0.9))))
-     `(treemacs-git-untracked-face ((t (:inherit variable-pitch :height 0.9))))))
+     `(treemacs-root-face ((t (:inherit variable-pitch :height 0.8))))
+     `(treemacs-file-face ((t (:inherit variable-pitch :height 0.8))))
+     `(treemacs-directory-face ((t (:inherit variable-pitch :height 0.8))))
+     `(treemacs-git-modified-face ((t (:inherit variable-pitch :height 0.8))))
+     `(treemacs-git-untracked-face ((t (:inherit variable-pitch :height 0.8))))))
   
   (message "Applied centralized font and face settings"))
 
@@ -2606,6 +2612,11 @@ Place cursor at token and call C-. r for quick ripgrep using that token
 
 ;; Prevent auto-centering
 (setq scroll-conservatively 101)
+
+;; Line density. nil adds no extra leading between lines (tightest - fits the
+;; most on screen), which together with the smaller default font keeps buffers
+;; compact. Bump to a small positive value (e.g. 0.1) if you want more air.
+(setq-default line-spacing nil)
 
 
 (global-set-key [f5] 'revert-buffer)
@@ -2917,35 +2928,8 @@ If in minibuffer during password prompt, inserts and submits."
 (message "Completed: SQL Client configuration")
 #+end_src
 
-* Claude Code Integration
-
-Claude Code integration using the dedicated claude-code.el package for better Emacs integration.
+* Finalization
 
 #+begin_src emacs-lisp
-(message "Loading: Claude Code Integration")
-;; -*- lexical-binding: t; -*-
-;; Claude Code Emacs Integration using claude-code.el
-;; This uses the dedicated Emacs package: https://github.com/stevemolitor/claude-code.el
-
-;; First, ensure we have the required dependencies
-(use-package transient
-  :ensure nil) ; Should already be available in modern Emacs
-
-(use-package eat
-  :ensure nil) ; Terminal emulator for Claude Code
-
-;; Configure claude-code.el
-(use-package claude-code
-  :ensure nil ; Already installed via package-vc-install above
-  :bind-keymap
-    ("C-c c" . claude-code-command-map)
-    :config
-    (claude-code-mode))
-
-(message "Completed: Claude Code Integration")
-
 (message "Emacs configuration loaded successfully!")
 #+end_src
- 
-nd_src
- 

@@ -1,21 +1,5 @@
 final: prev: {
   emacsPackagesCustom = with final.emacsPackages; {
-    emacs-claude-code = final.emacsPackages.trivialBuild {
-      pname = "claude-code";
-      version = "0.1.0";
-      src = final.fetchFromGitHub {
-        owner = "stevemolitor"; 
-        repo = "claude-code.el"; 
-        rev = "main"; 
-       sha256 = "sha256-5QJrWIu4EgnHcOqMwlrs2JBBx7aI9OaSJswesr6Apfk=";
-
-      };
-      packageRequires = with final.emacsPackages; [
-        transient
-        eat
-        inheritenv
-      ];
-    };
     org-notion = final.emacsPackages.trivialBuild {
       pname = "org-notion";
       version = "f7265a5";

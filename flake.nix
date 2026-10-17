@@ -51,7 +51,16 @@
         (import ./overlays/wsl-vpnkit.nix)
         # nixGL: lets nixpkgs GL apps (wezterm, media players) find the host's
         # OpenGL/EGL drivers on non-NixOS hosts. Consumed via pkgs.nixgl.
-        inputs.nixgl.overlay
+        # Inlined instead of inputs.nixgl.overlay: upstream's overlay reads the
+        # deprecated `final.system`, which prints an eval warning on every
+        # build. This replicates it against `stdenv.hostPlatform.system`.
+        (final: _: {
+          nixgl = import "${inputs.nixgl}/default.nix" {
+            pkgs = final;
+            enable32bits = final.stdenv.hostPlatform.system == "x86_64-linux";
+            enableIntelX86Extensions = final.stdenv.hostPlatform.system == "x86_64-linux";
+          };
+        })
       ];
 
       # System types to support.

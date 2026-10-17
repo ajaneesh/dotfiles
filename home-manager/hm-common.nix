@@ -76,8 +76,8 @@
     glab
     google-cloud-sdk
     awscli
+    minio-client     # MinIO/AIStor client; provides the `mc` command
     postgresql
-    gemini-cli
     firefox
     gnugrep
     vim
@@ -86,5 +86,20 @@
     less
     ncurses          # Terminal capabilities
     jq               # JSON processor
+
+    # nsh <pkg> [pkg...] - ad-hoc shell with packages straight from nixpkgs,
+    # without writing a shell.nix. Shorthand for `nix shell nixpkgs#<pkg> ...`
+    # (the flake equivalent of `nix-shell -p <pkg>`). e.g. `nsh ripgrep fd jq`.
+    (writeShellScriptBin "nsh" ''
+      if [ "$#" -eq 0 ]; then
+        echo "usage: nsh <pkg> [pkg...]   (e.g. nsh ripgrep fd)" >&2
+        exit 1
+      fi
+      refs=()
+      for p in "$@"; do
+        refs+=("nixpkgs#$p")
+      done
+      exec nix shell "''${refs[@]}"
+    '')
   ];
 }
